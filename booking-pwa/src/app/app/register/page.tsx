@@ -55,7 +55,11 @@ export default function RegisterPage() {
       setToken(data.token);
       router.push("/app");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Ошибка регистрации");
+      if (e instanceof TypeError && String(e).includes("fetch")) {
+        setError("Сервер остановился. Перезапустите в терминале: npm run dev");
+      } else {
+        setError(e instanceof Error ? e.message : "Ошибка регистрации");
+      }
     } finally {
       setLoading(false);
     }
