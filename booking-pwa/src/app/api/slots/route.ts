@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     .prepare(
       "SELECT * FROM bookings WHERE master_id = ? AND date = ? AND status != 'cancelled'"
     )
-    .all(master.id, date) as Booking[];
+    .all(master.id, date) as unknown as Booking[];
 
   const slots = getAvailableSlots(
     date,

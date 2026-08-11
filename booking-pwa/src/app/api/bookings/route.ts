@@ -96,7 +96,7 @@ export async function GET(request: Request) {
   const status = url.searchParams.get("status");
 
   let query = "SELECT * FROM bookings WHERE master_id = ?";
-  const params: unknown[] = [master.id];
+  const params: (string | number)[] = [master.id];
 
   if (status) {
     query += " AND status = ?";
@@ -105,6 +105,6 @@ export async function GET(request: Request) {
 
   query += " ORDER BY date DESC, time DESC";
 
-  const bookings = getDb().prepare(query).all(...params) as Booking[];
+  const bookings = getDb().prepare(query).all(...params) as unknown as Booking[];
   return NextResponse.json(bookings);
 }

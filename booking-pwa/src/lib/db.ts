@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import fs from "fs";
 import path from "path";
 import { DEFAULT_SCHEDULE } from "./types";
@@ -6,7 +6,7 @@ import { DEFAULT_SCHEDULE } from "./types";
 const DATA_DIR = path.join(process.cwd(), "data");
 const DB_PATH = path.join(DATA_DIR, "booking.db");
 
-let db: Database.Database | null = null;
+let db: DatabaseSync | null = null;
 
 function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -14,17 +14,16 @@ function ensureDataDir() {
   }
 }
 
-export function getDb(): Database.Database {
+export function getDb(): DatabaseSync {
   if (!db) {
     ensureDataDir();
-    db = new Database(DB_PATH);
-    db.pragma("journal_mode = WAL");
+    db = new DatabaseSync(DB_PATH);
     initSchema(db);
   }
   return db;
 }
 
-function initSchema(database: Database.Database) {
+function initSchema(database: DatabaseSync) {
   database.exec(`
     CREATE TABLE IF NOT EXISTS masters (
       id TEXT PRIMARY KEY,

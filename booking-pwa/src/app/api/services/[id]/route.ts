@@ -58,7 +58,7 @@ export async function PATCH(
     values.push(id);
     getDb()
       .prepare(`UPDATE services SET ${fields.join(", ")} WHERE id = ?`)
-      .run(...values);
+      .run(...(values as (string | number)[]));
   }
 
   const updated = getDb().prepare("SELECT * FROM services WHERE id = ?").get(id);

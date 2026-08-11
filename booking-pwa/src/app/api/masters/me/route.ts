@@ -50,7 +50,7 @@ export async function PATCH(request: Request) {
     values.push(master.id);
     getDb()
       .prepare(`UPDATE masters SET ${fields.join(", ")} WHERE id = ?`)
-      .run(...values);
+      .run(...(values as (string | number)[]));
 
     const updated = getDb()
       .prepare("SELECT * FROM masters WHERE id = ?")

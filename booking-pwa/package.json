@@ -9,11 +9,9 @@
     "start": "next start",
     "start:mobile": "next start --hostname 0.0.0.0 --port 3000",
     "lint": "eslint",
-    "max:setup": "node scripts/max-setup.mjs",
-    "postinstall": "npm rebuild better-sqlite3 --build-from-source || true"
+    "max:setup": "node scripts/max-setup.mjs"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3",
     "date-fns": "^4.4.0",
     "next": "16.3.0",
     "qrcode.react": "^4.2.0",
@@ -24,8 +22,7 @@
   "devDependencies": {
     "@ducanh2912/next-pwa": "^10.2.9",
     "@tailwindcss/postcss": "^4",
-    "@types/better-sqlite3": "^9.6.0",
-    "@types/node": "^20",
+    "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
