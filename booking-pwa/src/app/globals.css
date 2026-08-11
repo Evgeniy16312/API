@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  --background: #faf9f7;
+  --foreground: #1a1a2e;
+  --accent: #c9a96e;
+  --accent-dark: #a88b4a;
+  --card: #ffffff;
+  --muted: #6b7280;
+  --border: #e8e6e3;
+  --success: #16a34a;
+  --danger: #dc2626;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-dark);
+  --color-card: var(--card);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --font-sans: var(--font-geist-sans);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-primary {
+  @apply bg-[#1a1a2e] text-white px-6 py-3 rounded-xl font-medium
+    active:scale-[0.98] transition-transform disabled:opacity-50 disabled:active:scale-100;
+}
+
+.btn-accent {
+  @apply bg-[#c9a96e] text-white px-6 py-3 rounded-xl font-medium
+    active:scale-[0.98] transition-transform disabled:opacity-50;
+}
+
+.btn-outline {
+  @apply border border-[#e8e6e3] bg-white text-[#1a1a2e] px-6 py-3 rounded-xl font-medium
+    active:scale-[0.98] transition-transform;
+}
+
+.card {
+  @apply bg-white rounded-2xl border border-[#e8e6e3] p-4;
+}
+
+.input {
+  @apply w-full px-4 py-3 rounded-xl border border-[#e8e6e3] bg-white
+    focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e];
+}
+
+.slot-btn {
+  @apply px-4 py-2 rounded-lg border border-[#e8e6e3] text-sm font-medium
+    hover:border-[#c9a96e] active:scale-95 transition-all;
+}
+
+.slot-btn-active {
+  @apply bg-[#1a1a2e] text-white border-[#1a1a2e];
+}

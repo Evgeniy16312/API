@@ -1,0 +1,127 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { apiFetch } from "@/lib/client";
+import type { Service } from "@/lib/types";
+
+export default function ServicesPage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [name, setName] = useState("");
+  const [duration, setDuration] = useState(60);
+  const [price, setPrice] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [adding, setAdding] = useState(false);
+
+  useEffect(() => {
+    loadServices();
+  }, []);
+
+  async function loadServices() {
+    try {
+      const data = await apiFetch("/api/services");
+      setServices(data);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function addService(e: React.FormEvent) {
+    e.preventDefault();
+    setAdding(true);
+    try {
+      await apiFetch("/api/services", {
+        method: "POST",
+        body: JSON.stringify({ name, duration, price }),
+      });
+      setName("");
+      setDuration(60);
+      setPrice(0);
+      await loadServices();
+    } catch {
+      // handled by apiFetch
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function deleteService(id: string) {
+    if (!confirm("Удалить услугу?")) return;
+    await apiFetch(`/api/services/${id}`, { method: "DELETE" });
+    await loadServices();
+  }
+
+  if (loading) {
+    return (
+      <div className="flex justify-center py-20">
+        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-4 py-6 space-y-4">
+      <h1 className="text-xl font-bold">Услуги</h1>
+      <p className="text-sm text-[#6b7280]">
+        Клиенты выбирают услугу при записи
+      </p>
+
+      {services.length > 0 && (
+        <div className="space-y-2">
+          {services.map((s) => (
+            <div key={s.id} className="card flex justify-between items-center">
+              <div>
+                <p className="font-medium">{s.name}</p>
+                <p className="text-sm text-[#6b7280]">
+                  {s.duration} мин{s.price > 0 ? ` · ${s.price} ₽` : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => deleteService(s.id)}
+                className="text-red-500 text-sm px-2"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <form onSubmit={addService} className="card space-y-3">
+        <h3 className="font-semibold">Добавить услугу</h3>
+        <input
+          className="input"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Стрижка, маникюр, торт..."
+          required
+        />
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <label className="text-xs text-[#6b7280]">Длительность (мин)</label>
+            <input
+              className="input"
+              type="number"
+              value={duration}
+              onChange={(e) => setDuration(Number(e.target.value))}
+              min={15}
+              step={15}
+            />
+          </div>
+          <div className="flex-1">
+            <label className="text-xs text-[#6b7280]">Цена (₽)</label>
+            <input
+              className="input"
+              type="number"
+              value={price}
+              onChange={(e) => setPrice(Number(e.target.value))}
+              min={0}
+            />
+          </div>
+        </div>
+        <button type="submit" disabled={adding} className="btn-primary w-full">
+          {adding ? "Добавляем..." : "Добавить"}
+        </button>
+      </form>
+    </div>
+  );
+}
