@@ -4,9 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:mobile": "next dev --hostname 0.0.0.0 --port 3000",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "start:mobile": "next start --hostname 0.0.0.0 --port 3000",
+    "lint": "eslint",
+    "max:setup": "node scripts/max-setup.mjs"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

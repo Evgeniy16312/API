@@ -1,3 +1,5 @@
+import { maxSendMessage } from "@/lib/max/api";
+
 export interface NotificationPayload {
   masterName: string;
   clientName: string;
@@ -25,27 +27,8 @@ export async function sendMaxNotification(
   userId: string,
   payload: NotificationPayload
 ): Promise<boolean> {
-  const token = process.env.MAX_BOT_TOKEN;
-  if (!token || !userId) return false;
-
-  try {
-    const response = await fetch("https://platform-api.max.ru/messages", {
-      method: "POST",
-      headers: {
-        Authorization: token,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        user_id: Number(userId),
-        text: formatMessage(payload),
-      }),
-    });
-
-    return response.ok;
-  } catch (error) {
-    console.error("MAX notification error:", error);
-    return false;
-  }
+  if (!userId) return false;
+  return maxSendMessage(Number(userId), formatMessage(payload), undefined, null);
 }
 
 export async function sendVkNotification(

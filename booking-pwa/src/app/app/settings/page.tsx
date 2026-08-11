@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiFetch, clearToken } from "@/lib/client";
+import MaxConnect from "@/components/MaxConnect";
 import type { Master } from "@/lib/types";
 
 export default function SettingsPage() {
@@ -17,7 +18,6 @@ export default function SettingsPage() {
   const [specialty, setSpecialty] = useState("");
   const [address, setAddress] = useState("");
   const [description, setDescription] = useState("");
-  const [maxUserId, setMaxUserId] = useState("");
   const [vkUserId, setVkUserId] = useState("");
 
   useEffect(() => {
@@ -29,7 +29,6 @@ export default function SettingsPage() {
         setSpecialty(m.specialty);
         setAddress(m.address);
         setDescription(m.description);
-        setMaxUserId(m.max_user_id);
         setVkUserId(m.vk_user_id);
       })
       .finally(() => setLoading(false));
@@ -47,7 +46,6 @@ export default function SettingsPage() {
           specialty,
           address,
           description,
-          max_user_id: maxUserId,
           vk_user_id: vkUserId,
         }),
       });
@@ -111,21 +109,16 @@ export default function SettingsPage() {
         <div className="bg-[#faf9f7] rounded-xl p-3 space-y-3">
           <div>
             <label className="text-xs text-[#6b7280] font-medium">MAX</label>
-            <p className="text-xs text-[#6b7280] mb-1">
-              Ваш ID в MAX (числовой). Найдите в настройках профиля.
+            <p className="text-xs text-[#6b7280] mb-2">
+              Подключите бота — уведомления о записях придут в MAX
             </p>
-            <input
-              className="input"
-              value={maxUserId}
-              onChange={(e) => setMaxUserId(e.target.value)}
-              placeholder="12345678"
-            />
+            <MaxConnect />
           </div>
 
-          <div>
+          <div className="border-t border-[#e8e6e3] pt-3">
             <label className="text-xs text-[#6b7280] font-medium">VK Мессенджер</label>
             <p className="text-xs text-[#6b7280] mb-1">
-              Ваш ID ВКонтакте. Напишите нашему боту /start чтобы узнать ID.
+              Ваш ID ВКонтакте (вручную, пока бот VK в разработке)
             </p>
             <input
               className="input"
