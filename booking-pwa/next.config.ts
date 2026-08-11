@@ -13,6 +13,8 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   serverExternalPackages: ["better-sqlite3"],
   turbopack: {},
+  // Fix: repo has parent package-lock.json — tell Next.js root is booking-pwa
+  outputFileTracingRoot: process.cwd(),
 };
 
 export default withPWA(nextConfig);
