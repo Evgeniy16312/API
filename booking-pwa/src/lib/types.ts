@@ -13,6 +13,8 @@ export interface Master {
   phone: string;
   specialty: string;
   address: string;
+  lat: number | null;
+  lng: number | null;
   description: string;
   avatar_url: string;
   max_user_id: string;
@@ -44,11 +46,26 @@ export interface Booking {
   master_id: string;
   service_id: string;
   service_name: string;
+  /** Duration in minutes at booking time (survives service edits). */
+  service_duration?: number;
   client_name: string;
   client_phone: string;
   date: string;
   time: string;
   status: "pending" | "confirmed" | "cancelled";
+  /** Secret link for client cancel / manage. */
+  manage_token?: string;
+  created_at: string;
+}
+
+export interface Review {
+  id: string;
+  master_id: string;
+  booking_id: string;
+  client_name: string;
+  rating: number;
+  text: string;
+  status: "published" | "hidden";
   created_at: string;
 }
 

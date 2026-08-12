@@ -1,7 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { PortfolioItem, Service } from "@/lib/types";
+import dynamic from "next/dynamic";
+import { format, parse } from "date-fns";
+import { ru } from "date-fns/locale";
+import type { PortfolioItem, Review, Service } from "@/lib/types";
+import MonthCalendar from "@/components/MonthCalendar";
+import ReviewsSection from "@/components/ReviewsSection";
+
+const MasterMap = dynamic(() => import("@/components/MasterMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-48 rounded-xl bg-[#faf9f7] border border-[#e8e6e3] animate-pulse" />
+  ),
+});
 
 interface MasterData {
   id: string;
@@ -10,10 +22,14 @@ interface MasterData {
   phone: string;
   specialty: string;
   address: string;
+  lat: number | null;
+  lng: number | null;
   description: string;
   avatar_url: string;
+  vk_user_id?: string;
   services: Service[];
   portfolio: PortfolioItem[];
+  reviews?: Review[];
 }
 
 type Step = "service" | "datetime" | "contact" | "done";
@@ -25,11 +41,14 @@ export default function BookingFlow({ slug }: { slug: string }) {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [availableDates, setAvailableDates] = useState<string[]>([]);
+  const [month, setMonth] = useState(() => new Date());
   const [slots, setSlots] = useState<string[]>([]);
   const [clientName, setClientName] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [manageUrl, setManageUrl] = useState("");
 
   useEffect(() => {
     fetch(`/api/masters/${slug}`)
@@ -43,10 +62,24 @@ export default function BookingFlow({ slug }: { slug: string }) {
   }, [slug]);
 
   useEffect(() => {
+    if (!selectedService) return;
+    fetch(`/api/slots?slug=${encodeURIComponent(slug)}&service_id=${selectedService.id}`)
+      .then((r) => r.json())
+      .then((data) => {
+        const dates = (data.dates || []).map(
+          (d: { date: string } | string) =>
+            typeof d === "string" ? d : d.date
+        );
+        setAvailableDates(dates);
+      })
+      .catch(() => setAvailableDates([]));
+  }, [selectedService, slug]);
+
+  useEffect(() => {
     if (!selectedService || !selectedDate) return;
 
     fetch(
-      `/api/slots?slug=${slug}&service_id=${selectedService.id}&date=${selectedDate}`
+      `/api/slots?slug=${encodeURIComponent(slug)}&service_id=${selectedService.id}&date=${selectedDate}`
     )
       .then((r) => r.json())
       .then((data) => setSlots(data.slots || []))
@@ -75,6 +108,9 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
+      if (data.manage_token) {
+        setManageUrl(`${window.location.origin}/b/${data.manage_token}`);
+      }
       setStep("done");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка записи");
@@ -101,11 +137,10 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
   if (!master) return null;
 
-  const dates = getNextDates(14);
+  const hasMap = master.lat != null && master.lng != null;
 
   return (
     <div>
-      {/* Header */}
       <div className="bg-[#1a1a2e] text-white px-6 pt-8 pb-10 rounded-b-3xl">
         <div className="flex items-center gap-4 mb-4">
           {master.avatar_url ? (
@@ -137,13 +172,36 @@ export default function BookingFlow({ slug }: { slug: string }) {
       </div>
 
       <div className="px-4 -mt-4 space-y-4 pb-8">
-        {/* Portfolio */}
+        {hasMap && (
+          <div className="card space-y-2">
+            <h2 className="font-semibold">Как добраться</h2>
+            <MasterMap
+              lat={master.lat as number}
+              lng={master.lng as number}
+              label={master.name}
+            />
+            {master.address && (
+              <a
+                className="text-sm text-[#c9a96e]"
+                href={`https://www.openstreetmap.org/?mlat=${master.lat}&mlon=${master.lng}#map=16/${master.lat}/${master.lng}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Открыть в OpenStreetMap →
+              </a>
+            )}
+          </div>
+        )}
+
         {master.portfolio.length > 0 && (
           <div className="card">
             <h2 className="font-semibold mb-3">Портфолио</h2>
             <div className="grid grid-cols-2 gap-2">
               {master.portfolio.map((item) => (
-                <div key={item.id} className="relative aspect-square rounded-xl overflow-hidden">
+                <div
+                  key={item.id}
+                  className="relative aspect-square rounded-xl overflow-hidden"
+                >
                   <img
                     src={item.image_url}
                     alt={item.caption || "Работа"}
@@ -160,20 +218,35 @@ export default function BookingFlow({ slug }: { slug: string }) {
           </div>
         )}
 
-        {/* Booking */}
         {step === "done" ? (
-          <div className="card text-center py-8">
+          <div className="card text-center py-8" data-testid="booking-done">
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-xl font-bold mb-2">Вы записаны!</h2>
-            <p className="text-[#6b7280] mb-1">
-              {selectedService?.name}
-            </p>
+            <p className="text-[#6b7280] mb-1">{selectedService?.name}</p>
             <p className="text-[#6b7280]">
-              {selectedDate} в {selectedTime}
+              {selectedDate &&
+                format(parse(selectedDate, "yyyy-MM-dd", new Date()), "d MMMM", {
+                  locale: ru,
+                })}{" "}
+              в {selectedTime}
             </p>
             <p className="text-sm text-[#6b7280] mt-4">
               Мастер получит уведомление и свяжется с вами при необходимости
             </p>
+            {manageUrl && (
+              <div className="mt-6 space-y-2 text-left">
+                <p className="text-sm text-[#6b7280]">
+                  Сохраните ссылку — по ней можно отменить запись:
+                </p>
+                <a
+                  href={manageUrl}
+                  className="block text-sm text-[#c9a96e] break-all underline"
+                  data-testid="manage-booking-link"
+                >
+                  {manageUrl}
+                </a>
+              </div>
+            )}
           </div>
         ) : (
           <div className="card">
@@ -185,10 +258,9 @@ export default function BookingFlow({ slug }: { slug: string }) {
               </div>
             )}
 
-            {/* Step 1: Service */}
             {(step === "service" || !selectedService) && (
               <div className="space-y-2">
-                <p className="text-sm text-[#6b7280] mb-2">Выберите услугу</p>
+                <p className="text-sm text-[#6b7280] mb-2">Выберите услугу и цену</p>
                 {master.services.length === 0 ? (
                   <p className="text-[#6b7280] text-sm">Услуги пока не добавлены</p>
                 ) : (
@@ -198,6 +270,8 @@ export default function BookingFlow({ slug }: { slug: string }) {
                       onClick={() => {
                         setSelectedService(s);
                         setStep("datetime");
+                        setSelectedDate("");
+                        setSelectedTime("");
                       }}
                       className="w-full flex justify-between items-center p-3 rounded-xl border border-[#e8e6e3] hover:border-[#c9a96e] active:scale-[0.99] transition-all text-left"
                     >
@@ -216,7 +290,6 @@ export default function BookingFlow({ slug }: { slug: string }) {
               </div>
             )}
 
-            {/* Step 2: Date & Time */}
             {step === "datetime" && selectedService && (
               <div>
                 <button
@@ -231,27 +304,21 @@ export default function BookingFlow({ slug }: { slug: string }) {
                   ← {selectedService.name}
                 </button>
 
-                <p className="text-sm text-[#6b7280] mb-2">Выберите дату</p>
-                <div className="flex gap-2 overflow-x-auto pb-3 -mx-1 px-1">
-                  {dates.map((d) => (
-                    <button
-                      key={d.value}
-                      onClick={() => {
-                        setSelectedDate(d.value);
-                        setSelectedTime("");
-                      }}
-                      className={`slot-btn whitespace-nowrap shrink-0 ${
-                        selectedDate === d.value ? "slot-btn-active" : ""
-                      }`}
-                    >
-                      {d.label}
-                    </button>
-                  ))}
-                </div>
+                <p className="text-sm text-[#6b7280] mb-2">Выберите день</p>
+                <MonthCalendar
+                  availableDates={availableDates}
+                  selectedDate={selectedDate}
+                  onSelect={(d) => {
+                    setSelectedDate(d);
+                    setSelectedTime("");
+                  }}
+                  month={month}
+                  onMonthChange={setMonth}
+                />
 
                 {selectedDate && (
                   <>
-                    <p className="text-sm text-[#6b7280] mb-2 mt-2">Выберите время</p>
+                    <p className="text-sm text-[#6b7280] mb-2 mt-4">Свободное время</p>
                     {slots.length === 0 ? (
                       <p className="text-sm text-[#6b7280]">Нет свободного времени</p>
                     ) : (
@@ -277,7 +344,6 @@ export default function BookingFlow({ slug }: { slug: string }) {
               </div>
             )}
 
-            {/* Step 3: Contact */}
             {step === "contact" && (
               <div>
                 <button
@@ -320,37 +386,29 @@ export default function BookingFlow({ slug }: { slug: string }) {
           </div>
         )}
 
-        {/* Contact */}
         {master.phone && (
-          <div className="card text-center">
-            <p className="text-sm text-[#6b7280] mb-2">Есть вопрос?</p>
-            <a href={`tel:${master.phone}`} className="btn-outline inline-block text-sm">
-              📞 Позвонить
-            </a>
+          <div className="card text-center space-y-2">
+            <p className="text-sm text-[#6b7280]">Есть вопрос?</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              <a href={`tel:${master.phone}`} className="btn-outline inline-block text-sm">
+                Позвонить
+              </a>
+              {master.vk_user_id && (
+                <a
+                  href={`https://vk.com/id${master.vk_user_id}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn-outline inline-block text-sm"
+                >
+                  Написать в VK
+                </a>
+              )}
+            </div>
           </div>
         )}
+
+        <ReviewsSection slug={slug} initialReviews={master.reviews || []} />
       </div>
     </div>
   );
-}
-
-function getNextDates(count: number) {
-  const days = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-  const months = [
-    "янв", "фев", "мар", "апр", "май", "июн",
-    "июл", "авг", "сен", "окт", "ноя", "дек",
-  ];
-
-  const result: { value: string; label: string }[] = [];
-  const today = new Date();
-
-  for (let i = 0; i < count; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    const value = d.toISOString().split("T")[0];
-    const label = `${d.getDate()} ${months[d.getMonth()]}, ${days[d.getDay()]}`;
-    result.push({ value, label });
-  }
-
-  return result;
 }

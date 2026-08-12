@@ -1,34 +1,32 @@
-import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { requireAuth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { jsonError, jsonOk, requireMaster } from "@/lib/http";
+import { persistImageDataUrl } from "@/lib/uploads";
 
 export async function GET(request: Request) {
-  const master = requireAuth(request);
-  if (!master) {
-    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
-  }
+  const master = requireMaster(request);
+  if (!master) return jsonError("Не авторизован", 401);
 
   const items = getDb()
     .prepare("SELECT * FROM portfolio WHERE master_id = ? ORDER BY sort_order")
     .all(master.id);
 
-  return NextResponse.json(items);
+  return jsonOk(items);
 }
 
 export async function POST(request: Request) {
   const master = requireAuth(request);
-  if (!master) {
-    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
-  }
+  if (!master) return jsonError("Не авторизован", 401);
 
   try {
     const { image_url, caption } = await request.json();
 
     if (!image_url) {
-      return NextResponse.json({ error: "Загрузите фото" }, { status: 400 });
+      return jsonError("Загрузите фото", 400);
     }
 
+    const storedUrl = persistImageDataUrl(master.id, image_url, "portfolio");
     const id = uuidv4();
     const count = getDb()
       .prepare("SELECT COUNT(*) as c FROM portfolio WHERE master_id = ?")
@@ -38,12 +36,14 @@ export async function POST(request: Request) {
       .prepare(
         "INSERT INTO portfolio (id, master_id, image_url, caption, sort_order) VALUES (?, ?, ?, ?, ?)"
       )
-      .run(id, master.id, image_url, caption || "", count.c);
+      .run(id, master.id, storedUrl, caption || "", count.c);
 
     const item = getDb().prepare("SELECT * FROM portfolio WHERE id = ?").get(id);
-    return NextResponse.json(item, { status: 201 });
+    return jsonOk(item, 201);
   } catch (error) {
     console.error("Portfolio upload error:", error);
-    return NextResponse.json({ error: "Ошибка загрузки" }, { status: 500 });
+    const message =
+      error instanceof Error ? error.message : "Ошибка загрузки";
+    return jsonError(message, 500);
   }
 }

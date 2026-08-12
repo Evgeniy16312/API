@@ -1,0 +1,17 @@
+---
+description: UI формы и клиентские страницы МояЗапись
+globs: src/app/**/*.tsx,src/components/**/*.tsx
+alwaysApply: false
+---
+
+# UI / forms
+
+- Клиентские страницы с интерактивом: `"use client"`.
+- Интерактивные поля/кнопки: `data-testid` + `htmlFor`/`id` у лейблов.
+- Запросы панели: `apiFetch` из `@/lib/client` (сам подставит Bearer).
+- Токен: `getToken` / `setToken` / `clearToken` / `logoutSession`.
+- Запросы панели: `apiFetch` (`credentials: "include"` + Bearer).
+- Публичные пути `/app`: `register`, `login`.
+- Стили: существующие классы (`btn-primary`, `input`, цвета проекта) — не вводить чужой дизайн-язык.
+- Публичка клиента: `/m/[slug]`; кабинет: `/app/*`.
+- Не класть cards/stats в hero лендинга без нужды — см. текущий `src/app/page.tsx`.

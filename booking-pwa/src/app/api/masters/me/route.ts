@@ -1,50 +1,78 @@
-import { NextResponse } from "next/server";
-import { requireAuth, rowToMaster } from "@/lib/auth";
+import { rowToMaster } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { jsonError, jsonOk, requireMaster } from "@/lib/http";
+import { isValidSlug } from "@/lib/slots";
 
 export async function GET(request: Request) {
-  const master = requireAuth(request);
+  const master = requireMaster(request);
   if (!master) {
-    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+    return jsonError("Не авторизован", 401);
   }
-  return NextResponse.json(master);
+  return jsonOk(master);
 }
 
 export async function PATCH(request: Request) {
-  const master = requireAuth(request);
+  const master = requireMaster(request);
   if (!master) {
-    return NextResponse.json({ error: "Не авторизован" }, { status: 401 });
+    return jsonError("Не авторизован", 401);
   }
 
   try {
     const body = await request.json();
     const fields: string[] = [];
-    const values: unknown[] = [];
+    const values: import("@/lib/db").SqlParam[] = [];
 
+    // max_user_id — только через MAX /connect. vk_user_id временно из настроек до F12.
     const allowed = [
       "name",
       "phone",
       "specialty",
       "address",
+      "lat",
+      "lng",
       "description",
       "avatar_url",
-      "max_user_id",
       "vk_user_id",
       "work_schedule",
       "slot_duration",
+      "slug",
     ] as const;
 
     for (const key of allowed) {
       if (body[key] !== undefined) {
+        let value = body[key];
+        if (key === "work_schedule") {
+          value = JSON.stringify(body[key]);
+        } else if (key === "avatar_url" && typeof body[key] === "string") {
+          const { persistImageDataUrl } = await import("@/lib/uploads");
+          value = persistImageDataUrl(master.id, body[key], "avatar");
+        } else if (key === "slug") {
+          const cleanSlug = String(body.slug || "")
+            .trim()
+            .toLowerCase();
+          if (!isValidSlug(cleanSlug)) {
+            return jsonError(
+              "Адрес страницы: только латиница, цифры, дефис (от 3 символов)",
+              400
+            );
+          }
+          if (cleanSlug !== master.slug) {
+            const taken = getDb()
+              .prepare("SELECT id FROM masters WHERE slug = ? AND id != ?")
+              .get(cleanSlug, master.id);
+            if (taken) {
+              return jsonError("Этот адрес уже занят, выберите другой", 409);
+            }
+          }
+          value = cleanSlug;
+        }
         fields.push(`${key} = ?`);
-        values.push(
-          key === "work_schedule" ? JSON.stringify(body[key]) : body[key]
-        );
+        values.push(value);
       }
     }
 
     if (fields.length === 0) {
-      return NextResponse.json({ error: "Нет данных для обновления" }, { status: 400 });
+      return jsonError("Нет данных для обновления", 400);
     }
 
     values.push(master.id);
@@ -56,9 +84,9 @@ export async function PATCH(request: Request) {
       .prepare("SELECT * FROM masters WHERE id = ?")
       .get(master.id) as Record<string, unknown>;
 
-    return NextResponse.json(rowToMaster(updated));
+    return jsonOk(rowToMaster(updated));
   } catch (error) {
     console.error("Update master error:", error);
-    return NextResponse.json({ error: "Ошибка обновления" }, { status: 500 });
+    return jsonError("Ошибка обновления", 500);
   }
 }

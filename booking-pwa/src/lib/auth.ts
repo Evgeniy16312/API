@@ -1,4 +1,6 @@
 import { getDb } from "./db";
+import { parseSchedule } from "./db";
+import { readSessionToken } from "./session";
 import type { Master } from "./types";
 
 export function getMasterByToken(token: string): Master | null {
@@ -36,22 +38,25 @@ export function rowToMaster(row: Record<string, unknown>): Master {
     phone: row.phone as string,
     specialty: (row.specialty as string) || "",
     address: (row.address as string) || "",
+    lat: typeof row.lat === "number" ? row.lat : row.lat != null ? Number(row.lat) : null,
+    lng: typeof row.lng === "number" ? row.lng : row.lng != null ? Number(row.lng) : null,
     description: (row.description as string) || "",
     avatar_url: (row.avatar_url as string) || "",
     max_user_id: (row.max_user_id as string) || "",
     vk_user_id: (row.vk_user_id as string) || "",
-    work_schedule: JSON.parse(row.work_schedule as string),
+    work_schedule: parseSchedule(row.work_schedule as string),
     slot_duration: (row.slot_duration as number) || 60,
     created_at: row.created_at as string,
   };
 }
 
+/** Bearer first, then httpOnly session cookie. */
 export function extractToken(request: Request): string | null {
   const auth = request.headers.get("authorization");
   if (auth?.startsWith("Bearer ")) {
     return auth.slice(7);
   }
-  return null;
+  return readSessionToken(request);
 }
 
 export function requireAuth(request: Request): Master | null {

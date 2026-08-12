@@ -1,5 +1,17 @@
 # МояЗапись — PWA для онлайн-записи мастеров
 
+## Документация и Cursor
+
+| Что | Где |
+|-----|-----|
+| **Roadmap продукта** | [docs/ROADMAP.md](./docs/ROADMAP.md) |
+| Деплой на VPS | [docs/deploy.md](./docs/deploy.md) |
+| Каталог фич | [docs/FEATURES.md](./docs/FEATURES.md) |
+| Архитектура | [docs/architecture.md](./docs/architecture.md) |
+| Пакет docs | [docs/README.md](./docs/README.md) |
+| Rules | `.cursor/rules/` |
+| Skills | `.cursor/skills/` (`add-feature`, `document-feature`, `test-feature`) |
+
 ## Быстрый старт
 
 ```bash
@@ -7,6 +19,14 @@ cd booking-pwa
 cp .env.example .env.local
 npm install
 npm run dev
+```
+
+### Тесты (без ручного ввода)
+
+```bash
+npm run test:register   # регистрация API + UI
+npm run test:api        # все API-спеки
+npm run test            # всё
 ```
 
 ---

@@ -45,7 +45,7 @@ export async function PATCH(
   }
 
   const fields: string[] = [];
-  const values: unknown[] = [];
+  const values: import("@/lib/db").SqlParam[] = [];
 
   for (const key of ["name", "duration", "price"] as const) {
     if (body[key] !== undefined) {

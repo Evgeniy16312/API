@@ -1,26 +1,11 @@
 import { getDb } from "@/lib/db";
-import { v4 as uuidv4 } from "uuid";
+import { randomBytes } from "crypto";
 import { maxSendMessage } from "./api";
 
 const CODE_TTL_MS = 15 * 60 * 1000;
 
-export function initMaxTables() {
-  getDb().exec(`
-    CREATE TABLE IF NOT EXISTS max_connect_codes (
-      code TEXT PRIMARY KEY,
-      master_id TEXT NOT NULL,
-      max_user_id TEXT DEFAULT '',
-      expires_at TEXT NOT NULL,
-      used INTEGER DEFAULT 0,
-      created_at TEXT NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_max_codes_master ON max_connect_codes(master_id);
-  `);
-}
-
 export function createConnectCode(masterId: string): string {
-  initMaxTables();
-  const code = Math.random().toString(36).slice(2, 8).toUpperCase();
+  const code = randomBytes(3).toString("hex").toUpperCase();
   const now = new Date();
   const expires = new Date(now.getTime() + CODE_TTL_MS);
 
@@ -38,7 +23,6 @@ export function linkMaxUser(
   code: string,
   maxUserId: number
 ): { ok: boolean; masterName?: string; error?: string } {
-  initMaxTables();
   const row = getDb()
     .prepare("SELECT * FROM max_connect_codes WHERE code = ? AND used = 0")
     .get(code.toUpperCase()) as
@@ -75,7 +59,6 @@ export function linkMaxUser(
 }
 
 export function getConnectStatus(masterId: string) {
-  initMaxTables();
   const master = getDb()
     .prepare("SELECT max_user_id FROM masters WHERE id = ?")
     .get(masterId) as { max_user_id: string } | undefined;
@@ -106,7 +89,11 @@ export interface MaxUpdate {
     sender?: { user_id: number; first_name?: string; name?: string };
     body?: { text?: string };
   };
-  callback?: { user?: { user_id: number }; payload?: string };
+  callback?: {
+    user?: { user_id: number };
+    payload?: string;
+    callback_id?: string;
+  };
 }
 
 function extractUserId(update: MaxUpdate): number | null {
@@ -129,6 +116,11 @@ export async function handleMaxUpdate(update: MaxUpdate): Promise<void> {
     update.message?.sender?.first_name ||
     update.user?.name ||
     "друг";
+
+  if (update.update_type === "message_callback") {
+    await handleBookingCallback(userId, update.callback?.payload || "");
+    return;
+  }
 
   if (update.update_type === "bot_started") {
     await maxSendMessage(
@@ -195,4 +187,57 @@ export async function handleMaxUpdate(update: MaxUpdate): Promise<void> {
       `Не понял команду 🤔\n\nИспользуйте:\n/connect КОД — подключить уведомления\n/id — узнать ID\n/help — справка`
     );
   }
+}
+
+async function handleBookingCallback(maxUserId: number, payload: string) {
+  const match = payload.match(/^(ok|no):([0-9a-f-]{36})$/i);
+  if (!match) {
+    await maxSendMessage(maxUserId, "Неизвестная кнопка");
+    return;
+  }
+
+  const action = match[1].toLowerCase();
+  const bookingId = match[2];
+  const master = getDb()
+    .prepare("SELECT id, name FROM masters WHERE max_user_id = ?")
+    .get(String(maxUserId)) as { id: string; name: string } | undefined;
+
+  if (!master) {
+    await maxSendMessage(
+      maxUserId,
+      "Сначала подключите уведомления: /connect КОД"
+    );
+    return;
+  }
+
+  const status = action === "ok" ? "confirmed" : "cancelled";
+  const booking = getDb()
+    .prepare(
+      "SELECT id, client_name, service_name, date, time, status FROM bookings WHERE id = ? AND master_id = ?"
+    )
+    .get(bookingId, master.id) as
+    | {
+        id: string;
+        client_name: string;
+        service_name: string;
+        date: string;
+        time: string;
+        status: string;
+      }
+    | undefined;
+
+  if (!booking) {
+    await maxSendMessage(maxUserId, "Запись не найдена");
+    return;
+  }
+
+  getDb()
+    .prepare("UPDATE bookings SET status = ? WHERE id = ?")
+    .run(status, bookingId);
+
+  const label = status === "confirmed" ? "подтверждена" : "отменена";
+  await maxSendMessage(
+    maxUserId,
+    `Запись ${label}:\n${booking.client_name} · ${booking.service_name}\n${booking.date} ${booking.time}`
+  );
 }

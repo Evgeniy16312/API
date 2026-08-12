@@ -1,4 +1,4 @@
-import { maxSendMessage } from "@/lib/max/api";
+import { maxSendMessage, type MaxInlineButton } from "@/lib/max/api";
 
 export interface NotificationPayload {
   masterName: string;
@@ -8,11 +8,20 @@ export interface NotificationPayload {
   date: string;
   time: string;
   pageUrl: string;
+  bookingId?: string;
+  kind?: "new_booking" | "reminder_24h" | "reminder_2h" | "cancelled_by_client";
 }
 
-function formatMessage(p: NotificationPayload): string {
+function titleFor(kind?: NotificationPayload["kind"]): string {
+  if (kind === "reminder_24h") return "⏰ Напоминание: завтра запись";
+  if (kind === "reminder_2h") return "⏰ Напоминание: запись через ~2 часа";
+  if (kind === "cancelled_by_client") return "❌ Клиент отменил запись";
+  return "📅 Новая запись!";
+}
+
+export function formatMessage(p: NotificationPayload): string {
   return [
-    "📅 Новая запись!",
+    titleFor(p.kind),
     "",
     `👤 ${p.clientName}`,
     `📞 ${p.clientPhone}`,
@@ -23,12 +32,30 @@ function formatMessage(p: NotificationPayload): string {
   ].join("\n");
 }
 
+function bookingButtons(
+  bookingId?: string,
+  kind?: NotificationPayload["kind"]
+): MaxInlineButton[][] | undefined {
+  if (!bookingId || kind === "cancelled_by_client") return undefined;
+  return [
+    [
+      { type: "callback", text: "✅ Подтвердить", payload: `ok:${bookingId}` },
+      { type: "callback", text: "❌ Отменить", payload: `no:${bookingId}` },
+    ],
+  ];
+}
+
 export async function sendMaxNotification(
   userId: string,
   payload: NotificationPayload
 ): Promise<boolean> {
   if (!userId) return false;
-  return maxSendMessage(Number(userId), formatMessage(payload), undefined, null);
+  return maxSendMessage(
+    Number(userId),
+    formatMessage(payload),
+    bookingButtons(payload.bookingId, payload.kind),
+    null
+  );
 }
 
 export async function sendVkNotification(
@@ -60,6 +87,7 @@ export async function sendVkNotification(
   }
 }
 
+/** @deprecated prefer enqueue + flushOutbox — kept for direct sends */
 export async function notifyMaster(
   maxUserId: string,
   vkUserId: string,

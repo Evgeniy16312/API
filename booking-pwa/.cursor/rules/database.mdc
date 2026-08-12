@@ -1,0 +1,14 @@
+---
+description: Правила работы с SQLite (node:sqlite)
+globs: src/lib/db.ts,src/lib/**/*.ts,src/app/api/**/*.ts
+alwaysApply: false
+---
+
+# Database
+
+- Только `getDb()` / `withTransaction()` из `@/lib/db`.
+- API: `prepare().get|all|run`, `exec`. Миграции колонок — в `ensureMigrations`.
+- Схему и индексы описывать в карточке фичи; breaking → ADR.
+- Запись слота: проверять overlap; опираться на UNIQUE активных `(master_id,date,time)`.
+- `data/booking.db` в gitignore. Один writer на процесс (S0).
+- ❌ `better-sqlite3`. ❌ новые большие blob в таблицах.

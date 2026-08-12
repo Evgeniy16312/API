@@ -46,6 +46,7 @@ export default function RegisterPage() {
       const res = await fetch("/api/masters/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ name, phone, slug, specialty }),
       });
 
@@ -82,10 +83,14 @@ export default function RegisterPage() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form">
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block">Ваше имя</label>
+          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-name">
+            Ваше имя
+          </label>
           <input
+            id="register-name"
+            data-testid="register-name"
             className="input"
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
@@ -95,8 +100,12 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block">Телефон</label>
+          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-phone">
+            Телефон
+          </label>
           <input
+            id="register-phone"
+            data-testid="register-phone"
             className="input"
             type="tel"
             value={phone}
@@ -107,8 +116,12 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block">Специализация</label>
+          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-specialty">
+            Специализация
+          </label>
           <input
+            id="register-specialty"
+            data-testid="register-specialty"
             className="input"
             value={specialty}
             onChange={(e) => setSpecialty(e.target.value)}
@@ -117,7 +130,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block">
+          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-slug">
             Адрес вашей страницы
           </label>
           <div className="flex items-center gap-0">
@@ -125,6 +138,8 @@ export default function RegisterPage() {
               /m/
             </span>
             <input
+              id="register-slug"
+              data-testid="register-slug"
               className="input rounded-l-none"
               value={slug}
               onChange={(e) =>
@@ -137,10 +152,22 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <button type="submit" disabled={loading} className="btn-primary w-full mt-4">
+        <button
+          type="submit"
+          disabled={loading}
+          className="btn-primary w-full mt-4"
+          data-testid="register-submit"
+        >
           {loading ? "Создаём..." : "Создать страницу"}
         </button>
       </form>
+
+      <p className="text-center text-sm text-[#6b7280] mt-6">
+        Уже есть страница?{" "}
+        <Link href="/app/login" className="text-[#c9a96e] font-medium">
+          Войти по коду
+        </Link>
+      </p>
     </div>
   );
 }

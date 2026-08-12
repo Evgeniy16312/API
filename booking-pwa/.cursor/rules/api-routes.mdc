@@ -1,0 +1,25 @@
+---
+description: Конвенции API routes Next.js для МояЗапись
+globs: src/app/api/**/*.ts
+alwaysApply: false
+---
+
+# API routes
+
+```ts
+import { jsonError, jsonOk, requireMaster } from "@/lib/http";
+
+export async function GET(request: Request) {
+  const master = requireMaster(request);
+  if (!master) return jsonError("Не авторизован", 401);
+  // … domain call …
+  return jsonOk(data);
+}
+```
+
+- Публичное чтение — `getMasterBySlug`; мутации — `requireMaster` + `master_id`.
+- Статусы: `400` валидация, `401` auth, `404`, `409` конфликт, `500` + `console.error`.
+- ID: `uuidv4()`. SQL/бизнес — в `src/lib/*`, route тонкий.
+- Не писать `max_user_id` из тела PATCH (только bot connect). `vk_user_id` — временно до F12.
+- Booking create: overlap + транзакция; `notifyMaster` без блокировки ответа.
+- Новый эндпоинт → docs + `e2e/api/*.api.spec.ts`.

@@ -26,7 +26,11 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(path, { ...options, headers });
+  const response = await fetch(path, {
+    ...options,
+    headers,
+    credentials: "include",
+  });
   const data = await response.json();
 
   if (!response.ok) {
@@ -34,6 +38,19 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   }
 
   return data;
+}
+
+/** End session: clear cookie on server + local recovery token. */
+export async function logoutSession() {
+  try {
+    await fetch("/api/masters/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+  } catch {
+    /* ignore network errors on logout */
+  }
+  clearToken();
 }
 
 export function compressImage(file: File, maxWidth = 1200): Promise<string> {
@@ -57,7 +74,6 @@ export function compressImage(file: File, maxWidth = 1200): Promise<string> {
         resolve(canvas.toDataURL("image/jpeg", 0.8));
       };
       img.onerror = reject;
-      img.src = e.target?.result as string;
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);

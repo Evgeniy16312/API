@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
 import { getMasterBySlug } from "@/lib/auth";
 import { getDb } from "@/lib/db";
-import { getAvailableSlots } from "@/lib/slots";
+import { getAvailableDates, getAvailableSlots } from "@/lib/slots";
 import type { Booking, Service } from "@/lib/types";
+import { jsonError, jsonOk } from "@/lib/http";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -10,16 +10,23 @@ export async function GET(request: Request) {
   const serviceId = url.searchParams.get("service_id");
   const date = url.searchParams.get("date");
 
-  if (!slug || !serviceId || !date) {
-    return NextResponse.json(
-      { error: "Укажите slug, service_id и date" },
-      { status: 400 }
-    );
+  if (!slug) {
+    return jsonError("Укажите slug", 400);
   }
 
   const master = getMasterBySlug(slug);
   if (!master) {
-    return NextResponse.json({ error: "Мастер не найден" }, { status: 404 });
+    return jsonError("Мастер не найден", 404);
+  }
+
+  // Available working dates from weekly schedule
+  if (!date) {
+    const dates = getAvailableDates(master.work_schedule, 28);
+    return jsonOk({ dates });
+  }
+
+  if (!serviceId) {
+    return jsonError("Укажите service_id и date", 400);
   }
 
   const service = getDb()
@@ -27,15 +34,17 @@ export async function GET(request: Request) {
     .get(serviceId, master.id) as Service | undefined;
 
   if (!service) {
-    return NextResponse.json({ error: "Услуга не найдена" }, { status: 404 });
+    return jsonError("Услуга не найдена", 404);
   }
 
   const bookings = getDb()
     .prepare(
-      "SELECT * FROM bookings WHERE master_id = ? AND date = ? AND status != 'cancelled'"
+      `SELECT b.*, COALESCE(b.service_duration, s.duration, ?) AS service_duration
+       FROM bookings b
+       LEFT JOIN services s ON s.id = b.service_id
+       WHERE b.master_id = ? AND b.date = ? AND b.status != 'cancelled'`
     )
-    .all(master.id, date) as unknown as Booking[];
-
+    .all(master.slot_duration, master.id, date) as unknown as Booking[];
   const slots = getAvailableSlots(
     date,
     master.work_schedule,
@@ -44,5 +53,5 @@ export async function GET(request: Request) {
     master.slot_duration
   );
 
-  return NextResponse.json({ slots });
+  return jsonOk({ slots, dates: getAvailableDates(master.work_schedule, 28) });
 }

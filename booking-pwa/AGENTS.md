@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## МояЗапись project agents
+
+- Docs package: `docs/` (start at `docs/README.md`, catalog `docs/FEATURES.md`)
+- Always-on rules: `.cursor/rules/moyazapis-core.mdc`, `documentation.mdc`
+- Skills: `.cursor/skills/add-feature`, `document-feature`, `test-feature`

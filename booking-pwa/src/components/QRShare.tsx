@@ -40,8 +40,8 @@ export default function QRShare({ url, slug }: QRShareProps) {
         <QRCodeSVG value={url} size={160} level="M" />
       </div>
 
-      <div className="bg-[#faf9f7] rounded-xl px-4 py-3 mb-4 font-mono text-sm break-all">
-        /m/{slug}
+      <div className="bg-[#faf9f7] rounded-xl px-4 py-3 mb-4 font-mono text-xs sm:text-sm break-all text-left">
+        {url}
       </div>
 
       <div className="flex gap-2">

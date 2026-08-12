@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, getToken } from "@/lib/client";
 import QRShare from "@/components/QRShare";
+import { masterPublicPageUrl } from "@/lib/public-url";
 import type { Master, Booking } from "@/lib/types";
 
 export default function AppDashboard() {
@@ -15,7 +16,7 @@ export default function AppDashboard() {
 
   useEffect(() => {
     if (!getToken()) {
-      router.replace("/app/register");
+      router.replace("/app/login");
       return;
     }
 
@@ -27,7 +28,7 @@ export default function AppDashboard() {
         setMaster(m);
         setBookings(b);
       })
-      .catch(() => router.replace("/app/register"))
+      .catch(() => router.replace("/app/login"))
       .finally(() => setLoading(false));
   }, [router]);
 
@@ -41,11 +42,7 @@ export default function AppDashboard() {
 
   if (!master) return null;
 
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : process.env.NEXT_PUBLIC_APP_URL || "";
-  const pageUrl = `${baseUrl}/m/${master.slug}`;
+  const pageUrl = masterPublicPageUrl(master.slug);
 
   return (
     <div className="px-4 py-6 space-y-4">
@@ -96,12 +93,20 @@ export default function AppDashboard() {
           <span className="text-sm font-medium">Портфолио</span>
         </Link>
         <Link href="/app/schedule" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">🕐</span>
-          <span className="text-sm font-medium">Расписание</span>
+          <span className="text-2xl block mb-1">📅</span>
+          <span className="text-sm font-medium">Календарь</span>
+        </Link>
+        <Link href="/app/reviews" className="card text-center py-4 active:scale-[0.98] transition-transform">
+          <span className="text-2xl block mb-1">⭐</span>
+          <span className="text-sm font-medium">Отзывы</span>
         </Link>
         <Link href="/app/settings" className="card text-center py-4 active:scale-[0.98] transition-transform">
           <span className="text-2xl block mb-1">🔔</span>
           <span className="text-sm font-medium">MAX / VK</span>
+        </Link>
+        <Link href="/app/bookings" className="card text-center py-4 active:scale-[0.98] transition-transform">
+          <span className="text-2xl block mb-1">📋</span>
+          <span className="text-sm font-medium">Записи</span>
         </Link>
       </div>
     </div>

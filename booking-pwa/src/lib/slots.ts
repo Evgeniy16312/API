@@ -1,4 +1,4 @@
-import { addMinutes, format, parse, isBefore, isAfter, startOfDay } from "date-fns";
+import { addMinutes, format, parse, isAfter, startOfDay } from "date-fns";
 import { ru } from "date-fns/locale";
 import type { Booking, Service, WorkSchedule } from "./types";
 
@@ -11,6 +11,47 @@ const DAY_MAP: Record<number, string> = {
   5: "friday",
   6: "saturday",
 };
+
+export function timeToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return h * 60 + m;
+}
+
+/** True if [start, start+duration) intervals overlap. */
+export function intervalsOverlap(
+  startA: string,
+  durationA: number,
+  startB: string,
+  durationB: number
+): boolean {
+  const a0 = timeToMinutes(startA);
+  const a1 = a0 + durationA;
+  const b0 = timeToMinutes(startB);
+  const b1 = b0 + durationB;
+  return a0 < b1 && b0 < a1;
+}
+
+function bookingDuration(booking: Booking, fallback: number): number {
+  return booking.service_duration || fallback;
+}
+
+export function hasBookingConflict(
+  candidateTime: string,
+  candidateDuration: number,
+  existingBookings: Booking[],
+  dateStr: string,
+  fallbackDuration: number
+): boolean {
+  return existingBookings.some((b) => {
+    if (b.date !== dateStr || b.status === "cancelled") return false;
+    return intervalsOverlap(
+      candidateTime,
+      candidateDuration,
+      b.time,
+      bookingDuration(b, fallbackDuration)
+    );
+  });
+}
 
 export function getAvailableSlots(
   dateStr: string,
@@ -29,12 +70,6 @@ export function getAvailableSlots(
   const start = parse(daySchedule.start, "HH:mm", date);
   const end = parse(daySchedule.end, "HH:mm", date);
 
-  const bookedTimes = new Set(
-    existingBookings
-      .filter((b) => b.date === dateStr && b.status !== "cancelled")
-      .map((b) => b.time)
-  );
-
   const slots: string[] = [];
   let current = start;
   const now = new Date();
@@ -42,11 +77,16 @@ export function getAvailableSlots(
 
   while (addMinutes(current, duration) <= end) {
     const timeStr = format(current, "HH:mm");
+    const free = !hasBookingConflict(
+      timeStr,
+      duration,
+      existingBookings,
+      dateStr,
+      slotDuration
+    );
 
-    if (!bookedTimes.has(timeStr)) {
-      if (!isToday || isAfter(current, now)) {
-        slots.push(timeStr);
-      }
+    if (free && (!isToday || isAfter(current, now))) {
+      slots.push(timeStr);
     }
 
     current = addMinutes(current, duration);
@@ -90,4 +130,12 @@ export function isValidSlug(slug: string): boolean {
 export function isValidPhone(phone: string): boolean {
   const cleaned = phone.replace(/\D/g, "");
   return cleaned.length >= 10 && cleaned.length <= 15;
+}
+
+export function isValidDate(date: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(date);
+}
+
+export function isValidTime(time: string): boolean {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(time);
 }

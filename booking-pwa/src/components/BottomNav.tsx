@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
   { href: "/app", label: "Главная", icon: "🏠" },
-  { href: "/app/bookings", label: "Записи", icon: "📅" },
+  { href: "/app/bookings", label: "Записи", icon: "📋" },
+  { href: "/app/schedule", label: "Календарь", icon: "📅" },
   { href: "/app/services", label: "Услуги", icon: "✂️" },
-  { href: "/app/portfolio", label: "Портфолио", icon: "🖼️" },
   { href: "/app/settings", label: "Ещё", icon: "⚙️" },
 ];
 
