@@ -302,6 +302,24 @@ function ensureMigrations(database: DatabaseSync) {
     );
     CREATE INDEX IF NOT EXISTS idx_owner_alert_master ON owner_alert_log(master_id);
 
+    CREATE TABLE IF NOT EXISTS payments (
+      id TEXT PRIMARY KEY,
+      master_id TEXT NOT NULL,
+      plan TEXT NOT NULL,
+      amount_rub INTEGER NOT NULL,
+      days INTEGER NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      provider TEXT NOT NULL DEFAULT 'yookassa',
+      external_id TEXT DEFAULT '',
+      confirmation_url TEXT DEFAULT '',
+      created_at TEXT NOT NULL,
+      paid_at TEXT DEFAULT '',
+      FOREIGN KEY (master_id) REFERENCES masters(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_payments_master ON payments(master_id);
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_payments_external
+      ON payments(external_id) WHERE external_id != '';
+
     CREATE INDEX IF NOT EXISTS idx_vk_codes_master ON vk_connect_codes(master_id);
     CREATE INDEX IF NOT EXISTS idx_outbox_pending ON notification_outbox(status, available_at);
     CREATE INDEX IF NOT EXISTS idx_reviews_master ON reviews(master_id, status);

@@ -32,7 +32,7 @@
 | F28 | Email-уведомления (Mail.ru SMTP) | done | [features/email-notifications.md](./features/email-notifications.md) |
 | F29 | Админ-панель владельца | done | [features/admin-panel.md](./features/admin-panel.md) |
 | F30 | Подписки мастеров (ручные) | done | [features/master-subscriptions.md](./features/master-subscriptions.md) |
-| F31 | Онлайн-оплата подписок | planned | — (после F30) |
+| F31 | Онлайн-оплата подписок | done | [features/online-payments.md](./features/online-payments.md) |
 | F32 | MAX webhook в проде | blocked | [features/max-webhook-prod.md](./features/max-webhook-prod.md) |
 | F33 | Telegram-бот уведомления | done | [features/telegram-bot.md](./features/telegram-bot.md) |
 | F34 | Напоминания владельцу об истекающих подписках | done | [features/owner-subscription-alerts.md](./features/owner-subscription-alerts.md) |

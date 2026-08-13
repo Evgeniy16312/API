@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch, getToken, logoutSession, compressImage } from "@/lib/client";
 import LocationPicker from "@/components/LocationPicker";
@@ -302,6 +303,14 @@ export default function SettingsPage() {
       >
         {saving ? "Сохраняем..." : saved ? "✓ Сохранено" : "Сохранить"}
       </button>
+
+      <Link
+        href="/app/billing"
+        className="btn-outline w-full text-center block"
+        data-testid="settings-billing-link"
+      >
+        Подписка и оплата
+      </Link>
 
       <button
         onClick={logout}

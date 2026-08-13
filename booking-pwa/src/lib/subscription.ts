@@ -107,7 +107,7 @@ export function syncMasterSubscription(masterId: string): SubscriptionInfo | nul
     banner = "Аккаунт заблокирован. Онлайн-запись отключена.";
   } else if (status === "past_due") {
     banner =
-      "Подписка истекла — онлайн-запись недоступна. Напишите в поддержку МояЗапись.";
+      "Подписка истекла — онлайн-запись недоступна. Оплатите тариф в разделе «Подписка».";
   } else if (status === "trial") {
     banner = `Пробный период до ${formatRuDate(trialEnd.toISOString())}`;
   } else if (status === "active" && paidUntil) {
@@ -153,7 +153,8 @@ export function syncAllMasterSubscriptions(limit = 200): {
 
 export function extendMasterSubscription(
   masterId: string,
-  days: number
+  days: number,
+  options?: { plan?: PlanId }
 ): SubscriptionInfo | null {
   const existing = syncMasterSubscription(masterId);
   if (!existing) return null;
@@ -164,13 +165,20 @@ export function extendMasterSubscription(
       : new Date();
   const until = new Date(base.getTime() + days * 86400_000);
 
+  const nextPlan: PlanId =
+    options?.plan === "basic" || options?.plan === "pro"
+      ? options.plan
+      : existing.plan === "trial"
+        ? "basic"
+        : existing.plan;
+
   getDb()
     .prepare(
       `UPDATE masters
-       SET paid_until = ?, subscription_status = 'active', plan = CASE WHEN plan = 'trial' THEN 'basic' ELSE plan END, blocked = 0
+       SET paid_until = ?, subscription_status = 'active', plan = ?, blocked = 0
        WHERE id = ?`
     )
-    .run(until.toISOString(), masterId);
+    .run(until.toISOString(), nextPlan, masterId);
 
   return syncMasterSubscription(masterId);
 }
