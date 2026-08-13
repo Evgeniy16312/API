@@ -6,6 +6,8 @@ export interface WorkDay {
 
 export type WorkSchedule = Record<string, WorkDay>;
 
+export type NotifyChannel = "max" | "vk" | "telegram" | "email";
+
 export interface Master {
   id: string;
   slug: string;
@@ -19,6 +21,18 @@ export interface Master {
   avatar_url: string;
   max_user_id: string;
   vk_user_id: string;
+  telegram_user_id: string;
+  /** Preferred delivery channel — only one is used. */
+  notify_channel: NotifyChannel;
+  notify_email: string;
+  plan: "trial" | "basic" | "pro";
+  subscription_status: "trial" | "active" | "past_due" | "blocked";
+  paid_until: string;
+  blocked: boolean;
+  /** Present on /api/masters/me after sync. */
+  trial_ends_at?: string;
+  booking_allowed?: boolean;
+  subscription_banner?: string | null;
   work_schedule: WorkSchedule;
   slot_duration: number;
   created_at: string;

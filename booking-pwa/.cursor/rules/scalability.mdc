@@ -9,7 +9,7 @@ alwaysApply: true
 
 - `src/app/api/**` — тонкие handlers: parse → вызвать `src/lib/*` → `jsonOk/jsonError`
 - Домен (`slots`, booking conflict, connect codes) — в `src/lib/<domain>.ts`, не в route
-- Каналы MAX/VK — только send/webhook; не смешивать с SQL записи
+- Каналы MAX/VK/Telegram/email — только send/webhook/SMTP; не смешивать с SQL записи
 - HTTP-хелперы — `@/lib/http` (`requireMaster`, `jsonError`, `jsonOk`)
 
 ## S0 (сейчас)
@@ -23,8 +23,7 @@ alwaysApply: true
 ## Запреты до S2
 
 - ❌ Новые base64/blob портфолио в SQLite (файлы или URL)
-- ❌ Клиентский PATCH `max_user_id` (только bot connect). `vk_user_id` — исключение до F12.
-- ❌ Telegram
+- ❌ Клиентский PATCH `max_user_id` / `telegram_user_id` (только bot connect). `vk_user_id` — исключение до F12.
 - ❌ Возврат `better-sqlite3`
 
 ## Перед фичей

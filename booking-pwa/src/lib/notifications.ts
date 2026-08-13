@@ -1,4 +1,5 @@
 import { maxSendMessage, type MaxInlineButton } from "@/lib/max/api";
+import { telegramSendMessage } from "@/lib/telegram/api";
 
 export interface NotificationPayload {
   masterName: string;
@@ -83,6 +84,64 @@ export async function sendVkNotification(
     return !data.error;
   } catch (error) {
     console.error("VK notification error:", error);
+    return false;
+  }
+}
+
+export async function sendTelegramNotification(
+  userId: string,
+  payload: NotificationPayload
+): Promise<boolean> {
+  if (!userId) return false;
+  const buttons =
+    payload.bookingId && payload.kind !== "cancelled_by_client"
+      ? [
+          [
+            { text: "✅ Подтвердить", callback_data: `ok:${payload.bookingId}` },
+            { text: "❌ Отменить", callback_data: `no:${payload.bookingId}` },
+          ],
+        ]
+      : undefined;
+  return telegramSendMessage(userId, formatMessage(payload), buttons);
+}
+
+export async function sendEmailNotification(
+  to: string,
+  payload: NotificationPayload
+): Promise<boolean> {
+  const host = process.env.SMTP_HOST;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  if (!host || !user || !pass || !to) {
+    console.warn("Email notification skipped: SMTP not configured or empty to");
+    return false;
+  }
+
+  const port = Number(process.env.SMTP_PORT || "465");
+  const secure =
+    process.env.SMTP_SECURE === "true" ||
+    process.env.SMTP_SECURE === "1" ||
+    port === 465;
+  const from =
+    process.env.SMTP_FROM || `МояЗапись <${user}>`;
+
+  try {
+    const nodemailer = await import("nodemailer");
+    const transporter = nodemailer.createTransport({
+      host,
+      port,
+      secure,
+      auth: { user, pass },
+    });
+    await transporter.sendMail({
+      from,
+      to,
+      subject: titleFor(payload.kind).replace(/^[^\s]+\s/, ""),
+      text: formatMessage(payload),
+    });
+    return true;
+  } catch (error) {
+    console.error("Email notification error:", error);
     return false;
   }
 }

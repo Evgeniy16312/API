@@ -82,6 +82,13 @@ function initSchema(database: DatabaseSync) {
       token TEXT UNIQUE NOT NULL,
       max_user_id TEXT DEFAULT '',
       vk_user_id TEXT DEFAULT '',
+      telegram_user_id TEXT DEFAULT '',
+      notify_channel TEXT NOT NULL DEFAULT 'max',
+      notify_email TEXT DEFAULT '',
+      plan TEXT NOT NULL DEFAULT 'trial',
+      subscription_status TEXT NOT NULL DEFAULT 'trial',
+      paid_until TEXT DEFAULT '',
+      blocked INTEGER NOT NULL DEFAULT 0,
       work_schedule TEXT NOT NULL,
       slot_duration INTEGER DEFAULT 60,
       created_at TEXT NOT NULL
@@ -139,6 +146,15 @@ function initSchema(database: DatabaseSync) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS telegram_connect_codes (
+      code TEXT PRIMARY KEY,
+      master_id TEXT NOT NULL,
+      telegram_user_id TEXT DEFAULT '',
+      expires_at TEXT NOT NULL,
+      used INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS notification_outbox (
       id TEXT PRIMARY KEY,
       channel TEXT NOT NULL,
@@ -170,6 +186,7 @@ function initSchema(database: DatabaseSync) {
     CREATE INDEX IF NOT EXISTS idx_portfolio_master ON portfolio(master_id);
     CREATE INDEX IF NOT EXISTS idx_max_codes_master ON max_connect_codes(master_id);
     CREATE INDEX IF NOT EXISTS idx_vk_codes_master ON vk_connect_codes(master_id);
+    CREATE INDEX IF NOT EXISTS idx_telegram_codes_master ON telegram_connect_codes(master_id);
     CREATE INDEX IF NOT EXISTS idx_outbox_pending ON notification_outbox(status, available_at);
     CREATE INDEX IF NOT EXISTS idx_reviews_master ON reviews(master_id, status);
   `);
@@ -197,8 +214,53 @@ function ensureMigrations(database: DatabaseSync) {
   if (!masterCols.has("lng")) {
     database.exec("ALTER TABLE masters ADD COLUMN lng REAL");
   }
+  if (!masterCols.has("notify_channel")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN notify_channel TEXT NOT NULL DEFAULT 'max'"
+    );
+  }
+  if (!masterCols.has("notify_email")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN notify_email TEXT DEFAULT ''"
+    );
+  }
+  if (!masterCols.has("telegram_user_id")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN telegram_user_id TEXT DEFAULT ''"
+    );
+  }
+  if (!masterCols.has("plan")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN plan TEXT NOT NULL DEFAULT 'trial'"
+    );
+  }
+  if (!masterCols.has("subscription_status")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN subscription_status TEXT NOT NULL DEFAULT 'trial'"
+    );
+  }
+  if (!masterCols.has("paid_until")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN paid_until TEXT DEFAULT ''"
+    );
+  }
+  if (!masterCols.has("blocked")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0"
+    );
+  }
 
   database.exec(`
+    CREATE TABLE IF NOT EXISTS telegram_connect_codes (
+      code TEXT PRIMARY KEY,
+      master_id TEXT NOT NULL,
+      telegram_user_id TEXT DEFAULT '',
+      expires_at TEXT NOT NULL,
+      used INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_telegram_codes_master ON telegram_connect_codes(master_id);
+
     CREATE TABLE IF NOT EXISTS vk_connect_codes (
       code TEXT PRIMARY KEY,
       master_id TEXT NOT NULL,

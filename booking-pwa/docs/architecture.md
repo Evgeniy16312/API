@@ -3,7 +3,8 @@
 ## Продукт
 
 SaaS PWA для частных мастеров (барбер, маникюр, кондитер…): ссылка/QR → портфолио + онлайн-запись.  
-Уведомления мастеру: **MAX** и **VK**. Telegram не используем (блокировки в РФ).
+Уведомления мастеру: **ровно один** канал — **MAX** / **VK** / **Telegram** / **email** (свитчер, F27; ADR 004/005).  
+Владелец SaaS: админ-панель + подписки (F29–F30).
 
 ## Стек (сейчас)
 
@@ -12,7 +13,7 @@ SaaS PWA для частных мастеров (барбер, маникюр, �
 | UI / API | Next.js 16 App Router + TS + Tailwind | один репозиторий, SSR/PWA |
 | БД | `node:sqlite` (`DatabaseSync`) | без native build; single-writer на VPS |
 | Auth мастера | Bearer + httpOnly cookie `master_session`, вход по коду | F16; дальше — телефон/OTP |
-| Push/чат | MAX Bot API, VK (planned) | канал, доступный в РФ |
+| Push/чат | MAX / VK / Telegram / email (один активный) | каналы для РФ (+ Telegram через VPN) |
 | Тесты | Playwright (`e2e/`) | API + UI |
 
 ## Целевые слои (обязательно держать)
@@ -37,6 +38,7 @@ docs/features/      → карточки фич
 | `/` | все | лендинг |
 | `/app/register` | мастер | регистрация |
 | `/app/*` | мастер | панель |
+| `/admin/*` | владелец | админка SaaS (F29) |
 | `/m/[slug]` | клиент | публичная страница + запись |
 | `/api/*` | сервер | JSON API |
 
@@ -62,7 +64,7 @@ docs/features/      → карточки фич
 2. Только `node:sqlite` через `getDb()` — без `better-sqlite3`.
 3. Без Telegram.
 4. Публичные API — по `slug`; мутации мастера — `requireMaster` / `requireAuth`.
-5. Каналы (`max_user_id` / `vk_user_id`) **не** принимает PATCH от клиента — только через connect-flow бота.
+5. `max_user_id` / `telegram_user_id` — только через connect-flow бота; `vk_user_id` — connect (временно ещё PATCH). Выбор канала — `notify_channel` (F27).
 6. Создание записи: проверка overlap по длительности + транзакция; notify **не блокирует** ответ клиенту.
 7. Portfolio: не класть новые большие blob в SQLite (план — файлы/S3); лимит размера на upload.
 8. Фича → `docs/features/` + тест; см. skills `add-feature` / `test-feature`.

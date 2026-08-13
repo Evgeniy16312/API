@@ -44,6 +44,27 @@ export function rowToMaster(row: Record<string, unknown>): Master {
     avatar_url: (row.avatar_url as string) || "",
     max_user_id: (row.max_user_id as string) || "",
     vk_user_id: (row.vk_user_id as string) || "",
+    telegram_user_id: (row.telegram_user_id as string) || "",
+    notify_channel:
+      row.notify_channel === "vk" ||
+      row.notify_channel === "email" ||
+      row.notify_channel === "telegram"
+        ? row.notify_channel
+        : "max",
+    notify_email: (row.notify_email as string) || "",
+    plan:
+      row.plan === "basic" || row.plan === "pro" || row.plan === "trial"
+        ? row.plan
+        : "trial",
+    subscription_status:
+      row.subscription_status === "active" ||
+      row.subscription_status === "past_due" ||
+      row.subscription_status === "blocked" ||
+      row.subscription_status === "trial"
+        ? row.subscription_status
+        : "trial",
+    paid_until: (row.paid_until as string) || "",
+    blocked: Number(row.blocked || 0) === 1,
     work_schedule: parseSchedule(row.work_schedule as string),
     slot_duration: (row.slot_duration as number) || 60,
     created_at: row.created_at as string,

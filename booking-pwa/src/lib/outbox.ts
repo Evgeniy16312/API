@@ -1,12 +1,19 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "@/lib/db";
 import {
+  sendEmailNotification,
   sendMaxNotification,
+  sendTelegramNotification,
   sendVkNotification,
   type NotificationPayload,
 } from "@/lib/notifications";
 
-export type OutboxChannel = "max" | "vk" | "reminder_master";
+export type OutboxChannel =
+  | "max"
+  | "vk"
+  | "telegram"
+  | "email"
+  | "reminder_master";
 
 export type OutboxPayload = NotificationPayload;
 
@@ -57,8 +64,13 @@ async function deliver(row: OutboxRow): Promise<boolean> {
   if (row.channel === "vk") {
     return sendVkNotification(row.recipient, payload);
   }
+  if (row.channel === "telegram") {
+    return sendTelegramNotification(row.recipient, payload);
+  }
+  if (row.channel === "email") {
+    return sendEmailNotification(row.recipient, payload);
+  }
   if (row.channel === "reminder_master") {
-    // Prefer MAX, fallback VK — same message format with kind prefix
     const textPayload: OutboxPayload = {
       ...payload,
       kind: payload.kind || "reminder_24h",
@@ -68,6 +80,12 @@ async function deliver(row: OutboxRow): Promise<boolean> {
     }
     if (row.recipient.startsWith("vk:")) {
       return sendVkNotification(row.recipient.slice(3), textPayload);
+    }
+    if (row.recipient.startsWith("telegram:")) {
+      return sendTelegramNotification(row.recipient.slice(9), textPayload);
+    }
+    if (row.recipient.startsWith("email:")) {
+      return sendEmailNotification(row.recipient.slice(6), textPayload);
     }
     return sendMaxNotification(row.recipient, textPayload);
   }

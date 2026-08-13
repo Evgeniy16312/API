@@ -35,5 +35,10 @@ export default defineConfig({
         url: BASE_URL,
         reuseExistingServer: !process.env.CI,
         timeout: 120_000,
+        env: {
+          ...process.env,
+          ADMIN_SETUP_KEY:
+            process.env.ADMIN_SETUP_KEY || "change-me",
+        },
       },
 });

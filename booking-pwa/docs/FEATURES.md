@@ -28,7 +28,14 @@
 | F24 | Смена публичного slug | done | [features/slug-change.md](./features/slug-change.md) |
 | F25 | Отзывы клиентов | done | [features/client-reviews.md](./features/client-reviews.md) |
 | F26 | Отмена записи клиентом | done | [features/client-cancel-booking.md](./features/client-cancel-booking.md) |
+| F27 | Свитчер канала уведомлений | done | [features/notify-channel-switch.md](./features/notify-channel-switch.md) |
+| F28 | Email-уведомления (Mail.ru SMTP) | in_progress | [features/email-notifications.md](./features/email-notifications.md) |
+| F29 | Админ-панель владельца | done | [features/admin-panel.md](./features/admin-panel.md) |
+| F30 | Подписки мастеров (ручные) | done | [features/master-subscriptions.md](./features/master-subscriptions.md) |
+| F31 | Онлайн-оплата подписок | planned | — (после F30) |
+| F32 | MAX webhook в проде | planned | [features/max-webhook-prod.md](./features/max-webhook-prod.md) |
+| F33 | Telegram-бот уведомления | done | [features/telegram-bot.md](./features/telegram-bot.md) |
 
 ## Следующий свободный ID
 
-`F27`
+`F34`

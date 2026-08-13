@@ -8,7 +8,7 @@ alwaysApply: true
 - Рабочая папка: **только** `booking-pwa` (не корень `API`).
 - Стек: Next.js 16 App Router + TS + Tailwind + PWA.
 - БД: **только** `node:sqlite` через `getDb()` / `withTransaction`. Никогда `better-sqlite3`.
-- Уведомления: MAX + VK. **Не** Telegram.
+- Уведомления: **один** канал из MAX / VK / Telegram / email (свитчер). `max_user_id` / `telegram_user_id` — только через bot connect.
 - Перед кодом Next.js — `node_modules/next/dist/docs/` (см. `AGENTS.md`).
 - Auth: Bearer **или** httpOnly cookie `master_session` (`src/lib/session.ts`).
 - Вход: `/app/login` по коду доступа; выход: `POST /api/masters/logout`.

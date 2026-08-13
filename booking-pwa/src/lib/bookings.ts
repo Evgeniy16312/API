@@ -1,7 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
-import { getMasterBySlug } from "@/lib/auth";
+import { getMasterById, getMasterBySlug } from "@/lib/auth";
 import { getDb, withTransaction } from "@/lib/db";
+import { resolveNotifyTarget } from "@/lib/notify-channel";
 import { enqueueNotification, flushOutbox } from "@/lib/outbox";
+import { isMasterBookingAllowed } from "@/lib/subscription";
 import {
   formatBookingDate,
   hasBookingConflict,
@@ -40,6 +42,14 @@ export function createBooking(input: CreateBookingInput): CreateBookingResult {
   const master = getMasterBySlug(slug);
   if (!master) {
     return { ok: false, error: "Мастер не найден", status: 404 };
+  }
+
+  if (!isMasterBookingAllowed(master.id)) {
+    return {
+      ok: false,
+      error: "Онлайн-запись временно недоступна",
+      status: 403,
+    };
   }
 
   const service = getDb()
@@ -145,49 +155,38 @@ function queueBookingNotifications(
     kind: "new_booking" as const,
   };
 
-  enqueueNotification({
-    channel: "max",
-    recipient: master.max_user_id,
-    payload,
-    bookingId,
-  });
-  enqueueNotification({
-    channel: "vk",
-    recipient: master.vk_user_id,
-    payload,
-    bookingId,
-  });
+  const target = resolveNotifyTarget(master);
+  if (target) {
+    enqueueNotification({
+      channel: target.channel,
+      recipient: target.recipient,
+      payload,
+      bookingId,
+    });
+  }
 
   const visitAt = new Date(`${data.date}T${data.time}:00`);
-  if (!Number.isNaN(visitAt.getTime())) {
-    const reminderChannels: { prefix: string; id: string }[] = [];
-    if (master.max_user_id) {
-      reminderChannels.push({ prefix: "max:", id: master.max_user_id });
-    } else if (master.vk_user_id) {
-      reminderChannels.push({ prefix: "vk:", id: master.vk_user_id });
+  if (target && !Number.isNaN(visitAt.getTime())) {
+    const at24 = new Date(visitAt.getTime() - 24 * 60 * 60_000);
+    const at2 = new Date(visitAt.getTime() - 2 * 60 * 60_000);
+    const recipient = `${target.channel}:${target.recipient}`;
+    if (at24 > new Date()) {
+      enqueueNotification({
+        channel: "reminder_master",
+        recipient,
+        payload: { ...payload, kind: "reminder_24h" },
+        bookingId,
+        availableAt: at24,
+      });
     }
-
-    for (const ch of reminderChannels) {
-      const at24 = new Date(visitAt.getTime() - 24 * 60 * 60_000);
-      const at2 = new Date(visitAt.getTime() - 2 * 60 * 60_000);
-      if (at24 > new Date()) {
-        enqueueNotification({
-          channel: "reminder_master",
-          recipient: `${ch.prefix}${ch.id}`,
-          payload: { ...payload, kind: "reminder_24h" },
-          bookingId,
-          availableAt: at24,
-        });
-      }
-      if (at2 > new Date()) {
-        enqueueNotification({
-          channel: "reminder_master",
-          recipient: `${ch.prefix}${ch.id}`,
-          payload: { ...payload, kind: "reminder_2h" },
-          bookingId,
-          availableAt: at2,
-        });
-      }
+    if (at2 > new Date()) {
+      enqueueNotification({
+        channel: "reminder_master",
+        recipient,
+        payload: { ...payload, kind: "reminder_2h" },
+        bookingId,
+        availableAt: at2,
+      });
     }
   }
 }
@@ -267,15 +266,13 @@ export function cancelBookingByManageToken(
     )
     .run(full.id);
 
-  const master = getDb()
-    .prepare("SELECT * FROM masters WHERE id = ?")
-    .get(full.master_id) as unknown as Master;
-
-  queueCancelNotifications(master, full);
-
-  void flushOutbox().catch((error) => {
-    console.error("Outbox flush after client cancel failed:", error);
-  });
+  const master = getMasterById(full.master_id);
+  if (master) {
+    queueCancelNotifications(master, full);
+    void flushOutbox().catch((error) => {
+      console.error("Outbox flush after client cancel failed:", error);
+    });
+  }
 
   const updated = getBookingByManageToken(token)!;
   return { ok: true, booking: updated };
@@ -296,15 +293,11 @@ function queueCancelNotifications(master: Master, booking: Booking) {
     kind: "cancelled_by_client" as const,
   };
 
+  const target = resolveNotifyTarget(master);
+  if (!target) return;
   enqueueNotification({
-    channel: "max",
-    recipient: master.max_user_id,
-    payload,
-    bookingId: booking.id,
-  });
-  enqueueNotification({
-    channel: "vk",
-    recipient: master.vk_user_id,
+    channel: target.channel,
+    recipient: target.recipient,
     payload,
     bookingId: booking.id,
   });

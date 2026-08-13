@@ -14,6 +14,9 @@ services:
     #   ln -sf .env.production .env
     environment:
       NODE_ENV: production
+    # RU VPS: some Telegram A-records time out on :443; pin a working edge IP
+    extra_hosts:
+      - "api.telegram.org:149.154.167.220"
     volumes:
       - booking-data:/app/data
       - booking-uploads:/app/public/uploads

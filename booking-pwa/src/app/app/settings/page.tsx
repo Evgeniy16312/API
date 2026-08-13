@@ -5,8 +5,16 @@ import { useRouter } from "next/navigation";
 import { apiFetch, getToken, logoutSession, compressImage } from "@/lib/client";
 import MaxConnect from "@/components/MaxConnect";
 import LocationPicker from "@/components/LocationPicker";
+import TelegramConnect from "@/components/TelegramConnect";
 import VkConnect from "@/components/VkConnect";
-import type { Master } from "@/lib/types";
+import type { Master, NotifyChannel } from "@/lib/types";
+
+const CHANNEL_OPTIONS: { id: NotifyChannel; label: string; hint: string }[] = [
+  { id: "max", label: "MAX", hint: "Мессенджер MAX" },
+  { id: "vk", label: "VK", hint: "ВКонтакте" },
+  { id: "telegram", label: "Telegram", hint: "Через VPN тоже ок" },
+  { id: "email", label: "Почта", hint: "Mail.ru и др." },
+];
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -25,6 +33,8 @@ export default function SettingsPage() {
   const [description, setDescription] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("");
   const [vkUserId, setVkUserId] = useState("");
+  const [notifyChannel, setNotifyChannel] = useState<NotifyChannel>("max");
+  const [notifyEmail, setNotifyEmail] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState("");
 
@@ -46,9 +56,17 @@ export default function SettingsPage() {
         setDescription(m.description);
         setAvatarUrl(m.avatar_url || "");
         setVkUserId(m.vk_user_id);
+        setNotifyChannel(m.notify_channel || "max");
+        setNotifyEmail(m.notify_email || "");
       })
       .finally(() => setLoading(false));
   }, []);
+
+  const channelReady =
+    (notifyChannel === "max" && Boolean(master?.max_user_id)) ||
+    (notifyChannel === "vk" && Boolean(vkUserId.trim())) ||
+    (notifyChannel === "telegram" && Boolean(master?.telegram_user_id)) ||
+    (notifyChannel === "email" && Boolean(notifyEmail.trim()));
 
   async function save() {
     setSaving(true);
@@ -68,10 +86,14 @@ export default function SettingsPage() {
           description,
           avatar_url: avatarUrl,
           vk_user_id: vkUserId,
+          notify_channel: notifyChannel,
+          notify_email: notifyEmail,
         }),
       });
       setMaster(updated);
       setSlug(updated.slug);
+      setNotifyChannel(updated.notify_channel || "max");
+      setNotifyEmail(updated.notify_email || "");
       setSaved(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка сохранения");
@@ -224,19 +246,64 @@ export default function SettingsPage() {
       <div className="card space-y-3">
         <h3 className="font-semibold">Уведомления</h3>
         <p className="text-sm text-[#6b7280]">
-          Куда присылать уведомления о новых записях
+          Выберите один канал — туда будут приходить новые записи и напоминания
         </p>
 
+        <div
+          className="grid grid-cols-2 gap-2"
+          data-testid="notify-channel"
+          role="radiogroup"
+          aria-label="Канал уведомлений"
+        >
+          {CHANNEL_OPTIONS.map((opt) => {
+            const active = notifyChannel === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                data-testid={`notify-channel-${opt.id}`}
+                onClick={() => {
+                  setNotifyChannel(opt.id);
+                  setSaved(false);
+                }}
+                className={`rounded-xl border px-2 py-3 text-center transition-colors ${
+                  active
+                    ? "border-[#c9a96e] bg-[#c9a96e]/15"
+                    : "border-[#e8e6e3] bg-[#faf9f7]"
+                }`}
+              >
+                <div className="text-sm font-semibold">{opt.label}</div>
+                <div className="text-[10px] text-[#6b7280] mt-1 leading-tight">
+                  {opt.hint}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {!channelReady && (
+          <p className="text-xs text-amber-700 bg-amber-50 rounded-xl px-3 py-2">
+            Канал выбран, но ещё не подключён — уведомления не уйдут, пока не
+            завершите настройку ниже.
+          </p>
+        )}
+
         <div className="bg-[#faf9f7] rounded-xl p-3 space-y-3">
-          <div>
+          <div className={notifyChannel === "max" ? "" : "opacity-60"}>
             <label className="text-xs text-[#6b7280] font-medium">MAX</label>
             <p className="text-xs text-[#6b7280] mb-2">
-              Подключите бота — уведомления о записях придут в MAX
+              Подключите бота — затем выберите канал MAX выше
             </p>
             <MaxConnect />
           </div>
 
-          <div className="border-t border-[#e8e6e3] pt-3 space-y-2">
+          <div
+            className={`border-t border-[#e8e6e3] pt-3 space-y-2 ${
+              notifyChannel === "vk" ? "" : "opacity-60"
+            }`}
+          >
             <label className="text-xs text-[#6b7280] font-medium">VK</label>
             <VkConnect />
             <p className="text-xs text-[#6b7280]">
@@ -248,6 +315,45 @@ export default function SettingsPage() {
               onChange={(e) => setVkUserId(e.target.value)}
               placeholder="123456789"
             />
+          </div>
+
+          <div
+            className={`border-t border-[#e8e6e3] pt-3 space-y-2 ${
+              notifyChannel === "telegram" ? "" : "opacity-60"
+            }`}
+          >
+            <label className="text-xs text-[#6b7280] font-medium">
+              Telegram
+            </label>
+            <p className="text-xs text-[#6b7280] mb-2">
+              Подключите бота — затем выберите канал Telegram выше
+            </p>
+            <TelegramConnect />
+          </div>
+
+          <div
+            className={`border-t border-[#e8e6e3] pt-3 space-y-2 ${
+              notifyChannel === "email" ? "" : "opacity-60"
+            }`}
+          >
+            <label className="text-xs text-[#6b7280] font-medium">
+              Email (Mail.ru и др.)
+            </label>
+            <input
+              className="input"
+              type="email"
+              data-testid="notify-email"
+              value={notifyEmail}
+              onChange={(e) => {
+                setNotifyEmail(e.target.value);
+                setSaved(false);
+              }}
+              placeholder="name@mail.ru"
+            />
+            <p className="text-xs text-[#6b7280]">
+              Письма отправит сервер МояЗапись (SMTP). Нужна настройка на стороне
+              платформы.
+            </p>
           </div>
         </div>
       </div>

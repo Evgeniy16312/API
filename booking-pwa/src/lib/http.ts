@@ -14,3 +14,10 @@ export function jsonError(error: string, status: number) {
 export function requireMaster(request: Request): Master | null {
   return requireAuth(request);
 }
+
+/** Owner admin gate — header `x-admin-key` = ADMIN_SETUP_KEY (S0). */
+export function requireAdmin(request: Request): boolean {
+  const adminKey = process.env.ADMIN_SETUP_KEY;
+  if (!adminKey) return false;
+  return request.headers.get("x-admin-key") === adminKey;
+}
