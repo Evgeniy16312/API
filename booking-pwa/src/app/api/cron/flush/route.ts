@@ -1,8 +1,9 @@
 import { flushOutbox } from "@/lib/outbox";
 import { jsonError, jsonOk } from "@/lib/http";
+import { processOwnerSubscriptionAlerts } from "@/lib/owner-alerts";
 import { syncAllMasterSubscriptions } from "@/lib/subscription";
 
-/** Cron / manual flush of notification outbox + subscription sync. */
+/** Cron / manual flush of notification outbox + subscription sync + owner alerts. */
 export async function POST(request: Request) {
   const key =
     request.headers.get("x-admin-key") ||
@@ -16,7 +17,8 @@ export async function POST(request: Request) {
 
   const outbox = await flushOutbox(50);
   const subscriptions = syncAllMasterSubscriptions(200);
-  return jsonOk({ outbox, subscriptions });
+  const owner_alerts = await processOwnerSubscriptionAlerts();
+  return jsonOk({ outbox, subscriptions, owner_alerts });
 }
 
 export async function GET(request: Request) {

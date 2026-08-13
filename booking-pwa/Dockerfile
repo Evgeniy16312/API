@@ -34,6 +34,8 @@ RUN mkdir -p /app/data && addgroup --system --gid 1001 nodejs \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# standalone tracing sometimes omits nodemailer; copy explicitly for email channel
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules/nodemailer ./node_modules/nodemailer
 
 USER nextjs
 EXPOSE 3000

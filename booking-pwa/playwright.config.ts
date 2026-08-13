@@ -39,6 +39,7 @@ export default defineConfig({
           ...process.env,
           ADMIN_SETUP_KEY:
             process.env.ADMIN_SETUP_KEY || "change-me",
+          OWNER_ALERTS_DRY_RUN: "1",
         },
       },
 });

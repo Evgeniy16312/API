@@ -414,16 +414,6 @@ export default function BookingFlow({ slug }: { slug: string }) {
               <a href={`tel:${master.phone}`} className="btn-outline inline-block text-sm">
                 Позвонить
               </a>
-              {master.vk_user_id && (
-                <a
-                  href={`https://vk.com/id${master.vk_user_id}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn-outline inline-block text-sm"
-                >
-                  Написать в VK
-                </a>
-              )}
             </div>
           </div>
         )}

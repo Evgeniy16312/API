@@ -3,7 +3,7 @@ import { authHeaders, expectRegistered } from "../helpers/api";
 import { makeMaster } from "../fixtures/master";
 
 test.describe("API · канал уведомлений", () => {
-  test("по умолчанию max; можно выбрать vk, telegram и email", async ({
+  test("по умолчанию email; можно выбрать vk, telegram и max", async ({
     request,
   }) => {
     const master = await expectRegistered(request, makeMaster());
@@ -12,7 +12,7 @@ test.describe("API · канал уведомлений", () => {
     const me = await request.get("/api/masters/me", { headers });
     expect(me.status()).toBe(200);
     const body = await me.json();
-    expect(body.notify_channel).toBe("max");
+    expect(body.notify_channel).toBe("email");
     expect(body.notify_email).toBe("");
     expect(body.telegram_user_id).toBe("");
 

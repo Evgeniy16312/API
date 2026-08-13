@@ -3,6 +3,12 @@ import type { Master } from "@/lib/types";
 export const NOTIFY_CHANNELS = ["max", "vk", "telegram", "email"] as const;
 export type NotifyChannel = (typeof NOTIFY_CHANNELS)[number];
 
+/**
+ * Temporary UI gate: messengers hidden until MAX/Telegram rollout is ready.
+ * Backend + connect flows stay in codebase — only master-facing UI is filtered.
+ */
+export const NOTIFY_UI_ENABLED: readonly NotifyChannel[] = ["email"];
+
 export function isNotifyChannel(value: unknown): value is NotifyChannel {
   return (
     typeof value === "string" &&
@@ -12,7 +18,7 @@ export function isNotifyChannel(value: unknown): value is NotifyChannel {
 
 export function normalizeNotifyChannel(
   value: unknown,
-  fallback: NotifyChannel = "max"
+  fallback: NotifyChannel = "email"
 ): NotifyChannel {
   return isNotifyChannel(value) ? value : fallback;
 }

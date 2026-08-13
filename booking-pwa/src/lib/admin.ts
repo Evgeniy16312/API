@@ -8,10 +8,6 @@ import { rowToMaster } from "@/lib/auth";
 import { extendMasterSubscription } from "@/lib/subscription";
 
 export type AdminMasterRow = Master & {
-  blocked: boolean;
-  plan: string;
-  subscription_status: string;
-  paid_until: string;
   bookings_count: number;
 };
 
@@ -25,14 +21,14 @@ export function listMastersForAdmin(): AdminMasterRow[] {
     )
     .all() as Record<string, unknown>[];
 
-  return rows.map((row) => ({
-    ...rowToMaster(row),
-    blocked: Number(row.blocked || 0) === 1,
-    plan: String(row.plan || "trial"),
-    subscription_status: String(row.subscription_status || "trial"),
-    paid_until: String(row.paid_until || ""),
-    bookings_count: Number(row.bookings_count || 0),
-  }));
+  return rows.map((row) => {
+    const master = rowToMaster(row);
+    return {
+      ...master,
+      blocked: Number(row.blocked || 0) === 1 || master.blocked,
+      bookings_count: Number(row.bookings_count || 0),
+    };
+  });
 }
 
 export function getMasterForAdmin(id: string): AdminMasterRow | null {
@@ -44,12 +40,10 @@ export function getMasterForAdmin(id: string): AdminMasterRow | null {
     )
     .get(id) as Record<string, unknown> | undefined;
   if (!row) return null;
+  const master = rowToMaster(row);
   return {
-    ...rowToMaster(row),
-    blocked: Number(row.blocked || 0) === 1,
-    plan: String(row.plan || "trial"),
-    subscription_status: String(row.subscription_status || "trial"),
-    paid_until: String(row.paid_until || ""),
+    ...master,
+    blocked: Number(row.blocked || 0) === 1 || master.blocked,
     bookings_count: Number(row.bookings_count || 0),
   };
 }

@@ -83,7 +83,7 @@ function initSchema(database: DatabaseSync) {
       max_user_id TEXT DEFAULT '',
       vk_user_id TEXT DEFAULT '',
       telegram_user_id TEXT DEFAULT '',
-      notify_channel TEXT NOT NULL DEFAULT 'max',
+      notify_channel TEXT NOT NULL DEFAULT 'email',
       notify_email TEXT DEFAULT '',
       plan TEXT NOT NULL DEFAULT 'trial',
       subscription_status TEXT NOT NULL DEFAULT 'trial',
@@ -293,6 +293,15 @@ function ensureMigrations(database: DatabaseSync) {
       created_at TEXT NOT NULL,
       FOREIGN KEY (master_id) REFERENCES masters(id) ON DELETE CASCADE
     );
+    CREATE TABLE IF NOT EXISTS owner_alert_log (
+      id TEXT PRIMARY KEY,
+      kind TEXT NOT NULL,
+      digest_key TEXT NOT NULL UNIQUE,
+      master_id TEXT,
+      created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_owner_alert_master ON owner_alert_log(master_id);
+
     CREATE INDEX IF NOT EXISTS idx_vk_codes_master ON vk_connect_codes(master_id);
     CREATE INDEX IF NOT EXISTS idx_outbox_pending ON notification_outbox(status, available_at);
     CREATE INDEX IF NOT EXISTS idx_reviews_master ON reviews(master_id, status);

@@ -13,7 +13,7 @@ export default function HomePage() {
       <main className="flex-1 px-6 py-8 max-w-lg mx-auto w-full">
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-[#c9a96e]/10 text-[#a88b4a] px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            MAX · VK · Telegram · почта
+            Уведомления на почту
           </div>
           <h1 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] leading-tight mb-4">
             Ваша страница
@@ -22,7 +22,7 @@ export default function HomePage() {
           </h1>
           <p className="text-[#6b7280] text-lg leading-relaxed">
             Портфолио, услуги и онлайн-запись в одной ссылке. Клиенты
-            записываются сами — вы получаете уведомление в удобный канал.
+            записываются сами — вы получаете письмо о новой записи.
           </p>
         </div>
 
@@ -60,8 +60,8 @@ export default function HomePage() {
             },
             {
               icon: "🔔",
-              title: "Уведомления на выбор",
-              desc: "MAX, VK, Telegram или Mail.ru — один канал",
+              title: "Уведомления на почту",
+              desc: "Письмо о новой записи на ваш Mail.ru или другой email",
             },
           ].map((item) => (
             <div

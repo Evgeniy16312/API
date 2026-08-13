@@ -105,15 +105,16 @@ export async function sendTelegramNotification(
   return telegramSendMessage(userId, formatMessage(payload), buttons);
 }
 
-export async function sendEmailNotification(
+async function sendMailRaw(
   to: string,
-  payload: NotificationPayload
+  subject: string,
+  text: string
 ): Promise<boolean> {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
   if (!host || !user || !pass || !to) {
-    console.warn("Email notification skipped: SMTP not configured or empty to");
+    console.warn("Email skipped: SMTP not configured or empty to");
     return false;
   }
 
@@ -122,8 +123,7 @@ export async function sendEmailNotification(
     process.env.SMTP_SECURE === "true" ||
     process.env.SMTP_SECURE === "1" ||
     port === 465;
-  const from =
-    process.env.SMTP_FROM || `МояЗапись <${user}>`;
+  const from = process.env.SMTP_FROM || `МояЗапись <${user}>`;
 
   try {
     const nodemailer = await import("nodemailer");
@@ -133,17 +133,32 @@ export async function sendEmailNotification(
       secure,
       auth: { user, pass },
     });
-    await transporter.sendMail({
-      from,
-      to,
-      subject: titleFor(payload.kind).replace(/^[^\s]+\s/, ""),
-      text: formatMessage(payload),
-    });
+    await transporter.sendMail({ from, to, subject, text });
     return true;
   } catch (error) {
-    console.error("Email notification error:", error);
+    console.error("Email send error:", error);
     return false;
   }
+}
+
+export async function sendEmailNotification(
+  to: string,
+  payload: NotificationPayload
+): Promise<boolean> {
+  return sendMailRaw(
+    to,
+    titleFor(payload.kind).replace(/^[^\s]+\s/, ""),
+    formatMessage(payload)
+  );
+}
+
+/** Plain email for owner/ops alerts (not booking outbox). */
+export async function sendPlainEmail(
+  to: string,
+  subject: string,
+  text: string
+): Promise<boolean> {
+  return sendMailRaw(to, subject, text);
 }
 
 /** @deprecated prefer enqueue + flushOutbox — kept for direct sends */

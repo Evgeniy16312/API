@@ -23,6 +23,8 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig: NextConfig = {
   output: "standalone",
   outputFileTracingRoot: projectRoot,
+  // Keep SMTP driver outside the webpack bundle (standalone copy in Dockerfile)
+  serverExternalPackages: ["nodemailer"],
   // LAN / Playwright: set ALLOWED_DEV_ORIGINS=192.168.0.105
   allowedDevOrigins: ["127.0.0.1", "localhost", ...extraOrigins],
   turbopack: {},

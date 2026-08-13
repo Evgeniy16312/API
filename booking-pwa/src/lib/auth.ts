@@ -47,10 +47,11 @@ export function rowToMaster(row: Record<string, unknown>): Master {
     telegram_user_id: (row.telegram_user_id as string) || "",
     notify_channel:
       row.notify_channel === "vk" ||
-      row.notify_channel === "email" ||
-      row.notify_channel === "telegram"
+      row.notify_channel === "max" ||
+      row.notify_channel === "telegram" ||
+      row.notify_channel === "email"
         ? row.notify_channel
-        : "max",
+        : "email",
     notify_email: (row.notify_email as string) || "",
     plan:
       row.plan === "basic" || row.plan === "pro" || row.plan === "trial"

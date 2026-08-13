@@ -5,36 +5,53 @@
 | Поле | Значение |
 |------|----------|
 | ID | F28 |
-| Статус | in_progress |
+| Статус | done |
 | Обновлено | 2026-08-13 |
 
 ## Зачем
 
-Третий популярный в РФ канал: письмо на почту мастера (часто Mail.ru / Inbox / BK).
+Основной канал, пока MAX требует кабинет партнёра (ИП/самозанятый).  
+Письма шлёт платформа; мастер указывает свой ящик (`notify_email`).
 
-## Как
+## Как получить SMTP у Mail.ru
 
-- Outbox channel `email` + `sendEmailNotification` (`nodemailer`) — код уже в `src/lib/notifications.ts`
-- Отправка с платформенного ящика через SMTP
-- Рекомендуемый провайдер для РФ: `smtp.mail.ru:465` (SSL)
-- Осталось: завести ящик, прописать env на VPS, прогнать тест письмо
+1. Создать ящик, например `moyazapis@mail.ru` на [mail.ru](https://mail.ru)
+2. Войти → ⚙️ **Настройки** → **Все настройки** → **Безопасность**
+3. Раздел **Пароли для внешних приложений** → создать пароль (имя: `МояЗапись`)
+4. Скопировать **пароль приложения** (не обычный пароль входа)
 
-## Чеклист
+Прислать оператору:
 
-- [x] Код доставки
-- [ ] SMTP env на VPS
-- [ ] Проверка письма на @mail.ru
+```
+SMTP_USER=moyazapis@mail.ru
+SMTP_PASS=пароль_приложения
+```
 
-## Env
+Остальное стандартно: `smtp.mail.ru:465`, SSL.
+
+## Env на VPS
 
 ```
 SMTP_HOST=smtp.mail.ru
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=noreply@yourdomain.ru
+SMTP_USER=...
 SMTP_PASS=...
-SMTP_FROM="МояЗапись <noreply@yourdomain.ru>"
+SMTP_FROM=МояЗапись <тот_же@mail.ru>
 ```
+
+## Код
+
+- Outbox `email` + `nodemailer` в `src/lib/notifications.ts`
+- Дефолт канала для новых мастеров: `email`
+
+## Чеклист
+
+- [x] Код доставки
+- [x] Дефолт канала email
+- [x] SMTP env на VPS (`moyazapis@mail.ru`)
+- [x] Тестовое письмо с VPS (SMTP_OK)
+- [ ] Проверка полного цикла: запись → письмо мастеру
 
 ## Зависимости
 

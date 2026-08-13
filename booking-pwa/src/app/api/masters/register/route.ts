@@ -41,8 +41,8 @@ export async function POST(request: Request) {
 
     getDb()
       .prepare(
-        `INSERT INTO masters (id, slug, name, phone, specialty, work_schedule, token, created_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO masters (id, slug, name, phone, specialty, work_schedule, token, created_at, notify_channel)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'email')`
       )
       .run(
         id,
