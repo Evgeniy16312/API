@@ -49,5 +49,18 @@ test.describe("API · админка", () => {
     });
     expect(block.status()).toBe(200);
     expect((await block.json()).blocked).toBe(true);
+
+    const extend = await request.patch(`/api/admin/masters/${master.id}`, {
+      headers: {
+        "x-admin-key": ADMIN_KEY,
+        "Content-Type": "application/json",
+      },
+      data: { extend_days: 30 },
+    });
+    expect(extend.status()).toBe(200);
+    const extended = await extend.json();
+    expect(extended.subscription_status).toBe("active");
+    expect(extended.blocked).toBe(false);
+    expect(extended.paid_until).toBeTruthy();
   });
 });

@@ -129,3 +129,48 @@ export function isMasterBookingAllowed(masterId: string): boolean {
   const info = syncMasterSubscription(masterId);
   return info?.booking_allowed ?? false;
 }
+
+/** Lazy batch for cron — keep statuses fresh without a separate worker. */
+export function syncAllMasterSubscriptions(limit = 200): {
+  checked: number;
+  updated: number;
+} {
+  const rows = getDb()
+    .prepare(
+      `SELECT id, subscription_status FROM masters
+       ORDER BY created_at ASC LIMIT ?`
+    )
+    .all(limit) as { id: string; subscription_status: string }[];
+
+  let updated = 0;
+  for (const row of rows) {
+    const before = row.subscription_status;
+    const info = syncMasterSubscription(row.id);
+    if (info && info.subscription_status !== before) updated += 1;
+  }
+  return { checked: rows.length, updated };
+}
+
+export function extendMasterSubscription(
+  masterId: string,
+  days: number
+): SubscriptionInfo | null {
+  const existing = syncMasterSubscription(masterId);
+  if (!existing) return null;
+
+  const base =
+    existing.paid_until && new Date(existing.paid_until) > new Date()
+      ? new Date(existing.paid_until)
+      : new Date();
+  const until = new Date(base.getTime() + days * 86400_000);
+
+  getDb()
+    .prepare(
+      `UPDATE masters
+       SET paid_until = ?, subscription_status = 'active', plan = CASE WHEN plan = 'trial' THEN 'basic' ELSE plan END, blocked = 0
+       WHERE id = ?`
+    )
+    .run(until.toISOString(), masterId);
+
+  return syncMasterSubscription(masterId);
+}

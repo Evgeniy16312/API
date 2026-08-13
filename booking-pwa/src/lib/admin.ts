@@ -5,6 +5,7 @@ import {
 } from "@/lib/notify-channel";
 import type { Master } from "@/lib/types";
 import { rowToMaster } from "@/lib/auth";
+import { extendMasterSubscription } from "@/lib/subscription";
 
 export type AdminMasterRow = Master & {
   blocked: boolean;
@@ -60,6 +61,8 @@ export type AdminMasterPatch = {
   subscription_status?: string;
   paid_until?: string;
   blocked?: boolean;
+  /** Quick renew: extend paid_until by N days and set active. */
+  extend_days?: number;
 };
 
 const PLANS = new Set(["trial", "basic", "pro"]);
@@ -72,6 +75,15 @@ export function patchMasterAsAdmin(
   const existing = getMasterForAdmin(id);
   if (!existing) {
     return { ok: false, error: "Мастер не найден", status: 404 };
+  }
+
+  if (patch.extend_days !== undefined) {
+    const days = Number(patch.extend_days);
+    if (!Number.isFinite(days) || days < 1 || days > 366) {
+      return { ok: false, error: "extend_days: 1–366", status: 400 };
+    }
+    extendMasterSubscription(id, days);
+    return { ok: true, master: getMasterForAdmin(id)! };
   }
 
   const fields: string[] = [];

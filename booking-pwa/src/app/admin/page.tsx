@@ -174,18 +174,29 @@ export default function AdminPage() {
                     {m.blocked ? " · ЗАБЛОКИРОВАН" : ""}
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className={`text-sm px-3 py-1 rounded-lg border ${
-                    m.blocked
-                      ? "border-green-300 text-green-700"
-                      : "border-red-200 text-red-600"
-                  }`}
-                  disabled={savingId === m.id}
-                  onClick={() => patchMaster(m.id, { blocked: !m.blocked })}
-                >
-                  {m.blocked ? "Разблокировать" : "Заблокировать"}
-                </button>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    className="text-sm px-3 py-1 rounded-lg border border-[#c9a96e] text-[#8a6d2f]"
+                    disabled={savingId === m.id}
+                    data-testid={`admin-extend-${m.slug}`}
+                    onClick={() => patchMaster(m.id, { extend_days: 30 })}
+                  >
+                    +30 дней
+                  </button>
+                  <button
+                    type="button"
+                    className={`text-sm px-3 py-1 rounded-lg border ${
+                      m.blocked
+                        ? "border-green-300 text-green-700"
+                        : "border-red-200 text-red-600"
+                    }`}
+                    disabled={savingId === m.id}
+                    onClick={() => patchMaster(m.id, { blocked: !m.blocked })}
+                  >
+                    {m.blocked ? "Разблокировать" : "Заблокировать"}
+                  </button>
+                </div>
               </div>
 
               <div className="grid sm:grid-cols-3 gap-3">

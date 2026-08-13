@@ -45,7 +45,9 @@
 ## Логика
 
 - `src/lib/subscription.ts` — trial 14 дней, lazy sync на `/api/masters/me` и при записи
-- `past_due` / `blocked` → публичная запись 403
+- Cron `/api/cron/flush` также гоняет `syncAllMasterSubscriptions`
+- `past_due` / `blocked` → публичная запись 403 + `booking_enabled: false` на `/m/[slug]`
+- Админ: кнопка «+30 дней» (`extend_days`)
 
 ## Тесты
 

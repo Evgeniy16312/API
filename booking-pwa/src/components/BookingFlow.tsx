@@ -26,7 +26,7 @@ interface MasterData {
   lng: number | null;
   description: string;
   avatar_url: string;
-  vk_user_id?: string;
+  booking_enabled?: boolean;
   services: Service[];
   portfolio: PortfolioItem[];
   reviews?: Review[];
@@ -218,7 +218,28 @@ export default function BookingFlow({ slug }: { slug: string }) {
           </div>
         )}
 
-        {step === "done" ? (
+        {master.booking_enabled === false ? (
+          <div
+            className="card text-center py-8"
+            data-testid="booking-disabled"
+          >
+            <h2 className="text-xl font-bold mb-2">Запись временно недоступна</h2>
+            <p className="text-sm text-[#6b7280]">
+              Онлайн-запись у этого мастера сейчас отключена. Свяжитесь по
+              телефону
+              {master.phone ? (
+                <>
+                  :{" "}
+                  <a className="text-[#c9a96e]" href={`tel:${master.phone}`}>
+                    {master.phone}
+                  </a>
+                </>
+              ) : (
+                "."
+              )}
+            </p>
+          </div>
+        ) : step === "done" ? (
           <div className="card text-center py-8" data-testid="booking-done">
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-xl font-bold mb-2">Вы записаны!</h2>

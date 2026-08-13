@@ -29,6 +29,7 @@ export async function PATCH(request: Request, ctx: Ctx) {
       subscription_status: body.subscription_status,
       paid_until: body.paid_until,
       blocked: body.blocked,
+      extend_days: body.extend_days,
     });
     if (!result.ok) {
       return jsonError(result.error, result.status);

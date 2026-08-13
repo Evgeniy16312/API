@@ -1,7 +1,8 @@
 import { flushOutbox } from "@/lib/outbox";
 import { jsonError, jsonOk } from "@/lib/http";
+import { syncAllMasterSubscriptions } from "@/lib/subscription";
 
-/** Cron / manual flush of notification outbox. */
+/** Cron / manual flush of notification outbox + subscription sync. */
 export async function POST(request: Request) {
   const key =
     request.headers.get("x-admin-key") ||
@@ -13,8 +14,9 @@ export async function POST(request: Request) {
     return jsonError("Forbidden", 403);
   }
 
-  const result = await flushOutbox(50);
-  return jsonOk(result);
+  const outbox = await flushOutbox(50);
+  const subscriptions = syncAllMasterSubscriptions(200);
+  return jsonOk({ outbox, subscriptions });
 }
 
 export async function GET(request: Request) {

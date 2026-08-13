@@ -41,5 +41,12 @@ test.describe("API · подписка", () => {
       },
     });
     expect(book.status()).toBe(403);
+
+    const pub = await request.get(`/api/masters/${master.slug}`);
+    expect(pub.status()).toBe(200);
+    const pubBody = await pub.json();
+    expect(pubBody.booking_enabled).toBe(false);
+    expect(pubBody.telegram_user_id).toBeUndefined();
+    expect(pubBody.max_user_id).toBeUndefined();
   });
 });
