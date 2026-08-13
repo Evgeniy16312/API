@@ -35,7 +35,7 @@ function periodDays(): number {
 function priceRub(plan: BillingPlanId): number {
   const key =
     plan === "pro" ? "BILLING_PRO_PRICE_RUB" : "BILLING_BASIC_PRICE_RUB";
-  const fallback = plan === "pro" ? 1990 : 990;
+  const fallback = plan === "pro" ? 590 : 290;
   const n = Number(process.env[key] || fallback);
   if (!Number.isFinite(n) || n < 1) return fallback;
   return Math.floor(n);
