@@ -36,7 +36,8 @@
 | F32 | MAX webhook в проде | blocked | [features/max-webhook-prod.md](./features/max-webhook-prod.md) |
 | F33 | Telegram-бот уведомления | done | [features/telegram-bot.md](./features/telegram-bot.md) |
 | F34 | Напоминания владельцу об истекающих подписках | done | [features/owner-subscription-alerts.md](./features/owner-subscription-alerts.md) |
+| F35 | Автобэкап SQLite | done | [features/sqlite-backup.md](./features/sqlite-backup.md) |
 
 ## Следующий свободный ID
 
-`F35`
+`F36`

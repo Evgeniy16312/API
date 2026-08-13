@@ -36,6 +36,15 @@ function ensureDataDir() {
   }
 }
 
+export function getDataDir(): string {
+  ensureDataDir();
+  return DATA_DIR;
+}
+
+export function getDbPath(): string {
+  return DB_PATH;
+}
+
 export function getDb(): DatabaseSync {
   if (!db) {
     ensureDataDir();

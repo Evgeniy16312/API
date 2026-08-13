@@ -86,17 +86,20 @@ npm run max:setup
 - [x] Мастер в Настройках указал email для уведомлений и сохранил  
 - [x] Письмо о записи пришло на email мастера (outbox `sent`, пилот 2026-08-13)  
 - [x] `/admin` — видно мастера, «+30 дней» работает  
-- [ ] Backup: периодически копировать volume/`booking.db`
+- [x] Backup: ежедневный cron → `/api/cron/backup` (F35, volume `data/backups`)
 
-Cron flush: если в env задан `CRON_SECRET`, в заголовке нужен он (не `ADMIN_SETUP_KEY`).
+Cron flush / backup: если в env задан `CRON_SECRET`, в заголовке нужен он (не `ADMIN_SETUP_KEY`).
 
+```bash
+# на VPS (пример)
+15 3 * * * /opt/booking-pwa/scripts/backup-db.sh >> /var/log/moyazapis-backup.log 2>&1
+*/15 * * * * curl -fsS -X POST https://myazapis.ru/api/cron/flush -H "x-admin-key: $CRON_SECRET" >/dev/null
+```
 
 ## Backup (минимум)
 
-```bash
-docker compose exec app ls -la /app/data
-# скопировать volume или файл booking.db на S3 / другой диск раз в сутки
-```
+Копии лежат в Docker volume: `/app/data/backups/`.  
+Ручной запуск: `POST /api/cron/backup` или `scripts/backup-db.sh`.
 
 ## Без Docker (альтернатива)
 

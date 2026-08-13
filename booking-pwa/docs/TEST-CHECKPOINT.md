@@ -26,7 +26,7 @@ npm run test:api
 
 ## Backup
 
-Периодически копировать volume / `booking.db`.
+Ежедневно: `POST /api/cron/backup` → `data/backups/` (F35).
 
 ## Статус пилота
 
@@ -34,4 +34,6 @@ npm run test:api
 - [x] Запись → email мастеру (F28)  
 - [x] UI уведомлений: только email  
 - [x] Owner alerts F34 в cron  
+- [x] Автобэкап SQLite (F35)  
 - [ ] Живой пилот-мастер (не тестовый slug)
+- [ ] Ключи ЮKassa в проде
