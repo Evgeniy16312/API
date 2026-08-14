@@ -1,0 +1,13 @@
+---
+description: Деплой и прод-ограничения МояЗапись
+globs: Dockerfile,docker-compose.yml,docs/deploy.md
+alwaysApply: false
+---
+
+# Deploy
+
+- Прод: Docker + `output: 'standalone'`, данные только в volume `/app/data`.
+- Перед build задать `NEXT_PUBLIC_APP_URL` (build-arg / `.env.production`).
+- MAX webhook только по HTTPS; secret обязателен вне development.
+- Один контейнер app = один writer SQLite (не масштабировать replicas без Postgres).
+- Инструкция: `docs/deploy.md`, план: `docs/ROADMAP.md`.

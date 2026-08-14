@@ -1,0 +1,21 @@
+---
+description: Ядро проекта МояЗапись — стек, инварианты, документация
+alwaysApply: true
+---
+
+# МояЗапись — core
+
+- Рабочая папка: **только** `booking-pwa` (не корень `API`).
+- Стек: Next.js 16 App Router + TS + Tailwind + PWA.
+- БД: **только** `node:sqlite` через `getDb()` / `withTransaction`. Никогда `better-sqlite3`.
+- Уведомления: **один** канал из MAX / VK / Telegram / email (свитчер). `max_user_id` / `telegram_user_id` — только через bot connect.
+- Перед кодом Next.js — `node_modules/next/dist/docs/` (см. `AGENTS.md`).
+- Auth: Bearer **или** httpOnly cookie `master_session` (`src/lib/session.ts`).
+- Вход: `/app/login` по email и паролю; выход: `POST /api/masters/logout`.
+- Архитектура/стадии: `docs/architecture.md`. Слои — rule `scalability`.
+- Карта: бесплатные тайлы **CARTO Voyager** + Leaflet; поиск адреса **Photon** (`/api/geo/search`, только РФ). Без Google Maps billing.
+- Календарь записи строится из `work_schedule`; слоты — `/api/slots`.
+- Фича → `docs/features/` + `FEATURES.md` в той же сессии.
+- Проверка API/форм: Playwright (`test:api` / `test:e2e`), не ручной ввод.
+- UI-копирайт и ошибки API — на русском.
+- Не коммитить без явной просьбы.

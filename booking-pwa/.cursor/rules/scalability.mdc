@@ -1,0 +1,31 @@
+---
+description: Слои и ограничения масштабирования МояЗапись (S0–S2)
+alwaysApply: true
+---
+
+# Scalability
+
+## Слои
+
+- `src/app/api/**` — тонкие handlers: parse → вызвать `src/lib/*` → `jsonOk/jsonError`
+- Домен (`slots`, booking conflict, connect codes) — в `src/lib/<domain>.ts`, не в route
+- Каналы MAX/VK/Telegram/email — только send/webhook/SMTP; не смешивать с SQL записи
+- HTTP-хелперы — `@/lib/http` (`requireMaster`, `jsonError`, `jsonOk`)
+
+## S0 (сейчас)
+
+- Один процесс Node + один writer SQLite
+- ❌ Несколько реплик/`cluster` на один `booking.db`
+- Notify после записи — **не await** в критическом пути (fire-and-forget / later outbox)
+- Слоты: overlap по **duration**, не только точное `HH:mm`
+- Активный слот уникален: partial UNIQUE `(master_id, date, time)`
+
+## Запреты до S2
+
+- ❌ Новые base64/blob портфолио в SQLite (файлы или URL)
+- ❌ Клиентский PATCH `max_user_id` / `telegram_user_id` (только bot connect). `vk_user_id` — исключение до F12.
+- ❌ Возврат `better-sqlite3`
+
+## Перед фичей
+
+Спросить: остаёмся на S0 или нужен кусок S1 (backup, queue, disk media)? Документировать в карточке фичи.

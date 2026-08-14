@@ -1,0 +1,15 @@
+---
+description: Обязательное обновление docs при фичах
+alwaysApply: true
+---
+
+# Documentation discipline
+
+При добавлении или заметном изменении фичи в той же сессии:
+
+1. Карточка `docs/features/<kebab>.md` (из `_TEMPLATE.md`)
+2. Строка/статус в `docs/FEATURES.md`
+3. Если архитектурное решение — ADR в `docs/decisions/`
+4. При необходимости — ссылка/env в корневом `README.md`
+
+Не оставлять «потом задокументируем». Skill: `document-feature`.

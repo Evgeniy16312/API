@@ -1,0 +1,45 @@
+{
+  "name": "booking-pwa",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "dev:mobile": "next dev --webpack --hostname 0.0.0.0 --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "start:mobile": "next start --hostname 0.0.0.0 --port 3000",
+    "lint": "eslint",
+    "max:setup": "node scripts/max-setup.mjs",
+    "test": "playwright test",
+    "test:register": "playwright test e2e/api/register.api.spec.ts e2e/register.spec.ts",
+    "test:api": "playwright test --project=api",
+    "test:e2e": "playwright test --project=chromium",
+    "test:prod": "PLAYWRIGHT_NO_WEBSERVER=1 PLAYWRIGHT_BASE_URL=http://155.212.166.129 playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "dependencies": {
+    "date-fns": "^4.4.0",
+    "leaflet": "^1.9.4",
+    "next": "16.3.0",
+    "nodemailer": "^9.0.5",
+    "qrcode.react": "^4.2.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "uuid": "^14.0.1"
+  },
+  "devDependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@playwright/test": "^1.62.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^22.20.1",
+    "@types/nodemailer": "^8.0.1",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/uuid": "^10.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.0",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}

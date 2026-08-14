@@ -1,0 +1,23 @@
+---
+description: Playwright E2E/API тесты — структура и стиль
+globs: e2e/**/*.ts,playwright.config.ts
+alwaysApply: false
+---
+
+# E2E tests
+
+Паттерн масштабирования:
+
+1. `e2e/fixtures/<entity>.ts` → `makeX()` с уникальным суффиксом
+2. `e2e/helpers/api.ts` → обёртка запроса + `expectX`
+3. `e2e/api/<name>.api.spec.ts` — быстрый API
+4. `e2e/<name>.spec.ts` — UI через `getByTestId`
+
+```ts
+// ✅ UI: fill → assert values → Promise.all([waitForResponse, click])
+// ✅ baseURL localhost (не 127.0.0.1 без allowedDevOrigins)
+```
+
+- На формах обязательны стабильные `data-testid`.
+- Не полагаться на ручной ввод в браузере для проверки запросов.
+- Команды: `test:api`, `test:e2e`, `test:register`, `test`.

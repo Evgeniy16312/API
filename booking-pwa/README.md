@@ -1,0 +1,163 @@
+# МояЗапись — PWA для онлайн-записи мастеров
+
+## Документация и Cursor
+
+| Что | Где |
+|-----|-----|
+| **Roadmap продукта** | [docs/ROADMAP.md](./docs/ROADMAP.md) |
+| Деплой на VPS | [docs/deploy.md](./docs/deploy.md) |
+| Каталог фич | [docs/FEATURES.md](./docs/FEATURES.md) |
+| Архитектура | [docs/architecture.md](./docs/architecture.md) |
+| Пакет docs | [docs/README.md](./docs/README.md) |
+| Rules | `.cursor/rules/` |
+| Skills | `.cursor/skills/` (`add-feature`, `document-feature`, `test-feature`) |
+
+## Быстрый старт
+
+```bash
+cd booking-pwa
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+### Тесты (без ручного ввода)
+
+```bash
+npm run test:register   # регистрация API + UI
+npm run test:api        # все API-спеки
+npm run test            # всё
+```
+
+---
+
+## 📱 Как открыть с Android-телефона
+
+### Вариант 1: Та же Wi-Fi сеть (для теста дома)
+
+**На компьютере:**
+
+```bash
+cd booking-pwa
+npm run dev:mobile
+```
+
+Сервер запустится на `0.0.0.0:3000` — доступен из локальной сети.
+
+**Узнайте IP компьютера:**
+
+```bash
+# Linux / Mac
+hostname -I | awk '{print $1}'
+
+# Windows (PowerShell)
+ipconfig
+```
+
+Допустим, IP = `192.168.1.105`.
+
+**На Android-телефоне:**
+
+1. Подключитесь к **той же Wi-Fi**, что и компьютер
+2. Откройте Chrome
+3. Введите: `http://192.168.1.105:3000`
+4. Для панели мастера: `http://192.168.1.105:3000/app`
+5. Для установки как приложение: меню Chrome → **«Добавить на главный экран»**
+
+> Если не открывается — проверьте, что файрвол на компьютере разрешает порт 3000.
+
+---
+
+### Вариант 2: Через интернет (для показа клиентам)
+
+Нужен публичный HTTPS-адрес. Самый простой способ — **Cloudflare Tunnel** (бесплатно):
+
+```bash
+# Установите cloudflared, затем:
+cloudflared tunnel --url http://localhost:3000
+```
+
+Получите ссылку вида `https://xxxx.trycloudflare.com` — откройте её на телефоне.
+
+Обновите `.env.local`:
+```
+NEXT_PUBLIC_APP_URL=https://xxxx.trycloudflare.com
+```
+
+---
+
+### Вариант 3: Деплой на сервер (для продажи)
+
+Арендуйте VPS (Selectel, Timeweb ~500₽/мес), привяжите домен, запустите:
+
+```bash
+npm run build
+npm run start:mobile
+```
+
+С телефона открываете `https://ваш-домен.ru`
+
+---
+
+## 🤖 Настройка MAX-бота
+
+### Шаг 1. Создайте бота
+
+1. Зайдите на https://business.max.ru
+2. Создайте чат-бота
+3. Скопируйте **токен** → в `.env.local` как `MAX_BOT_TOKEN`
+4. Запомните **username** бота → `MAX_BOT_USERNAME`
+
+### Шаг 2. Настройте webhook (нужен HTTPS!)
+
+В `.env.local`:
+```
+MAX_WEBHOOK_URL=https://ваш-домен.ru/api/max/webhook
+MAX_WEBHOOK_SECRET=любой-секрет-от-5-символов
+ADMIN_SETUP_KEY=ваш-админ-ключ
+```
+
+Зарегистрируйте webhook:
+
+```bash
+npm run max:setup
+```
+
+Или через API:
+```bash
+curl -X POST https://ваш-домен.ru/api/max/setup \
+  -H "x-admin-key: ваш-админ-ключ"
+```
+
+### Шаг 3. Мастер подключает уведомления
+
+1. Мастер открывает приложение → **Настройки**
+2. Нажимает **«Подключить MAX»**
+3. Получает код, например: `/connect ABC123`
+4. Открывает бота в MAX → отправляет команду
+5. Готово — уведомления о записях приходят в MAX
+
+### Команды бота
+
+| Команда | Действие |
+|---------|----------|
+| `/start` | Приветствие и инструкция |
+| `/connect КОД` | Подключить уведомления |
+| `/id` | Показать свой MAX ID |
+| `/help` | Справка |
+
+---
+
+## Структура
+
+| Путь | Описание |
+|------|----------|
+| `/` | Лендинг |
+| `/app/register` | Регистрация мастера |
+| `/app` | Панель мастера (PWA) |
+| `/m/[slug]` | Страница для клиентов |
+| `/api/max/webhook` | Webhook MAX-бота |
+
+## Стек
+
+Next.js 16 · SQLite · PWA · MAX Bot API · VK API

@@ -1,0 +1,4 @@
+your-domain.ru, www.your-domain.ru {
+	encode gzip
+	reverse_proxy 127.0.0.1:3000
+}
