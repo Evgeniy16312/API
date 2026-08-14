@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/client";
 import PhoneRuInput from "@/components/PhoneRuInput";
+import PasswordInput from "@/components/PasswordInput";
 import { isValidEmail, isValidPhone } from "@/lib/validate";
 
 export default function RegisterPage() {
@@ -142,14 +143,12 @@ export default function RegisterPage() {
           <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-password">
             Пароль
           </label>
-          <input
+          <PasswordInput
             id="register-password"
             data-testid="register-password"
-            type="password"
             autoComplete="new-password"
-            className="input"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             placeholder="Минимум 8 символов"
             required
             minLength={8}

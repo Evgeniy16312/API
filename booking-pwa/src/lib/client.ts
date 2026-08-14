@@ -85,3 +85,10 @@ export function compressImage(file: File, maxWidth = 1200): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+/** Bypass PWA image cache for /uploads/ URLs (stale 404 after deploy). */
+export function uploadDisplayUrl(url: string): string {
+  if (!url || url.startsWith("data:") || url.startsWith("http")) return url;
+  if (!url.startsWith("/uploads/")) return url;
+  return `${url}${url.includes("?") ? "&" : "?"}v=2`;
+}

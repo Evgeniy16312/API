@@ -3,6 +3,7 @@
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import PasswordInput from "@/components/PasswordInput";
 
 function ResetPasswordForm() {
   const router = useRouter();
@@ -65,14 +66,12 @@ function ResetPasswordForm() {
         <label className="text-sm text-[#78716c] mb-1 block" htmlFor="reset-password">
           Новый пароль
         </label>
-        <input
+        <PasswordInput
           id="reset-password"
           data-testid="reset-password"
-          type="password"
           autoComplete="new-password"
-          className="input"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={setPassword}
           minLength={8}
           required
         />
@@ -82,14 +81,12 @@ function ResetPasswordForm() {
         <label className="text-sm text-[#78716c] mb-1 block" htmlFor="reset-confirm">
           Повторите пароль
         </label>
-        <input
+        <PasswordInput
           id="reset-confirm"
           data-testid="reset-confirm"
-          type="password"
           autoComplete="new-password"
-          className="input"
           value={confirm}
-          onChange={(e) => setConfirm(e.target.value)}
+          onChange={setConfirm}
           minLength={8}
           required
         />

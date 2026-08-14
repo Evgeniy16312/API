@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { apiFetch, logoutSession, compressImage } from "@/lib/client";
+import { apiFetch, logoutSession, compressImage, uploadDisplayUrl } from "@/lib/client";
 import LocationPicker from "@/components/LocationPicker";
 import PhoneRuInput from "@/components/PhoneRuInput";
 import { isValidEmail, isValidPhone } from "@/lib/validate";
@@ -155,7 +155,7 @@ export default function SettingsPage() {
           <div className="w-16 h-16 rounded-full overflow-hidden bg-[#c4a574]/30 flex items-center justify-center text-2xl shrink-0">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img src={uploadDisplayUrl(avatarUrl)} alt="" className="w-full h-full object-cover" />
             ) : (
               name.charAt(0) || "?"
             )}
@@ -204,9 +204,11 @@ export default function SettingsPage() {
         <div>
           <label className="text-xs text-[#78716c]">О себе</label>
           <textarea
-            className="input min-h-[80px]"
+            className="input min-h-[80px] resize-y"
+            data-testid="settings-description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            placeholder="Расскажите о себе клиентам"
           />
         </div>
         <LocationPicker

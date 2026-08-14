@@ -9,6 +9,7 @@ import MonthCalendar from "@/components/MonthCalendar";
 import ReviewsSection from "@/components/ReviewsSection";
 import PhoneRuInput from "@/components/PhoneRuInput";
 import { yandexMapsUrl } from "@/lib/geo";
+import { uploadDisplayUrl } from "@/lib/client";
 import { isValidPhone } from "@/lib/validate";
 
 const MasterMap = dynamic(() => import("@/components/MasterMap"), {
@@ -153,7 +154,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
         <div className="flex items-center gap-4 mb-4">
           {master.avatar_url ? (
             <img
-              src={master.avatar_url}
+              src={uploadDisplayUrl(master.avatar_url)}
               alt={master.name}
               className="w-[4.5rem] h-[4.5rem] rounded-full object-cover border-2 border-[var(--mz-accent)]"
             />
@@ -211,7 +212,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                   className="relative aspect-square rounded-xl overflow-hidden"
                 >
                   <img
-                    src={item.image_url}
+                    src={uploadDisplayUrl(item.image_url)}
                     alt={item.caption || "Работа"}
                     className="w-full h-full object-cover"
                   />

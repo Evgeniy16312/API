@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/client";
+import PasswordInput from "@/components/PasswordInput";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -79,14 +80,12 @@ export default function LoginPage() {
           <label className="text-sm text-[#78716c] mb-1 block" htmlFor="login-password">
             Пароль
           </label>
-          <input
+          <PasswordInput
             id="login-password"
             data-testid="login-password"
-            type="password"
             autoComplete="current-password"
-            className="input"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={setPassword}
             required
           />
         </div>

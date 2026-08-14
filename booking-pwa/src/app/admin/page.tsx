@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import PasswordInput from "@/components/PasswordInput";
 import type { NotifyChannel } from "@/lib/types";
 
 type AdminMaster = {
@@ -189,13 +190,12 @@ export default function AdminPage() {
           <p className="text-sm text-[#6b7280]">
             Вход по ключу `ADMIN_SETUP_KEY`
           </p>
-          <input
-            className="input"
-            type="password"
+          <PasswordInput
             data-testid="admin-key"
             value={key}
-            onChange={(e) => setKey(e.target.value)}
+            onChange={setKey}
             placeholder="Admin key"
+            autoComplete="off"
           />
           {error && (
             <p className="text-sm text-red-600" data-testid="admin-error">

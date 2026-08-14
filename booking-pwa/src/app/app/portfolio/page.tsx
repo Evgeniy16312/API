@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { apiFetch, compressImage } from "@/lib/client";
+import { apiFetch, compressImage, uploadDisplayUrl } from "@/lib/client";
 import type { PortfolioItem } from "@/lib/types";
 
 export default function PortfolioPage() {
   const [items, setItems] = useState<PortfolioItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function PortfolioPage() {
     if (!file) return;
 
     setUploading(true);
+    setError("");
     try {
       const image_url = await compressImage(file);
       await apiFetch("/api/portfolio", {
@@ -35,6 +37,8 @@ export default function PortfolioPage() {
         body: JSON.stringify({ image_url }),
       });
       await loadPortfolio();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Не удалось загрузить фото");
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -67,7 +71,7 @@ export default function PortfolioPage() {
           {items.map((item) => (
             <div key={item.id} className="relative aspect-square rounded-xl overflow-hidden group">
               <img
-                src={item.image_url}
+                src={uploadDisplayUrl(item.image_url)}
                 alt="Работа"
                 className="w-full h-full object-cover"
               />
@@ -97,6 +101,8 @@ export default function PortfolioPage() {
       >
         {uploading ? "Загружаем..." : "📷 Добавить фото"}
       </button>
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }

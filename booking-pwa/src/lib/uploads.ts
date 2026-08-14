@@ -2,7 +2,32 @@ import fs from "fs";
 import path from "path";
 import { randomBytes } from "crypto";
 
-const UPLOAD_ROOT = path.join(process.cwd(), "public", "uploads");
+export const UPLOAD_ROOT = path.join(process.cwd(), "public", "uploads");
+
+const MIME_BY_EXT: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+};
+
+export function uploadContentType(filename: string): string {
+  const ext = path.extname(filename).slice(1).toLowerCase();
+  return MIME_BY_EXT[ext] ?? "application/octet-stream";
+}
+
+/** Resolve /uploads/... path segments to an absolute file under UPLOAD_ROOT. */
+export function resolveUploadFilePath(segments: string[]): string | null {
+  if (segments.length < 3) return null;
+  if (segments.some((s) => !s || s === "." || s === ".." || s.includes("\0"))) {
+    return null;
+  }
+
+  const full = path.resolve(UPLOAD_ROOT, ...segments);
+  const root = path.resolve(UPLOAD_ROOT);
+  if (!full.startsWith(root + path.sep) && full !== root) return null;
+  return full;
+}
 
 function ensureDir(dir: string) {
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });

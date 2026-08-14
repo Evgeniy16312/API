@@ -7,8 +7,18 @@ const withPWA = withPWAInit({
   dest: "public",
   disable: process.env.NODE_ENV === "development",
   register: true,
+  extendDefaultRuntimeCaching: true,
   fallbacks: {
     document: "/offline",
+  },
+  workboxOptions: {
+    runtimeCaching: [
+      {
+        urlPattern: ({ url }: { url: URL }) =>
+          url.pathname.startsWith("/uploads/"),
+        handler: "NetworkOnly",
+      },
+    ],
   },
 });
 

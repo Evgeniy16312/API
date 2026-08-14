@@ -169,6 +169,10 @@ test.describe("API · профиль, слоты, портфолио", () => {
     const item = await create.json();
     expect(item.image_url).toMatch(/^\/uploads\//);
 
+    const img = await request.get(item.image_url);
+    expect(img.status()).toBe(200);
+    expect(img.headers()["content-type"]).toMatch(/^image\//);
+
     const pub = await request.get(`/api/masters/${a.master.slug}`);
     const page = await pub.json();
     expect(page.portfolio.some((p: { id: string }) => p.id === item.id)).toBe(
@@ -193,6 +197,10 @@ test.describe("API · профиль, слоты, портфолио", () => {
     expect(patch.status()).toBe(200);
     const body = await patch.json();
     expect(body.avatar_url).toMatch(/^\/uploads\/.+\/avatar\/.+\.png$/);
+
+    const avatar = await request.get(body.avatar_url);
+    expect(avatar.status()).toBe(200);
+    expect(avatar.headers()["content-type"]).toMatch(/^image\//);
 
     const me = await request.get("/api/masters/me", { headers });
     expect((await me.json()).avatar_url).toBe(body.avatar_url);
