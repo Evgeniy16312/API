@@ -98,19 +98,10 @@ test.describe("API · админка", () => {
     });
     expect(bad.status()).toBe(400);
 
-    const purge = await request.delete("/api/admin/masters", {
-      headers: {
-        "x-admin-key": ADMIN_KEY,
-        "Content-Type": "application/json",
-      },
-      data: { confirm: "DELETE_ALL" },
-    });
-    expect(purge.status()).toBe(200);
-    expect((await purge.json()).deleted).toBeGreaterThanOrEqual(1);
-
-    const empty = await request.get("/api/admin/masters", {
+    // Don't DELETE_ALL here — shared SQLite + parallel workers.
+    const delB = await request.delete(`/api/admin/masters/${b.id}`, {
       headers: { "x-admin-key": ADMIN_KEY },
     });
-    expect((await empty.json()).masters).toEqual([]);
+    expect(delB.status()).toBe(200);
   });
 });

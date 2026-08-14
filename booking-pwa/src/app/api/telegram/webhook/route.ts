@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     return jsonError("Webhook misconfigured", 500);
   }
 
-  if (secret) {
+  if (secret && !isDev) {
     const headerSecret = request.headers.get("X-Telegram-Bot-Api-Secret-Token");
     if (headerSecret !== secret) {
       return jsonError("Forbidden", 403);

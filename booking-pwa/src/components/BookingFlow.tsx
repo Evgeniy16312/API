@@ -288,6 +288,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                   master.services.map((s) => (
                     <button
                       key={s.id}
+                      data-testid="booking-service"
                       onClick={() => {
                         setSelectedService(s);
                         setStep("datetime");
@@ -351,6 +352,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                               setSelectedTime(t);
                               setStep("contact");
                             }}
+                            data-testid="booking-slot"
                             className={`slot-btn ${
                               selectedTime === t ? "slot-btn-active" : ""
                             }`}
@@ -379,6 +381,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                     <label className="text-sm text-[#6b7280] mb-1 block">Ваше имя</label>
                     <input
                       className="input"
+                      data-testid="booking-client-name"
                       value={clientName}
                       onChange={(e) => setClientName(e.target.value)}
                       placeholder="Иван"
@@ -389,6 +392,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                     <input
                       className="input"
                       type="tel"
+                      data-testid="booking-client-phone"
                       value={clientPhone}
                       onChange={(e) => setClientPhone(e.target.value)}
                       placeholder="+7 (999) 123-45-67"
@@ -398,6 +402,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                     onClick={submitBooking}
                     disabled={submitting || !clientName || !clientPhone}
                     className="btn-primary w-full mt-2"
+                    data-testid="booking-submit"
                   >
                     {submitting ? "Записываем..." : "Записаться"}
                   </button>

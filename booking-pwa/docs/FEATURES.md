@@ -14,7 +14,7 @@
 | F08 | MAX-бот уведомления | in_progress | [features/max-bot.md](./features/max-bot.md) |
 | F09 | PWA | done | [features/pwa.md](./features/pwa.md) |
 | F10 | SQLite / persistence | done | [features/sqlite-db.md](./features/sqlite-db.md) |
-| F11 | E2E / API тесты | in_progress | [features/e2e-testing.md](./features/e2e-testing.md) |
+| F11 | E2E / API тесты | done | [features/e2e-testing.md](./features/e2e-testing.md) |
 | F12 | VK-бот уведомления | in_progress | [features/vk-bot.md](./features/vk-bot.md) |
 | F13 | Напоминания мастеру (24ч/2ч) | done | [features/client-reminders.md](./features/client-reminders.md) |
 | F14 | Деплой на VPS | in_progress | [features/deploy-vps.md](./features/deploy-vps.md) |

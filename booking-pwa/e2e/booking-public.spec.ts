@@ -1,45 +1,50 @@
 import { test, expect } from "@playwright/test";
+import { seedMasterWithService } from "./helpers/api";
 
-const PILOT = process.env.PILOT_SLUG || "anna-pilot";
-
-test.describe("UI · публичная запись (пилот)", () => {
+test.describe("UI · публичная запись", () => {
   test("клиент выбирает услугу, дату, время и записывается", async ({
     page,
+    request,
   }) => {
-    await page.goto(`/m/${PILOT}`);
-    await expect(page.getByRole("heading", { name: /Анна Пилот|dfsdfsdf/ })).toBeVisible({
+    const { master, service } = await seedMasterWithService(request, {
+      name: "Анна UI",
+    });
+
+    await page.goto(`/m/${master.slug}`);
+    await expect(page.getByRole("heading", { name: master.name })).toBeVisible({
       timeout: 15_000,
     });
 
-    // service
-    const serviceBtn = page.getByRole("button", {
-      name: /Маникюр классический|Педикюр|Покрытие/,
-    }).first();
-    await expect(serviceBtn).toBeVisible();
-    await serviceBtn.click();
+    await page.getByTestId("booking-service").filter({ hasText: service.name }).click();
 
-    // pick first available day in calendar grid (not month nav)
     const dayBtn = page
-      .locator('[data-testid="month-calendar"] .grid.grid-cols-7 button:not([disabled])')
+      .locator(
+        '[data-testid="month-calendar"] .grid.grid-cols-7 button:not([disabled])'
+      )
       .first();
     await expect(dayBtn).toBeVisible({ timeout: 10_000 });
     await dayBtn.click();
 
-    // pick a free slot (skip 10:00 if taken — any slot)
-    const slot = page.locator("button.slot-btn").first();
-    await expect(slot).toBeVisible({ timeout: 10_000 });
-    await slot.click();
+    await expect(page.getByTestId("booking-slot").first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await page.getByTestId("booking-slot").first().click();
 
-    await page.getByPlaceholder("Иван").fill("Елена UI");
-    await page.getByPlaceholder("+7 (999) 123-45-67").fill("+79005554433");
+    await page.getByTestId("booking-client-name").fill("Елена UI");
+    await page.getByTestId("booking-client-phone").fill("+79005554433");
 
-    await Promise.all([
+    const [response] = await Promise.all([
       page.waitForResponse(
-        (r) => r.url().includes("/api/bookings") && r.request().method() === "POST"
+        (r) =>
+          r.url().includes("/api/bookings") && r.request().method() === "POST"
       ),
-      page.getByRole("button", { name: "Записаться" }).click(),
+      page.getByTestId("booking-submit").click(),
     ]);
 
-    await expect(page.getByText("Вы записаны!")).toBeVisible({ timeout: 10_000 });
+    expect(response.status()).toBe(201);
+    await expect(page.getByTestId("booking-done")).toBeVisible({
+      timeout: 10_000,
+    });
+    await expect(page.getByText("Вы записаны!")).toBeVisible();
   });
 });

@@ -76,3 +76,30 @@ export function tomorrowDate(): string {
   if (d.getDay() === 0) d.setDate(d.getDate() + 1);
   return d.toISOString().slice(0, 10);
 }
+
+export async function createPublicBooking(
+  request: APIRequestContext,
+  input: {
+    slug: string;
+    service_id: string;
+    date?: string;
+    time?: string;
+    client_name?: string;
+    client_phone?: string;
+  }
+) {
+  const date = input.date ?? tomorrowDate();
+  const time = input.time ?? "11:00";
+  const response = await request.post("/api/bookings", {
+    data: {
+      slug: input.slug,
+      service_id: input.service_id,
+      client_name: input.client_name ?? "Клиент Тест",
+      client_phone: input.client_phone ?? "+79991112233",
+      date,
+      time,
+    },
+  });
+  const body = await response.json();
+  return { response, body, date, time };
+}
