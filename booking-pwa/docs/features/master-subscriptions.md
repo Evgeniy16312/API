@@ -6,7 +6,7 @@
 |------|----------|
 | ID | F30 |
 | Статус | done |
-| Обновлено | 2026-08-13 |
+| Обновлено | 2026-08-14 |
 
 ## Зачем
 
@@ -40,7 +40,8 @@
 ## UI
 
 - Админка `/admin`: plan / status / paid_until / block
-- Панель мастера: `SubscriptionBanner` (`data-testid=subscription-banner`)
+- Панель мастера: `SubscriptionBanner` — только при ≤3 днях до конца trial/оплаты, либо при `past_due` / `blocked`
+- Настройки `/app/settings`: строка `subscription_status_line` (сколько осталось до конца подписки)
 
 ## Логика
 

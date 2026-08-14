@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { format, parse } from "date-fns";
 import { ru } from "date-fns/locale";
-import type { PortfolioItem, Review, Service } from "@/lib/types";
+import type { PortfolioItem, Review, Service, PageTheme } from "@/lib/types";
 import MonthCalendar from "@/components/MonthCalendar";
 import ReviewsSection from "@/components/ReviewsSection";
 import PhoneRuInput from "@/components/PhoneRuInput";
@@ -34,6 +34,8 @@ interface MasterData {
   services: Service[];
   portfolio: PortfolioItem[];
   reviews?: Review[];
+  page_theme?: PageTheme;
+  theme_custom?: boolean;
 }
 
 type Step = "service" | "datetime" | "contact" | "done";
@@ -150,7 +152,13 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
   return (
     <div>
-      <div className="mz-hero text-white px-5 pt-8 pb-12 rounded-b-[1.75rem]">
+      <div className="mz-hero px-5 pt-8 pb-12 rounded-b-[1.75rem]">
+        {master.page_theme?.showWelcomeBadge && (
+          <span className="mz-welcome-badge">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            Запись онлайн
+          </span>
+        )}
         <div className="flex items-center gap-4 mb-4">
           {master.avatar_url ? (
             <img
@@ -159,19 +167,21 @@ export default function BookingFlow({ slug }: { slug: string }) {
               className="w-[4.5rem] h-[4.5rem] rounded-full object-cover border-2 border-[var(--mz-accent)]"
             />
           ) : (
-            <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-[var(--mz-accent)] flex items-center justify-center text-3xl font-semibold">
+            <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-[var(--mz-accent)] flex items-center justify-center text-3xl font-semibold text-[var(--mz-header-text)]">
               {master.name.charAt(0)}
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold leading-tight">{master.name}</h1>
+            <h1 className="mz-title font-bold leading-tight">{master.name}</h1>
             {master.specialty && (
-              <p className="mz-accent text-sm mt-0.5">{master.specialty}</p>
+              <p className="mz-specialty mt-0.5">{master.specialty}</p>
             )}
           </div>
         </div>
         {master.address && (
-          <p className="text-white/70 text-sm">📍 {master.address}</p>
+          <p className="text-sm opacity-80" style={{ color: "var(--mz-header-text)" }}>
+            📍 {master.address}
+          </p>
         )}
         {master.description && (
           <p className="text-white/80 text-sm mt-3 leading-relaxed">

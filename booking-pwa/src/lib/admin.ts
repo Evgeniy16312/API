@@ -3,7 +3,8 @@ import { isNotifyChannel, type NotifyChannel } from "@/lib/notify-channel";
 import { isValidEmail } from "@/lib/validate";
 import type { Master } from "@/lib/types";
 import { rowToMaster } from "@/lib/auth";
-import { extendMasterSubscription } from "@/lib/subscription";
+import { extendMasterSubscription, syncMasterSubscription } from "@/lib/subscription";
+import { addCalendarMonths } from "@/lib/plan-catalog";
 
 export type AdminMasterRow = Master & {
   bookings_count: number;
@@ -158,6 +159,33 @@ export function patchMasterAsAdmin(
     }
     fields.push("subscription_status = ?");
     values.push(patch.subscription_status);
+
+    if (patch.subscription_status === "past_due") {
+      // Иначе syncMasterSubscription вернёт active, если paid_until ещё в будущем.
+      fields.push("paid_until = ?");
+      values.push("");
+      fields.push("blocked = ?");
+      values.push(0);
+    } else if (patch.subscription_status === "trial") {
+      fields.push("paid_until = ?");
+      values.push("");
+      fields.push("blocked = ?");
+      values.push(0);
+    } else if (patch.subscription_status === "active") {
+      fields.push("blocked = ?");
+      values.push(0);
+      if (patch.paid_until === undefined) {
+        const until = existing.paid_until ? new Date(existing.paid_until) : null;
+        const now = new Date();
+        if (!until || Number.isNaN(until.getTime()) || until < now) {
+          fields.push("paid_until = ?");
+          values.push(addCalendarMonths(now, 1).toISOString());
+        }
+      }
+    } else if (patch.subscription_status === "blocked") {
+      fields.push("blocked = ?");
+      values.push(1);
+    }
   }
   if (patch.paid_until !== undefined) {
     fields.push("paid_until = ?");
@@ -181,6 +209,7 @@ export function patchMasterAsAdmin(
     .prepare(`UPDATE masters SET ${fields.join(", ")} WHERE id = ?`)
     .run(...values);
 
+  syncMasterSubscription(id);
   const master = getMasterForAdmin(id)!;
   return { ok: true, master };
 }

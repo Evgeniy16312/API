@@ -8,6 +8,9 @@ import {
 /** Trial length from registration date (S0). */
 export const TRIAL_DAYS = 14;
 
+/** Показывать баннер «Оплатить» только когда до конца подписки ≤ N дней. */
+export const SUBSCRIPTION_BANNER_WARN_DAYS = 3;
+
 export type SubscriptionStatus = "trial" | "active" | "past_due" | "blocked";
 export type PlanId = "trial" | "lite" | "basic" | "pro";
 
@@ -18,8 +21,10 @@ export type SubscriptionInfo = {
   blocked: boolean;
   trial_ends_at: string;
   booking_allowed: boolean;
-  /** Short Russian line for master panel banner. */
+  /** Short Russian line for master panel banner (≤3 days or проблемы). */
   banner: string | null;
+  /** Статус подписки для настроек — всегда, если применимо. */
+  status_line: string | null;
 };
 
 function asPlan(value: unknown): PlanId {
@@ -58,6 +63,84 @@ function formatRuDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
   return d.toLocaleDateString("ru-RU");
+}
+
+function calendarDaysUntil(ends: Date, now: Date): number {
+  const a = Date.UTC(
+    now.getUTCFullYear(),
+    now.getUTCMonth(),
+    now.getUTCDate()
+  );
+  const b = Date.UTC(
+    ends.getUTCFullYear(),
+    ends.getUTCMonth(),
+    ends.getUTCDate()
+  );
+  return Math.round((b - a) / 86400_000);
+}
+
+function daysLeftLabel(days: number): string {
+  if (days <= 0) return "заканчивается сегодня";
+  if (days === 1) return "остался 1 день";
+  if (days >= 2 && days <= 4) return `осталось ${days} дня`;
+  return `осталось ${days} дней`;
+}
+
+function buildSubscriptionMessages(input: {
+  status: SubscriptionStatus;
+  blocked: boolean;
+  paidUntil: string;
+  trialEnd: Date;
+  now: Date;
+}): { banner: string | null; status_line: string | null } {
+  const { status, blocked, paidUntil, trialEnd, now } = input;
+
+  if (blocked || status === "blocked") {
+    return {
+      banner: "Аккаунт заблокирован. Онлайн-запись отключена.",
+      status_line: "Аккаунт заблокирован — онлайн-запись отключена.",
+    };
+  }
+
+  if (status === "past_due") {
+    return {
+      banner:
+        "Подписка истекла — онлайн-запись недоступна. Оплатите тариф в разделе «Подписка».",
+      status_line: "Подписка не оплачена — онлайн-запись отключена.",
+    };
+  }
+
+  if (status === "trial") {
+    const days = calendarDaysUntil(trialEnd, now);
+    const until = formatRuDate(trialEnd.toISOString());
+    const status_line = `Пробный период до ${until} — ${daysLeftLabel(days)}`;
+    const banner =
+      days <= SUBSCRIPTION_BANNER_WARN_DAYS
+        ? `Пробный период ${daysLeftLabel(days)} (до ${until})`
+        : null;
+    return { banner, status_line };
+  }
+
+  if (status === "active" && paidUntil) {
+    const untilDate = new Date(paidUntil);
+    if (Number.isNaN(untilDate.getTime())) {
+      return { banner: null, status_line: "Подписка активна" };
+    }
+    const until = formatRuDate(paidUntil);
+    const days = calendarDaysUntil(untilDate, now);
+    const status_line = `Подписка активна до ${until} — ${daysLeftLabel(days)}`;
+    const banner =
+      days <= SUBSCRIPTION_BANNER_WARN_DAYS
+        ? `Подписка ${daysLeftLabel(days)} (до ${until}) — продлите тариф`
+        : null;
+    return { banner, status_line };
+  }
+
+  if (status === "active") {
+    return { banner: null, status_line: "Подписка активна" };
+  }
+
+  return { banner: null, status_line: null };
 }
 
 /**
@@ -114,17 +197,13 @@ export function syncMasterSubscription(masterId: string): SubscriptionInfo | nul
 
   const booking_allowed = !blocked && status !== "past_due" && status !== "blocked";
 
-  let banner: string | null = null;
-  if (blocked || status === "blocked") {
-    banner = "Аккаунт заблокирован. Онлайн-запись отключена.";
-  } else if (status === "past_due") {
-    banner =
-      "Подписка истекла — онлайн-запись недоступна. Оплатите тариф в разделе «Подписка».";
-  } else if (status === "trial") {
-    banner = `Пробный период до ${formatRuDate(trialEnd.toISOString())}`;
-  } else if (status === "active" && paidUntil) {
-    banner = `Подписка активна до ${formatRuDate(paidUntil)}`;
-  }
+  const { banner, status_line } = buildSubscriptionMessages({
+    status,
+    blocked,
+    paidUntil,
+    trialEnd,
+    now,
+  });
 
   return {
     plan,
@@ -134,6 +213,7 @@ export function syncMasterSubscription(masterId: string): SubscriptionInfo | nul
     trial_ends_at: trialEnd.toISOString(),
     booking_allowed,
     banner,
+    status_line,
   };
 }
 

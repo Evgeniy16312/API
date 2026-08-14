@@ -3,6 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import PasswordInput from "@/components/PasswordInput";
 import type { NotifyChannel } from "@/lib/types";
+import {
+  NOTIFY_CHANNEL_LABELS,
+  planLabel,
+  planOptionLabel,
+  SUBSCRIPTION_STATUS_LABELS,
+  subscriptionStatusLabel,
+} from "@/lib/admin-labels";
 
 type AdminMaster = {
   id: string;
@@ -293,7 +300,7 @@ export default function AdminPage() {
             />
           </label>
           <label className="text-xs space-y-1 block">
-            <span className="text-[#6b7280]">Статус</span>
+            <span className="text-[#6b7280]">Статус подписки</span>
             <select
               className="input"
               data-testid="admin-filter-status"
@@ -303,13 +310,13 @@ export default function AdminPage() {
               <option value="all">Все</option>
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s}
+                  {SUBSCRIPTION_STATUS_LABELS[s]?.label ?? s}
                 </option>
               ))}
             </select>
           </label>
           <label className="text-xs space-y-1 block">
-            <span className="text-[#6b7280]">План</span>
+            <span className="text-[#6b7280]">Тариф</span>
             <select
               className="input"
               value={planFilter}
@@ -318,7 +325,7 @@ export default function AdminPage() {
               <option value="all">Все</option>
               {PLANS.map((p) => (
                 <option key={p} value={p}>
-                  {p}
+                  {planOptionLabel(p)}
                 </option>
               ))}
             </select>
@@ -388,6 +395,8 @@ export default function AdminPage() {
                   </div>
                   <div className="text-xs text-[#6b7280]">
                     {m.phone} · записей: {m.bookings_count}
+                    {" · "}
+                    {planLabel(m.plan)} · {subscriptionStatusLabel(m.subscription_status)}
                     {m.blocked ? " · ЗАБЛОКИРОВАН" : ""}
                   </div>
                 </div>
@@ -441,13 +450,13 @@ export default function AdminPage() {
                   >
                     {CHANNELS.map((c) => (
                       <option key={c} value={c}>
-                        {c}
+                        {NOTIFY_CHANNEL_LABELS[c] ?? c}
                       </option>
                     ))}
                   </select>
                 </label>
                 <label className="text-xs space-y-1 block">
-                  <span className="text-[#6b7280]">План</span>
+                  <span className="text-[#6b7280]">Тариф</span>
                   <select
                     className="input"
                     value={m.plan}
@@ -458,7 +467,7 @@ export default function AdminPage() {
                   >
                     {PLANS.map((p) => (
                       <option key={p} value={p}>
-                        {p}
+                        {planOptionLabel(p)}
                       </option>
                     ))}
                   </select>
@@ -477,10 +486,13 @@ export default function AdminPage() {
                   >
                     {STATUSES.map((s) => (
                       <option key={s} value={s}>
-                        {s}
+                        {SUBSCRIPTION_STATUS_LABELS[s]?.label ?? s}
                       </option>
                     ))}
                   </select>
+                  <span className="text-[10px] text-[#9ca3af] leading-snug block mt-1">
+                    {SUBSCRIPTION_STATUS_LABELS[m.subscription_status]?.hint}
+                  </span>
                 </label>
               </div>
 

@@ -25,6 +25,7 @@ export async function GET(request: Request) {
     trial_ends_at: sub?.trial_ends_at,
     booking_allowed: sub?.booking_allowed,
     subscription_banner: sub?.banner ?? null,
+    subscription_status_line: sub?.status_line ?? null,
     theme_customizable: canCustomizePageTheme(sub),
     login_email: master.login_email || "",
     has_password: master.has_password ?? false,
@@ -65,7 +66,28 @@ export async function PATCH(request: Request) {
       if (!canCustomizePageTheme(sub)) {
         return jsonError("Свой дизайн доступен на тарифе «Премиум»", 403);
       }
-      const parsed = sanitizePageTheme(body.page_theme);
+      let themeInput = body.page_theme;
+      if (
+        themeInput &&
+        typeof themeInput === "object" &&
+        typeof (themeInput as { backgroundImage?: string }).backgroundImage ===
+          "string" &&
+        (themeInput as { backgroundImage: string }).backgroundImage.startsWith(
+          "data:image/"
+        )
+      ) {
+        const { persistImageDataUrl } = await import("@/lib/uploads");
+        themeInput = {
+          ...(themeInput as Record<string, unknown>),
+          backgroundImage: persistImageDataUrl(
+            master.id,
+            (themeInput as { backgroundImage: string }).backgroundImage,
+            "theme"
+          ),
+          backgroundKind: "custom",
+        };
+      }
+      const parsed = sanitizePageTheme(themeInput);
       if (!parsed.ok) {
         return jsonError(parsed.error, 400);
       }

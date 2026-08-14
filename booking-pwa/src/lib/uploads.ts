@@ -37,7 +37,7 @@ function ensureDir(dir: string) {
 export function persistImageDataUrl(
   masterId: string,
   imageUrl: string,
-  kind: "portfolio" | "avatar" = "portfolio"
+  kind: "portfolio" | "avatar" | "theme" = "portfolio"
 ): string {
   if (!imageUrl.startsWith("data:image/")) {
     return imageUrl;

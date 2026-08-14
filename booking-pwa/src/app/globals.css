@@ -185,11 +185,36 @@ textarea.input {
   background: var(--mz-bg);
   color: var(--mz-ink);
   font-family: var(--mz-font);
+  font-size: var(--mz-font-size-body, 1rem);
+  position: relative;
+  isolation: isolate;
+}
+
+.page-theme[data-bg="image"] {
+  background-color: var(--mz-bg);
+  background-image: var(--mz-bg-image);
+  background-size: cover;
+  background-position: center top;
+}
+
+.page-theme[data-bg="image"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, var(--mz-bg-overlay, 0.35));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.page-theme[data-bg="image"] > * {
+  position: relative;
+  z-index: 1;
 }
 
 .page-theme .card {
   background: var(--mz-card);
   border-color: color-mix(in srgb, var(--mz-ink) 12%, var(--mz-bg));
+  border-radius: var(--mz-card-radius, 1rem);
 }
 
 .page-theme .btn-primary,
@@ -197,6 +222,11 @@ textarea.input {
   background: var(--mz-ink);
   border-color: var(--mz-ink);
   color: var(--mz-bg);
+}
+
+.page-theme[data-glow="1"] .btn-primary,
+.page-theme[data-glow="1"] .slot-btn-active {
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--mz-accent) 50%, transparent);
 }
 
 .page-theme .btn-outline,
@@ -209,7 +239,49 @@ textarea.input {
 
 .page-theme .mz-hero {
   background: var(--mz-header);
-  color: var(--mz-card);
+  color: var(--mz-header-text);
+}
+
+.page-theme[data-hero="gradient"] .mz-hero {
+  background: linear-gradient(
+    135deg,
+    var(--mz-header) 0%,
+    color-mix(in srgb, var(--mz-accent) 38%, var(--mz-header)) 100%
+  );
+}
+
+.page-theme[data-hero="glass"] .mz-hero {
+  background: color-mix(in srgb, var(--mz-header) 78%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid color-mix(in srgb, var(--mz-card) 22%, transparent);
+}
+
+.page-theme .mz-title {
+  font-size: var(--mz-font-size-title, 1.375rem);
+  line-height: 1.2;
+  color: var(--mz-header-text);
+}
+
+.page-theme .mz-specialty {
+  color: var(--mz-specialty-text);
+  font-size: calc(var(--mz-font-size-body, 1rem) * 0.95);
+}
+
+.page-theme .mz-welcome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--mz-card) 22%, transparent);
+  color: var(--mz-header-text);
+  border: 1px solid color-mix(in srgb, var(--mz-card) 35%, transparent);
+  margin-bottom: 0.75rem;
 }
 
 .mz-accent {

@@ -8,7 +8,25 @@ export type WorkSchedule = Record<string, WorkDay>;
 
 export type NotifyChannel = "max" | "vk" | "telegram" | "email";
 
-export type PageFontId = "inter" | "cormorant" | "nunito" | "manrope";
+export type PageFontId =
+  | "inter"
+  | "cormorant"
+  | "nunito"
+  | "manrope"
+  | "playfair"
+  | "rubik"
+  | "montserrat";
+
+export type PageFontSize = "sm" | "md" | "lg" | "xl";
+export type PageHeroStyle = "solid" | "gradient" | "glass";
+export type PageCardStyle = "soft" | "round" | "sharp";
+export type PageBackgroundKind = "color" | "preset" | "custom";
+export type PageBackgroundPreset =
+  | "flowers"
+  | "abstract"
+  | "nature"
+  | "city"
+  | "watercolor";
 
 export type PageTheme = {
   accent: string;
@@ -17,6 +35,24 @@ export type PageTheme = {
   header: string;
   card: string;
   font: PageFontId;
+  /** Hero title color */
+  headerText: string;
+  /** Specialty line on hero */
+  specialtyText: string;
+  fontSizeTitle: PageFontSize;
+  fontSizeBody: PageFontSize;
+  backgroundKind: PageBackgroundKind;
+  backgroundPreset: PageBackgroundPreset | null;
+  /** Preset path /uploads/... or empty */
+  backgroundImage: string;
+  /** 0–80 — затемнение фото для читаемости */
+  backgroundOverlay: number;
+  heroStyle: PageHeroStyle;
+  cardStyle: PageCardStyle;
+  /** Pill «Запись онлайн» на шапке */
+  showWelcomeBadge: boolean;
+  /** Мягкое свечение кнопок */
+  accentGlow: boolean;
 };
 
 export interface Master {
@@ -44,6 +80,7 @@ export interface Master {
   trial_ends_at?: string;
   booking_allowed?: boolean;
   subscription_banner?: string | null;
+  subscription_status_line?: string | null;
   work_schedule: WorkSchedule;
   slot_duration: number;
   created_at: string;

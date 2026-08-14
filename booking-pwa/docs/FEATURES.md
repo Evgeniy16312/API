@@ -41,7 +41,7 @@
 | F37 | Mobile-first UI | done | [features/mobile-first-ui.md](./features/mobile-first-ui.md) |
 | F38 | Дизайн страницы (Pro) | done | [features/page-theme.md](./features/page-theme.md) |
 | F39 | Продающий сайт | planned | [features/marketing-site.md](./features/marketing-site.md) |
-| F40 | Три тарифа (Старт 149) | done | [features/three-tier-billing.md](./features/three-tier-billing.md) |
+| F40 | Три тарифа (99 / 249 / 499 ₽) | done | [features/three-tier-billing.md](./features/three-tier-billing.md) |
 | F41 | Email и пароль (вход / восстановление) | done | [features/email-password-auth.md](./features/email-password-auth.md) |
 
 ## Следующий свободный ID

@@ -3,6 +3,7 @@ import { getMasterBySlug } from "@/lib/auth";
 import BookingFlow from "@/components/BookingFlow";
 import {
   pageThemeCssVars,
+  pageThemeDataAttrs,
   pageThemeFontHref,
 } from "@/lib/page-theme";
 import { resolvePublicPageTheme } from "@/lib/page-theme-resolve";
@@ -43,6 +44,7 @@ export default async function MasterPage({ params }: Props) {
     <div
       className="page-theme min-h-screen max-w-lg mx-auto"
       style={pageThemeCssVars(theme)}
+      {...pageThemeDataAttrs(theme)}
       data-testid="public-page"
     >
       {fontHref ? (

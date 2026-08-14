@@ -46,6 +46,7 @@ export default function SettingsPage() {
   const [avatarUrl, setAvatarUrl] = useState("");
   const [notifyEmail, setNotifyEmail] = useState("");
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [subscriptionStatusLine, setSubscriptionStatusLine] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -61,6 +62,7 @@ export default function SettingsPage() {
         setDescription(m.description);
         setAvatarUrl(m.avatar_url || "");
         setNotifyEmail(m.notify_email || "");
+        setSubscriptionStatusLine(m.subscription_status_line || "");
       })
       .finally(() => setLoading(false));
   }, []);
@@ -148,6 +150,15 @@ export default function SettingsPage() {
   return (
     <div className="px-4 py-6 space-y-4">
       <h1 className="text-xl font-bold">Настройки</h1>
+
+      {subscriptionStatusLine ? (
+        <p
+          className="text-sm text-[#78716c]"
+          data-testid="settings-subscription-status"
+        >
+          {subscriptionStatusLine}
+        </p>
+      ) : null}
 
       <div className="card space-y-3">
         <h3 className="font-semibold">Профиль</h3>
