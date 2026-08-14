@@ -1,15 +1,20 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 
 type Plan = {
   id: "lite" | "basic" | "pro";
+  name: string;
+  title: string;
   label: string;
   price_rub: number;
-  days: number;
-  hint: string;
+  period_label: string;
+  daily_orders_label: string;
+  tagline: string;
+  highlights: string[];
 };
 
 type TransferInfo = {
@@ -120,13 +125,16 @@ function BillingInner() {
 
   const plan = plans.find((p) => p.id === selected) || plans[0];
   const comment =
-    transfer && plan
-      ? transfer.comments[plan.id]
-      : "";
+    transfer && plan ? transfer.comments[plan.id] : "";
 
   return (
     <div className="px-4 py-6 space-y-4" data-testid="billing-page">
-      <h1 className="text-xl font-bold">Подписка</h1>
+      <div>
+        <h1 className="text-xl font-bold">Подписка</h1>
+        <p className="text-sm text-[#78716c] mt-1">
+          Оплата за календарный месяц — без привязки к «30 дням».
+        </p>
+      </div>
       {banner && (
         <p className="text-sm text-[#78716c]" data-testid="billing-status">
           {banner}
@@ -137,7 +145,7 @@ function BillingInner() {
           className="rounded-xl bg-emerald-50 text-emerald-800 text-sm px-3 py-2 border border-emerald-100"
           data-testid="billing-paid-ok"
         >
-          Оплата прошла — подписка продлена. Можно принимать записи.
+          Оплата прошла — подписка продлена на месяц. Можно принимать записи.
         </div>
       )}
       {error && (
@@ -178,18 +186,26 @@ function BillingInner() {
                     </svg>
                   )}
                 </span>
-                <div className="min-w-0 flex-1 space-y-1">
+                <div className="min-w-0 flex-1 space-y-2">
                   <div className="flex items-baseline justify-between gap-2">
-                    <h2 className="font-semibold">{p.label}</h2>
-                    <div className="text-lg font-bold text-[#1c1917]">
+                    <h2 className="font-semibold">{p.title}</h2>
+                    <div className="text-lg font-bold text-[#1c1917] shrink-0">
                       {p.price_rub} ₽
                       <span className="text-xs font-normal text-[#78716c]">
                         {" "}
-                        / {p.days} дн.
+                        / {p.period_label}
                       </span>
                     </div>
                   </div>
-                  <p className="text-sm text-[#78716c]">{p.hint}</p>
+                  <p className="text-sm font-medium text-[#9a7b4a]">
+                    {p.daily_orders_label}
+                  </p>
+                  <p className="text-sm text-[#78716c]">{p.tagline}</p>
+                  <ul className="text-xs text-[#78716c] space-y-0.5">
+                    {p.highlights.map((h) => (
+                      <li key={h}>· {h}</li>
+                    ))}
+                  </ul>
                   {isSelected && (
                     <p className="text-xs font-medium text-[#a8864a]">
                       Выбран
@@ -202,6 +218,14 @@ function BillingInner() {
         })}
       </div>
 
+      <Link
+        href="/app/billing/plans"
+        className="btn-outline w-full text-center text-sm"
+        data-testid="billing-plans-detail-link"
+      >
+        Подробнее о тарифах
+      </Link>
+
       {mode === "transfer" && transfer && plan && (
         <div
           className="card space-y-3"
@@ -209,8 +233,8 @@ function BillingInner() {
         >
           <h3 className="font-semibold">Оплата переводом (пилот)</h3>
           <p className="text-sm text-[#78716c]">
-            Пока подключаем онлайн-кассу, оплата — по СБП. После перевода
-            напишите нам — продлим доступ в течение дня.
+            Пока подключаем онлайн-кассу, оплата — по СБП за один месяц.
+            После перевода напишите нам — продлим доступ в течение дня.
           </p>
 
           <div className="space-y-2 text-sm">
@@ -262,10 +286,13 @@ function BillingInner() {
             disabled={paying !== null}
             onClick={() => checkout(plan.id)}
           >
-            {paying === plan.id ? "Переходим…" : `Оплатить ${plan.price_rub} ₽`}
+            {paying === plan.id
+              ? "Переходим…"
+              : `Оплатить ${plan.price_rub} ₽ / ${plan.period_label}`}
           </button>
           <p className="text-xs text-[#78716c]">
-            Оплата через ЮKassa. После оплаты доступ продлевается автоматически.
+            Оплата через ЮKassa. После оплаты доступ продлевается на месяц
+            автоматически.
           </p>
         </>
       )}

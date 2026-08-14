@@ -61,7 +61,7 @@ export async function PATCH(request: Request) {
     if (body.page_theme !== undefined) {
       const sub = syncMasterSubscription(master.id);
       if (!canCustomizePageTheme(sub)) {
-        return jsonError("Свой дизайн доступен на тарифе Витрина", 403);
+        return jsonError("Свой дизайн доступен на тарифе «Премиум»", 403);
       }
       const parsed = sanitizePageTheme(body.page_theme);
       if (!parsed.ok) {

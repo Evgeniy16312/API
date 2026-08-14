@@ -103,7 +103,7 @@ export default function AppDashboard() {
         </Link>
         <Link href="/app/billing" className="card text-center py-5 active:scale-[0.98] transition-transform min-h-24">
           <span className="text-xl block mb-1">Подписка</span>
-          <span className="text-xs text-[#78716c]">от 149 ₽ / мес</span>
+          <span className="text-xs text-[#78716c]">от 99 ₽ / мес</span>
         </Link>
         <Link href="/app/settings" className="card text-center py-5 active:scale-[0.98] transition-transform min-h-24">
           <span className="text-xl block mb-1">Профиль</span>

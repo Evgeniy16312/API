@@ -1,6 +1,14 @@
 import { test, expect } from "@playwright/test";
-import { authHeaders, expectRegistered, registerMaster } from "../helpers/api";
+import {
+  authHeaders,
+  expectRegistered,
+  registerMaster,
+  seedMasterWithService,
+  tomorrowDate,
+} from "../helpers/api";
 import { makeMaster } from "../fixtures/master";
+
+const ADMIN_KEY = process.env.ADMIN_SETUP_KEY || "change-me";
 
 test.describe("API · телефон и email", () => {
   test("принимает 8XXXXXXXXXX и сохраняет +7", async ({ request }) => {
@@ -71,5 +79,51 @@ test.describe("API · услуга: длительность и цена", () =>
     });
     expect(res.status()).toBe(201);
     expect((await res.json()).price).toBe(100_000);
+  });
+});
+
+test.describe("API · лимит заказов в день", () => {
+  test("Старт блокирует 4-ю запись в один день", async ({ request }) => {
+    const { master, service } = await seedMasterWithService(request);
+    await request.patch(`/api/admin/masters/${master.id}`, {
+      headers: {
+        "x-admin-key": ADMIN_KEY,
+        "Content-Type": "application/json",
+      },
+      data: {
+        plan: "lite",
+        subscription_status: "active",
+        paid_until: new Date(Date.now() + 86400000 * 30).toISOString(),
+      },
+    });
+
+    const date = tomorrowDate();
+    const times = ["10:00", "11:00", "12:00", "13:00"];
+    for (let i = 0; i < 3; i++) {
+      const res = await request.post("/api/bookings", {
+        data: {
+          slug: master.slug,
+          service_id: service.id,
+          client_name: `Клиент ${i + 1}`,
+          client_phone: `+7999000112${i}`,
+          date,
+          time: times[i],
+        },
+      });
+      expect(res.status(), await res.text()).toBe(201);
+    }
+
+    const blocked = await request.post("/api/bookings", {
+      data: {
+        slug: master.slug,
+        service_id: service.id,
+        client_name: "Клиент 4",
+        client_phone: "+79990001124",
+        date,
+        time: times[3],
+      },
+    });
+    expect(blocked.status()).toBe(403);
+    expect((await blocked.json()).error).toMatch(/3 заказ/i);
   });
 });

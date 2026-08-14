@@ -184,7 +184,7 @@ test.describe("API · профиль, слоты, портфолио", () => {
 });
 
 test.describe("API · billing transfer + admin filter", () => {
-  test("plans в mock/transfer отдают тарифы 149/290/590", async ({ request }) => {
+  test("plans в mock/transfer отдают тарифы 99/249/499", async ({ request }) => {
     const master = await expectRegistered(request, makeMaster());
     const res = await request.get("/api/billing/plans", {
       headers: authHeaders(master.token),
@@ -195,9 +195,13 @@ test.describe("API · billing transfer + admin filter", () => {
     const prices = (body.plans as { id: string; price_rub: number }[]).map(
       (p) => p.price_rub
     );
-    expect(prices).toContain(149);
-    expect(prices).toContain(290);
-    expect(prices).toContain(590);
+    expect(prices).toContain(99);
+    expect(prices).toContain(249);
+    expect(prices).toContain(499);
+    const lite = (body.plans as { id: string; title: string }[]).find(
+      (p) => p.id === "lite"
+    );
+    expect(lite?.title).toBe("Тариф «Старт»");
     expect((body.plans as { id: string }[]).map((p) => p.id)).toEqual([
       "lite",
       "basic",

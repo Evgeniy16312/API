@@ -11,41 +11,50 @@
 
 ## Зачем
 
-Охватить мастеров с 1–2 заказами в день (блокнот), не демпингуя Витрину. ADR [007](../decisions/007-three-tier-pricing.md), [pricing.md](../business/pricing.md).
+Охватить мастеров с малым потоком заказов, не демпингуя Премиум. ADR [007](../decisions/007-three-tier-pricing.md), каталог `src/lib/plan-catalog.ts`.
 
-## Сценарий
+## Тарифы (UI)
 
-1. Trial 14 дней = возможности Мастер (напоминания).
-2. Оплата: Старт 149 / Мастер 290 / Витрина 590.
-3. Lite: без напоминаний 24ч/2ч, без темы F38, до 5 фото.
+| id | Название | Цена | Заказов/день |
+|----|----------|------|--------------|
+| lite | Тариф «Старт» | 99 ₽ / мес | до 3 |
+| basic | Тариф «Стандарт» | 249 ₽ / мес | до 10 |
+| pro | Тариф «Премиум» | 499 ₽ / мес | без лимита |
+
+Подписка продлевается **календарным месяцем** (не «30 дней»).
+
+## Лимиты
+
+- Заказы в день: `dailyBookingLimitForPlan` + проверка в `createBooking`
+- Напоминания: не на Старт
+- Тема F38: только Премиум
+- Портфолио: 5 / 20 / 100 фото
 
 ## API
 
 | Метод | Путь | Auth | Описание |
 |-------|------|------|----------|
-| GET | `/api/billing/plans` | Bearer | `lite`, `basic`, `pro` |
-| POST | `/api/billing/checkout` | Bearer | `{ plan: "lite" \| "basic" \| "pro" }` |
-| PATCH | `/api/masters/me` | Bearer | `page_theme` только Витрина |
+| GET | `/api/billing/plans` | Bearer | полный каталог с features |
+| POST | `/api/billing/checkout` | Bearer | `{ plan }` |
+| PATCH | `/api/masters/me` | Bearer | `page_theme` только Премиум |
 
-Env: `BILLING_LITE_PRICE_RUB` (149).
+Env: `BILLING_*_PRICE_RUB` (99 / 249 / 499).
 
 ## UI
 
-`/app/billing` три карточки, `data-testid=billing-plan-lite`. Лендинг «от 149 ₽».
-
-## Данные
-
-`masters.plan` = `trial` \| `lite` \| `basic` \| `pro`
+- `/app/billing` — выбор тарифа
+- `/app/billing/plans` — сравнение всех возможностей
+- Лендинг «от 99 ₽ в месяц»
 
 ## Тесты
 
-- `e2e/api/coverage.api.spec.ts` — цены 149/290/590
+- `e2e/api/coverage.api.spec.ts` — 99/249/499
+- `e2e/api/validate.api.spec.ts` — лимит 3 заказа на Старт
 - `e2e/api/page-theme.api.spec.ts` — lite → 403 тема
-- `e2e/api/validate.api.spec.ts` — телефон/email
 
 ## Чеклист
 
-- [x] Код + админка `lite`
-- [x] FEATURES
+- [x] Каталог тарифов + лимиты заказов
+- [x] Страница сравнения
+- [x] Календарный месяц подписки
 - [x] Playwright
-- [x] Лендинг от 149 ₽

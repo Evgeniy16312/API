@@ -1,15 +1,28 @@
 import { randomBytes } from "crypto";
 import { getDb } from "@/lib/db";
+import {
+  BILLING_PERIOD_LABEL,
+  getPlanCatalogEntry,
+  listPlanCatalog,
+  type PaidPlanId,
+} from "@/lib/plan-catalog";
 import { extendMasterSubscription, type PlanId } from "@/lib/subscription";
 
-export type BillingPlanId = "lite" | "basic" | "pro";
+export type BillingPlanId = PaidPlanId;
 
 export type BillingPlan = {
   id: BillingPlanId;
+  name: string;
+  title: string;
   label: string;
   price_rub: number;
-  days: number;
-  hint: string;
+  period_label: string;
+  daily_orders: number | null;
+  daily_orders_label: string;
+  tagline: string;
+  highlights: string[];
+  features: string[];
+  excludes: string[];
 };
 
 export type PaymentRow = {
@@ -25,25 +38,6 @@ export type PaymentRow = {
   created_at: string;
   paid_at: string;
 };
-
-function periodDays(): number {
-  const n = Number(process.env.BILLING_PERIOD_DAYS || "30");
-  if (!Number.isFinite(n) || n < 1) return 30;
-  return Math.min(366, Math.floor(n));
-}
-
-function priceRub(plan: BillingPlanId): number {
-  const key =
-    plan === "pro"
-      ? "BILLING_PRO_PRICE_RUB"
-      : plan === "lite"
-        ? "BILLING_LITE_PRICE_RUB"
-        : "BILLING_BASIC_PRICE_RUB";
-  const fallback = plan === "pro" ? 590 : plan === "lite" ? 149 : 290;
-  const n = Number(process.env[key] || fallback);
-  if (!Number.isFinite(n) || n < 1) return fallback;
-  return Math.floor(n);
-}
 
 export function isBillingMock(): boolean {
   return (
@@ -98,36 +92,31 @@ export function paymentCommentForMaster(slug: string, planId: string): string {
   return `MZ ${slug} ${planId}`.slice(0, 40);
 }
 
+function toBillingPlan(entry: NonNullable<ReturnType<typeof getPlanCatalogEntry>>): BillingPlan {
+  return {
+    id: entry.id,
+    name: entry.name,
+    title: entry.title,
+    label: entry.title,
+    price_rub: entry.price_rub,
+    period_label: BILLING_PERIOD_LABEL,
+    daily_orders: entry.daily_orders,
+    daily_orders_label: entry.daily_orders_label,
+    tagline: entry.tagline,
+    highlights: entry.highlights,
+    features: entry.features,
+    excludes: entry.excludes,
+  };
+}
+
 export function listBillingPlans(): BillingPlan[] {
-  const days = periodDays();
-  return [
-    {
-      id: "lite",
-      label: "Старт",
-      price_rub: priceRub("lite"),
-      days,
-      hint: "Ссылка и запись. Для 1–2 заказов в день",
-    },
-    {
-      id: "basic",
-      label: "Мастер",
-      price_rub: priceRub("basic"),
-      days,
-      hint: "Напоминания, отзывы и карта",
-    },
-    {
-      id: "pro",
-      label: "Витрина",
-      price_rub: priceRub("pro"),
-      days,
-      hint: "Свой дизайн страницы: цвета, шрифт, шапка",
-    },
-  ];
+  return listPlanCatalog().map((entry) => toBillingPlan(entry));
 }
 
 export function getBillingPlan(plan: string): BillingPlan | null {
-  if (plan !== "basic" && plan !== "pro" && plan !== "lite") return null;
-  return listBillingPlans().find((p) => p.id === plan) || null;
+  const entry = getPlanCatalogEntry(plan);
+  if (!entry) return null;
+  return toBillingPlan(entry);
 }
 
 function newId(): string {
@@ -228,8 +217,9 @@ export function applySuccessfulPayment(
         ? "lite"
         : "basic"
   ) as PlanId;
-  const info = extendMasterSubscription(payment.master_id, payment.days, {
+  const info = extendMasterSubscription(payment.master_id, {
     plan,
+    months: 1,
   });
   if (!info) return { ok: false, error: "Мастер не найден" };
 

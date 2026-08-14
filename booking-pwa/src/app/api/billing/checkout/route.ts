@@ -25,12 +25,14 @@ export async function POST(request: Request) {
   const plan = getBillingPlan(planId);
   if (!plan) return jsonError("Неизвестный тариф", 400);
 
+  const periodDays = 31;
+
   if (isBillingMock()) {
     const payment = insertPendingPayment({
       masterId: master.id,
       plan: plan.id,
       amountRub: plan.price_rub,
-      days: plan.days,
+      days: periodDays,
       provider: "mock",
     });
     const base = appBaseUrl(request);
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       payment_id: payment.id,
       confirmation_url,
       amount_rub: plan.price_rub,
-      days: plan.days,
+      period_label: plan.period_label,
       plan: plan.id,
       mock: true,
     });
@@ -57,14 +59,14 @@ export async function POST(request: Request) {
     masterId: master.id,
     plan: plan.id,
     amountRub: plan.price_rub,
-    days: plan.days,
+    days: periodDays,
     provider: "yookassa",
   });
 
   const returnUrl = `${appBaseUrl(request)}/app/billing?paid=1`;
   const created = await yookassaCreatePayment({
     amountRub: plan.price_rub,
-    description: `МояЗапись: тариф ${plan.label} на ${plan.days} дн.`,
+    description: `МояЗапись: ${plan.title} (${plan.period_label})`,
     returnUrl,
     metadata: {
       payment_id: payment.id,
@@ -84,7 +86,7 @@ export async function POST(request: Request) {
     payment_id: payment.id,
     confirmation_url,
     amount_rub: plan.price_rub,
-    days: plan.days,
+    period_label: plan.period_label,
     plan: plan.id,
     mock: false,
   });

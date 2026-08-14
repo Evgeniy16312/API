@@ -82,19 +82,20 @@ export default function DesignPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Дизайн страницы</h1>
         <p className="text-sm text-[#78716c] mt-1">
-          Так клиент видит вашу ссылку записи. На Старте и Мастере — классика.
+          Так клиент видит вашу ссылку записи. На «Старт» и «Стандарт» —
+          классический вид.
         </p>
       </div>
 
       {locked && (
         <div className="card space-y-3" data-testid="design-locked">
-          <p className="font-semibold">Свой дизайн — в тарифе Витрина</p>
+          <p className="font-semibold">Свой дизайн — в тарифе «Премиум»</p>
           <p className="text-sm text-[#78716c]">
-            Цвета, шрифт и шапка вашей витрины. Классический вид на Basic
-            остаётся аккуратным и узнаваемым.
+            Цвета, шрифт и шапка вашей страницы записи. На «Старт» и «Стандарт»
+            остаётся аккуратный классический вид.
           </p>
-          <Link href="/app/billing" className="btn-primary block text-center">
-            Перейти на Витрину · 590 ₽
+          <Link href="/app/billing" className="btn-primary w-full">
+            Перейти на «Премиум» · от 499 ₽ / мес
           </Link>
         </div>
       )}

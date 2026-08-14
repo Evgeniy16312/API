@@ -1,4 +1,9 @@
 import { getDb } from "@/lib/db";
+import {
+  addCalendarMonths,
+  getPlanCatalogEntry,
+  type PaidPlanId,
+} from "@/lib/plan-catalog";
 
 /** Trial length from registration date (S0). */
 export const TRIAL_DAYS = 14;
@@ -139,9 +144,43 @@ export function canCustomizePageTheme(
   return Boolean(info && info.plan === "pro" && info.booking_allowed);
 }
 
-/** Напоминания 24ч/2ч — не на тарифе Старт. Trial как Мастер. */
+/** Напоминания 24ч/2ч — не на тарифе Старт. Trial как Стандарт. */
 export function planHasReminders(plan: PlanId | undefined): boolean {
   return plan === "trial" || plan === "basic" || plan === "pro";
+}
+
+/** Лимит записей в день; trial = как Стандарт. null = без лимита. */
+export function dailyBookingLimitForPlan(
+  plan: PlanId | undefined
+): number | null {
+  if (plan === "pro") return null;
+  if (plan === "basic" || plan === "trial") return 10;
+  if (plan === "lite") return 3;
+  return 3;
+}
+
+export function countMasterBookingsOnDate(
+  masterId: string,
+  date: string
+): number {
+  const row = getDb()
+    .prepare(
+      `SELECT COUNT(*) AS c FROM bookings
+       WHERE master_id = ? AND date = ? AND status != 'cancelled'`
+    )
+    .get(masterId, date) as { c: number };
+  return Number(row?.c) || 0;
+}
+
+export function dailyBookingLimitError(plan: PlanId): string {
+  const limit = dailyBookingLimitForPlan(plan);
+  if (limit === null) return "";
+  const entry = getPlanCatalogEntry(plan === "trial" ? "basic" : plan);
+  const name = entry?.name || "тариф";
+  if (plan === "lite") {
+    return `На тарифе «Старт» — до ${limit} заказов в день. Перейдите на «Стандарт» или «Премиум».`;
+  }
+  return `Лимит ${limit} заказов в день на тарифе «${name}». Перейдите на «Премиум» для снятия лимита.`;
 }
 
 export function portfolioLimitForPlan(plan: PlanId | undefined): number {
@@ -178,8 +217,7 @@ export function syncAllMasterSubscriptions(limit = 200): {
 
 export function extendMasterSubscription(
   masterId: string,
-  days: number,
-  options?: { plan?: PlanId }
+  options?: { plan?: PlanId; months?: number; days?: number }
 ): SubscriptionInfo | null {
   const existing = syncMasterSubscription(masterId);
   if (!existing) return null;
@@ -188,7 +226,15 @@ export function extendMasterSubscription(
     existing.paid_until && new Date(existing.paid_until) > new Date()
       ? new Date(existing.paid_until)
       : new Date();
-  const until = new Date(base.getTime() + days * 86400_000);
+
+  let until: Date;
+  if (options?.months && options.months > 0) {
+    until = addCalendarMonths(base, options.months);
+  } else if (options?.days && options.days > 0) {
+    until = new Date(base.getTime() + options.days * 86400_000);
+  } else {
+    until = addCalendarMonths(base, 1);
+  }
 
   const nextPlan: PlanId =
     options?.plan === "basic" ||

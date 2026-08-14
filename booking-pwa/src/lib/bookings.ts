@@ -3,7 +3,7 @@ import { getMasterById, getMasterBySlug } from "@/lib/auth";
 import { getDb, withTransaction } from "@/lib/db";
 import { resolveNotifyTarget } from "@/lib/notify-channel";
 import { enqueueNotification, flushOutbox } from "@/lib/outbox";
-import { isMasterBookingAllowed, planHasReminders, syncMasterSubscription } from "@/lib/subscription";
+import { isMasterBookingAllowed, planHasReminders, syncMasterSubscription, dailyBookingLimitForPlan, countMasterBookingsOnDate, dailyBookingLimitError } from "@/lib/subscription";
 import { normalizeRuPhone } from "@/lib/validate";
 import {
   formatBookingDate,
@@ -59,6 +59,20 @@ export function createBooking(input: CreateBookingInput): CreateBookingResult {
 
   if (!service) {
     return { ok: false, error: "Услуга не найдена", status: 404 };
+  }
+
+  const sub = syncMasterSubscription(master.id);
+  const plan = sub?.plan ?? master.plan;
+  const dailyLimit = dailyBookingLimitForPlan(plan);
+  if (dailyLimit !== null) {
+    const count = countMasterBookingsOnDate(master.id, date);
+    if (count >= dailyLimit) {
+      return {
+        ok: false,
+        error: dailyBookingLimitError(plan),
+        status: 403,
+      };
+    }
   }
 
   const duration = service.duration || master.slot_duration || 60;

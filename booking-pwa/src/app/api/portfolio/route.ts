@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     const limit = portfolioLimitForPlan(sub?.plan);
     if (count.c >= limit) {
       return jsonError(
-        `На вашем тарифе можно загрузить до ${limit} фото. Перейдите на Мастер или Витрину.`,
+        `На вашем тарифе можно загрузить до ${limit} фото. Перейдите на «Стандарт» или «Премиум».`,
         403
       );
     }

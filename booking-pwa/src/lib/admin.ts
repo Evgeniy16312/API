@@ -121,7 +121,7 @@ export function patchMasterAsAdmin(
     if (!Number.isFinite(days) || days < 1 || days > 366) {
       return { ok: false, error: "extend_days: 1–366", status: 400 };
     }
-    extendMasterSubscription(id, days);
+    extendMasterSubscription(id, { days });
     return { ok: true, master: getMasterForAdmin(id)! };
   }
 
