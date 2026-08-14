@@ -89,10 +89,10 @@ export default function MonthCalendar({
               className={[
                 "min-h-11 rounded-xl text-sm transition-all",
                 !inMonth && "opacity-30",
-                canSelect && !selected && "bg-[#c4a574]/15 text-[#1c1917] font-medium",
+                canSelect && !selected && "bg-[color-mix(in_srgb,var(--mz-accent)_18%,transparent)] text-[var(--mz-ink)] font-medium",
                 !canSelect && "text-[#d6d3d1] cursor-default",
-                selected && "bg-[#1c1917] text-white font-semibold",
-                today && !selected && "ring-1 ring-[#c4a574]",
+                selected && "bg-[var(--mz-ink)] text-[var(--mz-bg)] font-semibold",
+                today && !selected && "ring-1 ring-[var(--mz-accent)]",
               ]
                 .filter(Boolean)
                 .join(" ")}

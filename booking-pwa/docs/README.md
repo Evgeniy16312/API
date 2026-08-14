@@ -7,7 +7,7 @@
 
 | Раздел | Файл |
 |--------|------|
-| **Roadmap** | [ROADMAP.md](./ROADMAP.md) |
+| **Бизнес / рынок / тарифы / инфра / продажи** | [business/README.md](./business/README.md) |
 | Деплой | [deploy.md](./deploy.md) |
 | Каталог фич | [FEATURES.md](./FEATURES.md) |
 | Архитектура | [architecture.md](./architecture.md) |

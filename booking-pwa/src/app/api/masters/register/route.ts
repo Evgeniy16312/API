@@ -1,7 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "@/lib/db";
 import { jsonError, jsonOk } from "@/lib/http";
-import { isValidSlug, isValidPhone } from "@/lib/slots";
+import { isValidSlug } from "@/lib/slots";
+import { normalizeRuPhone } from "@/lib/validate";
 import { attachSessionCookie } from "@/lib/session";
 import { DEFAULT_SCHEDULE } from "@/lib/types";
 
@@ -23,8 +24,9 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!isValidPhone(phone)) {
-      return jsonError("Укажите корректный номер телефона", 400);
+    const phoneNorm = normalizeRuPhone(phone);
+    if (!phoneNorm) {
+      return jsonError("Телефон: +7 и 10 цифр", 400);
     }
 
     const existing = getDb()
@@ -48,7 +50,7 @@ export async function POST(request: Request) {
         id,
         cleanSlug,
         name.trim(),
-        phone.trim(),
+        phoneNorm,
         specialty?.trim() || "",
         JSON.stringify(DEFAULT_SCHEDULE),
         token,

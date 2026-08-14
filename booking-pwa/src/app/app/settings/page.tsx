@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { apiFetch, getToken, logoutSession, compressImage } from "@/lib/client";
 import LocationPicker from "@/components/LocationPicker";
+import PhoneRuInput from "@/components/PhoneRuInput";
+import { isValidEmail, isValidPhone } from "@/lib/validate";
 // Messengers temporarily hidden in UI (code kept):
 // import MaxConnect from "@/components/MaxConnect";
 // import TelegramConnect from "@/components/TelegramConnect";
@@ -73,6 +75,16 @@ export default function SettingsPage() {
     setSaving(true);
     setSaved(false);
     setError("");
+    if (!isValidPhone(phone)) {
+      setError("Телефон: +7 и 10 цифр");
+      setSaving(false);
+      return;
+    }
+    if (notifyEmail.trim() && !isValidEmail(notifyEmail)) {
+      setError("Укажите корректный email");
+      setSaving(false);
+      return;
+    }
     try {
       const updated = await apiFetch("/api/masters/me", {
         method: "PATCH",
@@ -166,7 +178,7 @@ export default function SettingsPage() {
         </div>
         <div>
           <label className="text-xs text-[#78716c]">Телефон</label>
-          <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <PhoneRuInput value={phone} onChange={setPhone} />
         </div>
         <div>
           <label className="text-xs text-[#78716c]">Специализация</label>
@@ -303,6 +315,14 @@ export default function SettingsPage() {
       >
         {saving ? "Сохраняем..." : saved ? "✓ Сохранено" : "Сохранить"}
       </button>
+
+      <Link
+        href="/app/design"
+        className="btn-outline w-full text-center block"
+        data-testid="settings-design-link"
+      >
+        Дизайн страницы
+      </Link>
 
       <Link
         href="/app/billing"

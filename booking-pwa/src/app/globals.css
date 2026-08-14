@@ -12,6 +12,12 @@
   --danger: #dc2626;
   --ink: #1c1917;
   --nav-h: 4.25rem;
+  --mz-bg: #f4f0ea;
+  --mz-ink: #1c1917;
+  --mz-accent: #c4a574;
+  --mz-header: #1c1917;
+  --mz-card: #fffcf8;
+  --mz-font: var(--font-geist-sans), system-ui, sans-serif;
 }
 
 @theme inline {
@@ -88,4 +94,39 @@ body {
   bottom: 0;
   padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--background) 70%, transparent);
+}
+
+.page-theme {
+  background: var(--mz-bg);
+  color: var(--mz-ink);
+  font-family: var(--mz-font);
+}
+
+.page-theme .card {
+  background: var(--mz-card);
+  border-color: color-mix(in srgb, var(--mz-ink) 12%, var(--mz-bg));
+}
+
+.page-theme .btn-primary,
+.page-theme .slot-btn-active {
+  background: var(--mz-ink);
+  border-color: var(--mz-ink);
+  color: var(--mz-bg);
+}
+
+.page-theme .btn-outline,
+.page-theme .slot-btn,
+.page-theme .input {
+  border-color: color-mix(in srgb, var(--mz-ink) 14%, var(--mz-bg));
+  background: var(--mz-card);
+  color: var(--mz-ink);
+}
+
+.page-theme .mz-hero {
+  background: var(--mz-header);
+  color: var(--mz-card);
+}
+
+.mz-accent {
+  color: var(--mz-accent);
 }

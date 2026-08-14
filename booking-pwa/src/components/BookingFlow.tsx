@@ -7,6 +7,8 @@ import { ru } from "date-fns/locale";
 import type { PortfolioItem, Review, Service } from "@/lib/types";
 import MonthCalendar from "@/components/MonthCalendar";
 import ReviewsSection from "@/components/ReviewsSection";
+import PhoneRuInput from "@/components/PhoneRuInput";
+import { isValidPhone } from "@/lib/validate";
 
 const MasterMap = dynamic(() => import("@/components/MasterMap"), {
   ssr: false,
@@ -45,7 +47,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
   const [month, setMonth] = useState(() => new Date());
   const [slots, setSlots] = useState<string[]>([]);
   const [clientName, setClientName] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
+  const [clientPhone, setClientPhone] = useState("+7");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [manageUrl, setManageUrl] = useState("");
@@ -88,6 +90,11 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
   async function submitBooking() {
     if (!selectedService || !selectedDate || !selectedTime) return;
+
+    if (!isValidPhone(clientPhone)) {
+      setError("Телефон: +7 и 10 цифр");
+      return;
+    }
 
     setSubmitting(true);
     setError("");
@@ -141,23 +148,23 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
   return (
     <div>
-      <div className="bg-[#1c1917] text-white px-5 pt-8 pb-12 rounded-b-[1.75rem]">
+      <div className="mz-hero text-white px-5 pt-8 pb-12 rounded-b-[1.75rem]">
         <div className="flex items-center gap-4 mb-4">
           {master.avatar_url ? (
             <img
               src={master.avatar_url}
               alt={master.name}
-              className="w-[4.5rem] h-[4.5rem] rounded-full object-cover border-2 border-[#c4a574]"
+              className="w-[4.5rem] h-[4.5rem] rounded-full object-cover border-2 border-[var(--mz-accent)]"
             />
           ) : (
-            <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-[#c4a574] flex items-center justify-center text-3xl font-semibold">
+            <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-[var(--mz-accent)] flex items-center justify-center text-3xl font-semibold">
               {master.name.charAt(0)}
             </div>
           )}
           <div>
             <h1 className="text-2xl font-bold leading-tight">{master.name}</h1>
             {master.specialty && (
-              <p className="text-[#c4a574] text-sm mt-0.5">{master.specialty}</p>
+              <p className="mz-accent text-sm mt-0.5">{master.specialty}</p>
             )}
           </div>
         </div>
@@ -182,7 +189,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
             />
             {master.address && (
               <a
-                className="text-sm text-[#c4a574]"
+                className="text-sm mz-accent"
                 href={`https://www.openstreetmap.org/?mlat=${master.lat}&mlon=${master.lng}#map=16/${master.lat}/${master.lng}`}
                 target="_blank"
                 rel="noreferrer"
@@ -230,7 +237,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
               {master.phone ? (
                 <>
                   :{" "}
-                  <a className="text-[#c4a574]" href={`tel:${master.phone}`}>
+                  <a className="mz-accent" href={`tel:${master.phone}`}>
                     {master.phone}
                   </a>
                 </>
@@ -261,7 +268,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                 </p>
                 <a
                   href={manageUrl}
-                  className="block text-sm text-[#c4a574] break-all underline"
+                  className="block text-sm mz-accent break-all underline"
                   data-testid="manage-booking-link"
                 >
                   {manageUrl}
@@ -302,7 +309,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                         <p className="text-sm text-[#78716c]">{s.duration} мин</p>
                       </div>
                       {s.price > 0 && (
-                        <span className="font-semibold text-[#c4a574]">
+                        <span className="font-semibold mz-accent">
                           {s.price} ₽
                         </span>
                       )}
@@ -321,7 +328,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                     setSelectedDate("");
                     setSelectedTime("");
                   }}
-                  className="text-sm text-[#c4a574] mb-3"
+                  className="text-sm mz-accent mb-3"
                 >
                   ← {selectedService.name}
                 </button>
@@ -371,7 +378,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
               <div>
                 <button
                   onClick={() => setStep("datetime")}
-                  className="text-sm text-[#c4a574] mb-3"
+                  className="text-sm mz-accent mb-3"
                 >
                   ← {selectedDate} в {selectedTime}
                 </button>
@@ -389,18 +396,16 @@ export default function BookingFlow({ slug }: { slug: string }) {
                   </div>
                   <div>
                     <label className="text-sm text-[#78716c] mb-1 block">Телефон</label>
-                    <input
-                      className="input"
-                      type="tel"
+                    <PhoneRuInput
                       data-testid="booking-client-phone"
                       value={clientPhone}
-                      onChange={(e) => setClientPhone(e.target.value)}
-                      placeholder="+7 (999) 123-45-67"
+                      onChange={setClientPhone}
+                      required
                     />
                   </div>
                   <button
                     onClick={submitBooking}
-                    disabled={submitting || !clientName || !clientPhone}
+                    disabled={submitting || !clientName || !isValidPhone(clientPhone)}
                     className="btn-primary w-full mt-2"
                     data-testid="booking-submit"
                   >

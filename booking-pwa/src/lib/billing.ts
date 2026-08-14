@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { getDb } from "@/lib/db";
 import { extendMasterSubscription, type PlanId } from "@/lib/subscription";
 
-export type BillingPlanId = "basic" | "pro";
+export type BillingPlanId = "lite" | "basic" | "pro";
 
 export type BillingPlan = {
   id: BillingPlanId;
@@ -34,8 +34,12 @@ function periodDays(): number {
 
 function priceRub(plan: BillingPlanId): number {
   const key =
-    plan === "pro" ? "BILLING_PRO_PRICE_RUB" : "BILLING_BASIC_PRICE_RUB";
-  const fallback = plan === "pro" ? 590 : 290;
+    plan === "pro"
+      ? "BILLING_PRO_PRICE_RUB"
+      : plan === "lite"
+        ? "BILLING_LITE_PRICE_RUB"
+        : "BILLING_BASIC_PRICE_RUB";
+  const fallback = plan === "pro" ? 590 : plan === "lite" ? 149 : 290;
   const n = Number(process.env[key] || fallback);
   if (!Number.isFinite(n) || n < 1) return fallback;
   return Math.floor(n);
@@ -98,24 +102,31 @@ export function listBillingPlans(): BillingPlan[] {
   const days = periodDays();
   return [
     {
+      id: "lite",
+      label: "Старт",
+      price_rub: priceRub("lite"),
+      days,
+      hint: "Ссылка и запись. Для 1–2 заказов в день",
+    },
+    {
       id: "basic",
-      label: "Базовый",
+      label: "Мастер",
       price_rub: priceRub("basic"),
       days,
-      hint: "Онлайн-запись и уведомления на email",
+      hint: "Напоминания, отзывы и карта",
     },
     {
       id: "pro",
-      label: "Pro",
+      label: "Витрина",
       price_rub: priceRub("pro"),
       days,
-      hint: "Всё из Базового + приоритет поддержки",
+      hint: "Свой дизайн страницы: цвета, шрифт, шапка",
     },
   ];
 }
 
 export function getBillingPlan(plan: string): BillingPlan | null {
-  if (plan !== "basic" && plan !== "pro") return null;
+  if (plan !== "basic" && plan !== "pro" && plan !== "lite") return null;
   return listBillingPlans().find((p) => p.id === plan) || null;
 }
 
@@ -210,7 +221,13 @@ export function applySuccessfulPayment(
     )
     .run(paid_at, externalId || "", externalId || "", paymentId);
 
-  const plan = (payment.plan === "pro" ? "pro" : "basic") as PlanId;
+  const plan = (
+    payment.plan === "pro"
+      ? "pro"
+      : payment.plan === "lite"
+        ? "lite"
+        : "basic"
+  ) as PlanId;
   const info = extendMasterSubscription(payment.master_id, payment.days, {
     plan,
   });

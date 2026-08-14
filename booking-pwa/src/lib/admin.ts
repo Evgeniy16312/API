@@ -1,8 +1,6 @@
 import { getDb, withTransaction } from "@/lib/db";
-import {
-  isNotifyChannel,
-  type NotifyChannel,
-} from "@/lib/notify-channel";
+import { isNotifyChannel, type NotifyChannel } from "@/lib/notify-channel";
+import { isValidEmail } from "@/lib/validate";
 import type { Master } from "@/lib/types";
 import { rowToMaster } from "@/lib/auth";
 import { extendMasterSubscription } from "@/lib/subscription";
@@ -106,7 +104,7 @@ export type AdminMasterPatch = {
   extend_days?: number;
 };
 
-const PLANS = new Set(["trial", "basic", "pro"]);
+const PLANS = new Set(["trial", "lite", "basic", "pro"]);
 const STATUSES = new Set(["trial", "active", "past_due", "blocked"]);
 
 export function patchMasterAsAdmin(
@@ -141,7 +139,7 @@ export function patchMasterAsAdmin(
     const email = String(patch.notify_email || "")
       .trim()
       .toLowerCase();
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (email && !isValidEmail(email)) {
       return { ok: false, error: "Некорректный email", status: 400 };
     }
     fields.push("notify_email = ?");

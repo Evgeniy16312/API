@@ -17,7 +17,9 @@ test.describe("UI · регистрация мастера", () => {
     await page.getByTestId("register-slug").fill(master.slug);
 
     await expect(page.getByTestId("register-name")).toHaveValue(master.name);
-    await expect(page.getByTestId("register-phone")).toHaveValue(master.phone);
+    await expect(page.getByTestId("register-phone")).toHaveValue(
+      master.phone.replace(/\D/g, "").slice(-10)
+    );
     await expect(page.getByTestId("register-slug")).toHaveValue(master.slug);
 
     const [response] = await Promise.all([

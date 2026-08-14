@@ -1,5 +1,6 @@
 import { getDb } from "./db";
 import { parseSchedule } from "./db";
+import { parseStoredPageTheme } from "./page-theme";
 import { readSessionToken } from "./session";
 import type { Master } from "./types";
 
@@ -54,7 +55,10 @@ export function rowToMaster(row: Record<string, unknown>): Master {
         : "email",
     notify_email: (row.notify_email as string) || "",
     plan:
-      row.plan === "basic" || row.plan === "pro" || row.plan === "trial"
+      row.plan === "basic" ||
+      row.plan === "pro" ||
+      row.plan === "trial" ||
+      row.plan === "lite"
         ? row.plan
         : "trial",
     subscription_status:
@@ -69,6 +73,7 @@ export function rowToMaster(row: Record<string, unknown>): Master {
     work_schedule: parseSchedule(row.work_schedule as string),
     slot_duration: (row.slot_duration as number) || 60,
     created_at: row.created_at as string,
+    page_theme: parseStoredPageTheme(row.page_theme),
   };
 }
 

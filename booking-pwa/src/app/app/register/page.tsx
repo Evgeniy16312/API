@@ -4,11 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/client";
+import PhoneRuInput from "@/components/PhoneRuInput";
+import { isValidPhone } from "@/lib/validate";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState("+7");
   const [slug, setSlug] = useState("");
   const [specialty, setSpecialty] = useState("");
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,12 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (!isValidPhone(phone)) {
+      setError("Телефон: +7 и 10 цифр");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch("/api/masters/register", {
@@ -103,14 +111,11 @@ export default function RegisterPage() {
           <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-phone">
             Телефон
           </label>
-          <input
+          <PhoneRuInput
             id="register-phone"
             data-testid="register-phone"
-            className="input"
-            type="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+7 (999) 123-45-67"
+            onChange={setPhone}
             required
           />
         </div>

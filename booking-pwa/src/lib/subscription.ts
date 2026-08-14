@@ -4,7 +4,7 @@ import { getDb } from "@/lib/db";
 export const TRIAL_DAYS = 14;
 
 export type SubscriptionStatus = "trial" | "active" | "past_due" | "blocked";
-export type PlanId = "trial" | "basic" | "pro";
+export type PlanId = "trial" | "lite" | "basic" | "pro";
 
 export type SubscriptionInfo = {
   plan: PlanId;
@@ -18,7 +18,14 @@ export type SubscriptionInfo = {
 };
 
 function asPlan(value: unknown): PlanId {
-  if (value === "basic" || value === "pro" || value === "trial") return value;
+  if (
+    value === "basic" ||
+    value === "pro" ||
+    value === "trial" ||
+    value === "lite"
+  ) {
+    return value;
+  }
   return "trial";
 }
 
@@ -125,6 +132,24 @@ export function syncMasterSubscription(masterId: string): SubscriptionInfo | nul
   };
 }
 
+/** Свой дизайн публичной страницы — только активный Pro. */
+export function canCustomizePageTheme(
+  info: SubscriptionInfo | null | undefined
+): boolean {
+  return Boolean(info && info.plan === "pro" && info.booking_allowed);
+}
+
+/** Напоминания 24ч/2ч — не на тарифе Старт. Trial как Мастер. */
+export function planHasReminders(plan: PlanId | undefined): boolean {
+  return plan === "trial" || plan === "basic" || plan === "pro";
+}
+
+export function portfolioLimitForPlan(plan: PlanId | undefined): number {
+  if (plan === "pro") return 100;
+  if (plan === "basic" || plan === "trial") return 20;
+  return 5;
+}
+
 export function isMasterBookingAllowed(masterId: string): boolean {
   const info = syncMasterSubscription(masterId);
   return info?.booking_allowed ?? false;
@@ -166,7 +191,9 @@ export function extendMasterSubscription(
   const until = new Date(base.getTime() + days * 86400_000);
 
   const nextPlan: PlanId =
-    options?.plan === "basic" || options?.plan === "pro"
+    options?.plan === "basic" ||
+    options?.plan === "pro" ||
+    options?.plan === "lite"
       ? options.plan
       : existing.plan === "trial"
         ? "basic"

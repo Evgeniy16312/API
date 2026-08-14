@@ -100,6 +100,7 @@ function initSchema(database: DatabaseSync) {
       blocked INTEGER NOT NULL DEFAULT 0,
       work_schedule TEXT NOT NULL,
       slot_duration INTEGER DEFAULT 60,
+      page_theme TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL
     );
 
@@ -256,6 +257,11 @@ function ensureMigrations(database: DatabaseSync) {
   if (!masterCols.has("blocked")) {
     database.exec(
       "ALTER TABLE masters ADD COLUMN blocked INTEGER NOT NULL DEFAULT 0"
+    );
+  }
+  if (!masterCols.has("page_theme")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN page_theme TEXT NOT NULL DEFAULT ''"
     );
   }
 

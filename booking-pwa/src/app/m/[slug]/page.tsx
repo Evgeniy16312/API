@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { getMasterBySlug } from "@/lib/auth";
 import BookingFlow from "@/components/BookingFlow";
+import {
+  pageThemeCssVars,
+  pageThemeFontHref,
+} from "@/lib/page-theme";
+import { resolvePublicPageTheme } from "@/lib/page-theme-resolve";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -30,9 +35,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MasterPage({ params }: Props) {
   const { slug } = await params;
+  const master = getMasterBySlug(slug);
+  const { theme } = resolvePublicPageTheme(master);
+  const fontHref = pageThemeFontHref(theme.font);
 
   return (
-    <div className="min-h-screen bg-[#f4f0ea] max-w-lg mx-auto">
+    <div
+      className="page-theme min-h-screen max-w-lg mx-auto"
+      style={pageThemeCssVars(theme)}
+      data-testid="public-page"
+    >
+      {fontHref ? (
+        // eslint-disable-next-line @next/next/no-page-custom-font
+        <link rel="stylesheet" href={fontHref} />
+      ) : null}
       <BookingFlow slug={slug} />
     </div>
   );

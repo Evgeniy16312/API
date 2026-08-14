@@ -2,8 +2,13 @@ import { rowToMaster } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { jsonError, jsonOk, requireMaster } from "@/lib/http";
 import { isNotifyChannel } from "@/lib/notify-channel";
+import { sanitizePageTheme } from "@/lib/page-theme";
 import { isValidSlug } from "@/lib/slots";
-import { syncMasterSubscription } from "@/lib/subscription";
+import { isValidEmail, normalizeRuPhone } from "@/lib/validate";
+import {
+  canCustomizePageTheme,
+  syncMasterSubscription,
+} from "@/lib/subscription";
 
 export async function GET(request: Request) {
   const master = requireMaster(request);
@@ -20,6 +25,7 @@ export async function GET(request: Request) {
     trial_ends_at: sub?.trial_ends_at,
     booking_allowed: sub?.booking_allowed,
     subscription_banner: sub?.banner ?? null,
+    theme_customizable: canCustomizePageTheme(sub),
   });
 }
 
@@ -51,6 +57,19 @@ export async function PATCH(request: Request) {
       "slot_duration",
       "slug",
     ] as const;
+
+    if (body.page_theme !== undefined) {
+      const sub = syncMasterSubscription(master.id);
+      if (!canCustomizePageTheme(sub)) {
+        return jsonError("Свой дизайн доступен на тарифе Витрина", 403);
+      }
+      const parsed = sanitizePageTheme(body.page_theme);
+      if (!parsed.ok) {
+        return jsonError(parsed.error, 400);
+      }
+      fields.push("page_theme = ?");
+      values.push(JSON.stringify(parsed.theme));
+    }
 
     for (const key of allowed) {
       if (body[key] !== undefined) {
@@ -84,11 +103,17 @@ export async function PATCH(request: Request) {
             return jsonError("Неизвестный канал уведомлений", 400);
           }
           value = body.notify_channel;
+        } else if (key === "phone") {
+          const n = normalizeRuPhone(String(body.phone || ""));
+          if (!n) {
+            return jsonError("Телефон: +7 и 10 цифр", 400);
+          }
+          value = n;
         } else if (key === "notify_email") {
           value = String(body.notify_email || "")
             .trim()
             .toLowerCase();
-          if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          if (value && !isValidEmail(value)) {
             return jsonError("Некорректный email", 400);
           }
         }

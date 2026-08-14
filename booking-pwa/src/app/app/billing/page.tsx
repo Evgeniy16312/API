@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/client";
 
 type Plan = {
-  id: "basic" | "pro";
+  id: "lite" | "basic" | "pro";
   label: string;
   price_rub: number;
   days: number;
@@ -18,7 +18,7 @@ type TransferInfo = {
   recipient: string;
   support: string;
   note: string;
-  comments: { basic: string; pro: string };
+  comments: { lite: string; basic: string; pro: string };
 };
 
 function BillingInner() {
@@ -28,7 +28,7 @@ function BillingInner() {
     "transfer"
   );
   const [transfer, setTransfer] = useState<TransferInfo | null>(null);
-  const [selected, setSelected] = useState<"basic" | "pro">("basic");
+  const [selected, setSelected] = useState<"lite" | "basic" | "pro">("lite");
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -115,7 +115,7 @@ function BillingInner() {
   const plan = plans.find((p) => p.id === selected) || plans[0];
   const comment =
     transfer && plan
-      ? transfer.comments[plan.id as "basic" | "pro"]
+      ? transfer.comments[plan.id]
       : "";
 
   return (

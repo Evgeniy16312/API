@@ -48,7 +48,7 @@ export default function HomePage() {
         </ol>
 
         <p className="text-center text-sm text-[#78716c]">
-          14 дней бесплатно · дальше от 290 ₽ / мес
+          14 дней бесплатно · дальше от 149 ₽ / мес
         </p>
       </main>
 

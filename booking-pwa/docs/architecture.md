@@ -54,7 +54,9 @@ docs/features/      → карточки фич
 |--------|----------|-----------|------------|
 | **S0 MVP** | 1–20 мастеров, 1 процесс | SQLite WAL, один `next start` | Несколько реплик приложения |
 | **S1 Pilot** | десятки мастеров | + backup cron БД, queue/outbox для notify, картинки на диск/S3 | Несколько Node-воркеров на одну БД |
-| **S2 Growth** | сотни+ | Postgres (или managed SQLite primary), cookie auth, rate limit, object storage | Хранить base64 в SQLite |
+| **S2 Growth** | сотни–~1.5 тыс. частных | Postgres при росте файла БД / втором инстансе; фото вне SQLite | Несколько Node на один `booking.db` |
+
+Смета ₽ на 50 / 1000 / 5000 мастеров: [business/infra.md](./business/infra.md).
 
 Переход S0→S1 **не ломает** слои выше: меняются только `db` adapter и storage для media.
 

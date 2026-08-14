@@ -6,7 +6,7 @@ import { ru } from "date-fns/locale";
 import { apiFetch } from "@/lib/client";
 import { DAY_KEYS, DAY_LABELS, DEFAULT_SCHEDULE } from "@/lib/types";
 import type { WorkSchedule, WorkDay, Service } from "@/lib/types";
-import { getAvailableDates, getAvailableSlots } from "@/lib/slots";
+import { getAvailableDates, getAvailableSlots, isValidTime } from "@/lib/slots";
 import MonthCalendar from "@/components/MonthCalendar";
 
 export default function SchedulePage() {
@@ -63,6 +63,14 @@ export default function SchedulePage() {
   }
 
   async function save() {
+    for (const day of DAY_KEYS) {
+      const d = schedule[day];
+      if (!d?.enabled) continue;
+      if (!isValidTime(d.start) || !isValidTime(d.end)) {
+        alert("Время в формате ЧЧ:ММ, например 10:00");
+        return;
+      }
+    }
     setSaving(true);
     try {
       await apiFetch("/api/masters/me", {
@@ -173,17 +181,27 @@ export default function SchedulePage() {
               {d.enabled && (
                 <div className="flex gap-2 items-center">
                   <input
-                    type="time"
+                    type="text"
+                    placeholder="10:00"
                     value={d.start}
-                    onChange={(e) => updateDay(day, "start", e.target.value)}
-                    className="input text-sm py-2"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/[^\d:]/g, "").slice(0, 5);
+                      updateDay(day, "start", v);
+                    }}
+                    className="input text-sm"
+                    data-testid={`schedule-start-${day}`}
                   />
                   <span className="text-[#78716c]">—</span>
                   <input
-                    type="time"
+                    type="text"
+                    placeholder="19:00"
                     value={d.end}
-                    onChange={(e) => updateDay(day, "end", e.target.value)}
-                    className="input text-sm py-2"
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/[^\d:]/g, "").slice(0, 5);
+                      updateDay(day, "end", v);
+                    }}
+                    className="input text-sm"
+                    data-testid={`schedule-end-${day}`}
                   />
                 </div>
               )}

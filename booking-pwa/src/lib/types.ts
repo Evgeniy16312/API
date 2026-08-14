@@ -8,6 +8,17 @@ export type WorkSchedule = Record<string, WorkDay>;
 
 export type NotifyChannel = "max" | "vk" | "telegram" | "email";
 
+export type PageFontId = "inter" | "cormorant" | "nunito" | "manrope";
+
+export type PageTheme = {
+  accent: string;
+  background: string;
+  ink: string;
+  header: string;
+  card: string;
+  font: PageFontId;
+};
+
 export interface Master {
   id: string;
   slug: string;
@@ -25,7 +36,7 @@ export interface Master {
   /** Preferred delivery channel — only one is used. */
   notify_channel: NotifyChannel;
   notify_email: string;
-  plan: "trial" | "basic" | "pro";
+  plan: "trial" | "lite" | "basic" | "pro";
   subscription_status: "trial" | "active" | "past_due" | "blocked";
   paid_until: string;
   blocked: boolean;
@@ -36,6 +47,9 @@ export interface Master {
   work_schedule: WorkSchedule;
   slot_duration: number;
   created_at: string;
+  /** Saved theme; applied on the public page only for active Pro. */
+  page_theme: PageTheme;
+  theme_customizable?: boolean;
 }
 
 export interface Service {

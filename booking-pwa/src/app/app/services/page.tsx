@@ -7,8 +7,8 @@ import type { Service } from "@/lib/types";
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState(60);
-  const [price, setPrice] = useState(0);
+  const [duration, setDuration] = useState("60");
+  const [price, setPrice] = useState("");
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
@@ -31,11 +31,15 @@ export default function ServicesPage() {
     try {
       await apiFetch("/api/services", {
         method: "POST",
-        body: JSON.stringify({ name, duration, price }),
+        body: JSON.stringify({
+          name,
+          duration: Math.max(15, parseInt(duration, 10) || 60),
+          price: parseInt(price, 10) || 0,
+        }),
       });
       setName("");
-      setDuration(60);
-      setPrice(0);
+      setDuration("60");
+      setPrice("");
       await loadServices();
     } catch {
       // handled by apiFetch
@@ -100,21 +104,28 @@ export default function ServicesPage() {
             <label className="text-xs text-[#78716c]">Длительность (мин)</label>
             <input
               className="input"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              data-testid="service-duration"
               value={duration}
-              onChange={(e) => setDuration(Number(e.target.value))}
-              min={15}
-              step={15}
+              onChange={(e) =>
+                setDuration(e.target.value.replace(/\D/g, "").slice(0, 4))
+              }
+              placeholder="60"
             />
           </div>
           <div className="flex-1">
             <label className="text-xs text-[#78716c]">Цена (₽)</label>
             <input
               className="input"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              data-testid="service-price"
               value={price}
-              onChange={(e) => setPrice(Number(e.target.value))}
-              min={0}
+              onChange={(e) =>
+                setPrice(e.target.value.replace(/\D/g, "").slice(0, 7))
+              }
+              placeholder="0"
             />
           </div>
         </div>

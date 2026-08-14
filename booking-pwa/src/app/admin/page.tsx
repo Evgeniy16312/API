@@ -22,7 +22,7 @@ type AdminMaster = {
 };
 
 const CHANNELS: NotifyChannel[] = ["max", "vk", "telegram", "email"];
-const PLANS = ["trial", "basic", "pro"];
+const PLANS = ["trial", "lite", "basic", "pro"];
 const STATUSES = ["trial", "active", "past_due", "blocked"];
 const KEY_STORAGE = "moyazapis_admin_key";
 

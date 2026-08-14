@@ -39,7 +39,10 @@
 | F35 | Автобэкап SQLite | done | [features/sqlite-backup.md](./features/sqlite-backup.md) |
 | F36 | Напоминания мастеру об истечении подписки | done | [features/master-expiry-reminders.md](./features/master-expiry-reminders.md) |
 | F37 | Mobile-first UI | done | [features/mobile-first-ui.md](./features/mobile-first-ui.md) |
+| F38 | Дизайн страницы (Pro) | done | [features/page-theme.md](./features/page-theme.md) |
+| F39 | Продающий сайт | planned | [features/marketing-site.md](./features/marketing-site.md) |
+| F40 | Три тарифа (Старт 149) | done | [features/three-tier-billing.md](./features/three-tier-billing.md) |
 
 ## Следующий свободный ID
 
-`F38`
+`F41`

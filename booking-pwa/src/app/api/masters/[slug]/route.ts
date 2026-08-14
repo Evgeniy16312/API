@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getMasterBySlug } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { listPublishedReviews } from "@/lib/reviews";
+import { resolvePublicPageTheme } from "@/lib/page-theme-resolve";
 import { syncMasterSubscription } from "@/lib/subscription";
 
 export async function GET(
@@ -16,6 +17,7 @@ export async function GET(
   }
 
   const sub = syncMasterSubscription(master.id);
+  const { theme, custom } = resolvePublicPageTheme(master, sub);
 
   const services = getDb()
     .prepare(
@@ -46,6 +48,8 @@ export async function GET(
     work_schedule: master.work_schedule,
     slot_duration: master.slot_duration,
     booking_enabled: sub?.booking_allowed ?? true,
+    page_theme: theme,
+    theme_custom: custom,
     services,
     portfolio,
     reviews,

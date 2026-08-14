@@ -3,6 +3,7 @@ import { requireAuth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
 import { jsonError, jsonOk, requireMaster } from "@/lib/http";
 import { persistImageDataUrl } from "@/lib/uploads";
+import { portfolioLimitForPlan, syncMasterSubscription } from "@/lib/subscription";
 
 export async function GET(request: Request) {
   const master = requireMaster(request);
@@ -31,6 +32,14 @@ export async function POST(request: Request) {
     const count = getDb()
       .prepare("SELECT COUNT(*) as c FROM portfolio WHERE master_id = ?")
       .get(master.id) as { c: number };
+    const sub = syncMasterSubscription(master.id);
+    const limit = portfolioLimitForPlan(sub?.plan);
+    if (count.c >= limit) {
+      return jsonError(
+        `На вашем тарифе можно загрузить до ${limit} фото. Перейдите на Мастер или Витрину.`,
+        403
+      );
+    }
 
     getDb()
       .prepare(

@@ -3,12 +3,12 @@ import { getMasterById, getMasterBySlug } from "@/lib/auth";
 import { getDb, withTransaction } from "@/lib/db";
 import { resolveNotifyTarget } from "@/lib/notify-channel";
 import { enqueueNotification, flushOutbox } from "@/lib/outbox";
-import { isMasterBookingAllowed } from "@/lib/subscription";
+import { isMasterBookingAllowed, planHasReminders, syncMasterSubscription } from "@/lib/subscription";
+import { normalizeRuPhone } from "@/lib/validate";
 import {
   formatBookingDate,
   hasBookingConflict,
   isValidDate,
-  isValidPhone,
   isValidTime,
 } from "@/lib/slots";
 import type { Booking, Master, Service } from "@/lib/types";
@@ -32,8 +32,9 @@ export function createBooking(input: CreateBookingInput): CreateBookingResult {
   if (!slug || !service_id || !client_name || !client_phone || !date || !time) {
     return { ok: false, error: "Заполните все поля", status: 400 };
   }
-  if (!isValidPhone(client_phone)) {
-    return { ok: false, error: "Укажите корректный телефон", status: 400 };
+  const phoneNorm = normalizeRuPhone(client_phone);
+  if (!phoneNorm) {
+    return { ok: false, error: "Телефон: +7 и 10 цифр", status: 400 };
   }
   if (!isValidDate(date) || !isValidTime(time)) {
     return { ok: false, error: "Некорректная дата или время", status: 400 };
@@ -93,7 +94,7 @@ export function createBooking(input: CreateBookingInput): CreateBookingResult {
           service.name,
           duration,
           client_name.trim(),
-          client_phone.trim(),
+          phoneNorm,
           date,
           time,
           manageToken,
@@ -117,7 +118,7 @@ export function createBooking(input: CreateBookingInput): CreateBookingResult {
 
   queueBookingNotifications(master, id, {
     clientName: client_name.trim(),
-    clientPhone: client_phone.trim(),
+    clientPhone: phoneNorm,
     serviceName: service.name,
     date,
     time,
@@ -166,7 +167,12 @@ function queueBookingNotifications(
   }
 
   const visitAt = new Date(`${data.date}T${data.time}:00`);
-  if (target && !Number.isNaN(visitAt.getTime())) {
+  const sub = syncMasterSubscription(master.id);
+  if (
+    target &&
+    !Number.isNaN(visitAt.getTime()) &&
+    planHasReminders(sub?.plan)
+  ) {
     const at24 = new Date(visitAt.getTime() - 24 * 60 * 60_000);
     const at2 = new Date(visitAt.getTime() - 2 * 60 * 60_000);
     const recipient = `${target.channel}:${target.recipient}`;

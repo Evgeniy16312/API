@@ -21,6 +21,7 @@ export async function GET(request: Request) {
         ? {
             ...transfer,
             comments: {
+              lite: paymentCommentForMaster(master.slug, "lite"),
               basic: paymentCommentForMaster(master.slug, "basic"),
               pro: paymentCommentForMaster(master.slug, "pro"),
             },

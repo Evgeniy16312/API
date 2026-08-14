@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     return jsonError("Некорректный JSON", 400);
   }
 
-  const planId = (body.plan || "basic") as BillingPlanId;
+  const planId = (body.plan || "lite") as BillingPlanId;
   const plan = getBillingPlan(planId);
   if (!plan) return jsonError("Неизвестный тариф", 400);
 
