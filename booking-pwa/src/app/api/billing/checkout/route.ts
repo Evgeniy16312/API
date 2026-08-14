@@ -48,7 +48,7 @@ export async function POST(request: Request) {
 
   if (!isYookassaConfigured()) {
     return jsonError(
-      "Онлайн-оплата пока не настроена. Напишите в поддержку МояЗапись.",
+      "Картой пока нельзя — оплатите переводом на странице «Подписка» и напишите в поддержку.",
       503
     );
   }

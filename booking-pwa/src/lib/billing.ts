@@ -55,6 +55,45 @@ export function isYookassaConfigured(): boolean {
   );
 }
 
+export type BillingMode = "mock" | "yookassa" | "transfer";
+
+/** Pilot: transfer by default until ЮKassa keys are set. */
+export function getBillingMode(): BillingMode {
+  if (isBillingMock()) return "mock";
+  const forced = (process.env.BILLING_MODE || "").trim().toLowerCase();
+  if (forced === "transfer" || forced === "manual") return "transfer";
+  if (forced === "yookassa") return "yookassa";
+  if (isYookassaConfigured()) return "yookassa";
+  return "transfer";
+}
+
+export type ManualTransferInfo = {
+  phone: string;
+  bank: string;
+  recipient: string;
+  support: string;
+  note: string;
+};
+
+export function getManualTransferInfo(): ManualTransferInfo {
+  return {
+    phone: process.env.BILLING_TRANSFER_PHONE?.trim() || "",
+    bank: process.env.BILLING_TRANSFER_BANK?.trim() || "СБП / любой банк",
+    recipient: process.env.BILLING_TRANSFER_NAME?.trim() || "МояЗапись",
+    support:
+      process.env.BILLING_SUPPORT_CONTACT?.trim() ||
+      process.env.ADMIN_NOTIFY_EMAIL?.trim() ||
+      "moyazapis@mail.ru",
+    note:
+      process.env.BILLING_TRANSFER_NOTE?.trim() ||
+      "После перевода напишите в поддержку — продлим доступ вручную.",
+  };
+}
+
+export function paymentCommentForMaster(slug: string, planId: string): string {
+  return `MZ ${slug} ${planId}`.slice(0, 40);
+}
+
 export function listBillingPlans(): BillingPlan[] {
   const days = periodDays();
   return [

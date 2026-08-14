@@ -12,14 +12,29 @@ type Plan = {
   hint: string;
 };
 
+type TransferInfo = {
+  phone: string;
+  bank: string;
+  recipient: string;
+  support: string;
+  note: string;
+  comments: { basic: string; pro: string };
+};
+
 function BillingInner() {
   const search = useSearchParams();
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [mode, setMode] = useState<"mock" | "yookassa" | "transfer">(
+    "transfer"
+  );
+  const [transfer, setTransfer] = useState<TransferInfo | null>(null);
+  const [selected, setSelected] = useState<"basic" | "pro">("basic");
   const [loading, setLoading] = useState(true);
   const [paying, setPaying] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [banner, setBanner] = useState<string | null>(null);
+  const [copied, setCopied] = useState("");
 
   useEffect(() => {
     if (search.get("paid") === "1") setSuccess(true);
@@ -41,13 +56,19 @@ function BillingInner() {
     }
 
     Promise.all([
-      apiFetch("/api/billing/plans") as Promise<{ plans: Plan[] }>,
+      apiFetch("/api/billing/plans") as Promise<{
+        mode: "mock" | "yookassa" | "transfer";
+        plans: Plan[];
+        transfer: TransferInfo | null;
+      }>,
       apiFetch("/api/masters/me") as Promise<{
         subscription_banner?: string | null;
       }>,
     ])
       .then(([p, me]) => {
         setPlans(p.plans || []);
+        setMode(p.mode || "transfer");
+        setTransfer(p.transfer);
         setBanner(me.subscription_banner || null);
       })
       .catch((e: unknown) => {
@@ -72,6 +93,17 @@ function BillingInner() {
     }
   }
 
+  async function copyText(label: string, value: string) {
+    if (!value) return;
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopied(label);
+      setTimeout(() => setCopied(""), 2000);
+    } catch {
+      setError("Не удалось скопировать");
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex justify-center py-20">
@@ -79,6 +111,12 @@ function BillingInner() {
       </div>
     );
   }
+
+  const plan = plans.find((p) => p.id === selected) || plans[0];
+  const comment =
+    transfer && plan
+      ? transfer.comments[plan.id as "basic" | "pro"]
+      : "";
 
   return (
     <div className="px-4 py-6 space-y-4" data-testid="billing-page">
@@ -101,39 +139,138 @@ function BillingInner() {
           {error}
         </div>
       )}
+
       <div className="space-y-3">
-        {plans.map((plan) => (
-          <div
-            key={plan.id}
-            className="card space-y-2"
-            data-testid={`billing-plan-${plan.id}`}
+        {plans.map((p) => (
+          <button
+            key={p.id}
+            type="button"
+            data-testid={`billing-plan-${p.id}`}
+            onClick={() => setSelected(p.id)}
+            className={`card w-full text-left space-y-1 border transition ${
+              selected === p.id
+                ? "border-[#c9a96e] bg-[#c9a96e]/10"
+                : "border-transparent"
+            }`}
           >
             <div className="flex items-baseline justify-between gap-2">
-              <h2 className="font-semibold">{plan.label}</h2>
+              <h2 className="font-semibold">{p.label}</h2>
               <div className="text-lg font-bold text-[#1a1a2e]">
-                {plan.price_rub} ₽
+                {p.price_rub} ₽
                 <span className="text-xs font-normal text-[#6b7280]">
                   {" "}
-                  / {plan.days} дн.
+                  / {p.days} дн.
                 </span>
               </div>
             </div>
-            <p className="text-sm text-[#6b7280]">{plan.hint}</p>
-            <button
-              type="button"
-              className="btn-primary w-full"
-              data-testid={`billing-pay-${plan.id}`}
-              disabled={paying !== null}
-              onClick={() => checkout(plan.id)}
-            >
-              {paying === plan.id ? "Переходим…" : "Оплатить"}
-            </button>
-          </div>
+            <p className="text-sm text-[#6b7280]">{p.hint}</p>
+          </button>
         ))}
       </div>
-      <p className="text-xs text-[#6b7280]">
-        Оплата через ЮKassa. После оплаты доступ продлевается автоматически.
-      </p>
+
+      {mode === "transfer" && transfer && plan && (
+        <div
+          className="card space-y-3"
+          data-testid="billing-transfer-block"
+        >
+          <h3 className="font-semibold">Оплата переводом (пилот)</h3>
+          <p className="text-sm text-[#6b7280]">
+            Пока подключаем онлайн-кассу, оплата — по СБП. После перевода
+            напишите нам — продлим доступ в течение дня.
+          </p>
+
+          <div className="space-y-2 text-sm">
+            <Row
+              label="Сумма"
+              value={`${plan.price_rub} ₽`}
+              testId="billing-transfer-amount"
+              onCopy={() => copyText("amount", String(plan.price_rub))}
+              copied={copied === "amount"}
+            />
+            <Row
+              label="Телефон (СБП)"
+              value={transfer.phone || "уточните у поддержки"}
+              testId="billing-transfer-phone"
+              onCopy={
+                transfer.phone
+                  ? () => copyText("phone", transfer.phone)
+                  : undefined
+              }
+              copied={copied === "phone"}
+            />
+            <Row label="Банк" value={transfer.bank} />
+            <Row label="Получатель" value={transfer.recipient} />
+            <Row
+              label="Комментарий к переводу"
+              value={comment}
+              testId="billing-transfer-comment"
+              onCopy={() => copyText("comment", comment)}
+              copied={copied === "comment"}
+            />
+          </div>
+
+          <p className="text-xs text-[#6b7280]">{transfer.note}</p>
+          <p className="text-sm">
+            Поддержка:{" "}
+            <span className="font-medium" data-testid="billing-support">
+              {transfer.support}
+            </span>
+          </p>
+        </div>
+      )}
+
+      {(mode === "yookassa" || mode === "mock") && plan && (
+        <>
+          <button
+            type="button"
+            className="btn-primary w-full"
+            data-testid={`billing-pay-${plan.id}`}
+            disabled={paying !== null}
+            onClick={() => checkout(plan.id)}
+          >
+            {paying === plan.id ? "Переходим…" : `Оплатить ${plan.price_rub} ₽`}
+          </button>
+          <p className="text-xs text-[#6b7280]">
+            Оплата через ЮKassa. После оплаты доступ продлевается автоматически.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
+
+function Row({
+  label,
+  value,
+  testId,
+  onCopy,
+  copied,
+}: {
+  label: string;
+  value: string;
+  testId?: string;
+  onCopy?: () => void;
+  copied?: boolean;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-2 rounded-lg bg-[#faf9f7] px-3 py-2">
+      <div>
+        <div className="text-[10px] uppercase tracking-wide text-[#6b7280]">
+          {label}
+        </div>
+        <div className="font-medium break-all" data-testid={testId}>
+          {value}
+        </div>
+      </div>
+      {onCopy && (
+        <button
+          type="button"
+          className="text-xs text-[#c9a96e] shrink-0 pt-1"
+          onClick={onCopy}
+        >
+          {copied ? "Скопировано" : "Копировать"}
+        </button>
+      )}
     </div>
   );
 }

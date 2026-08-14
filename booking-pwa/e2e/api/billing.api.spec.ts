@@ -15,6 +15,7 @@ test.describe("API · billing (F31)", () => {
     const plansBody = await plans.json();
     expect(plansBody.plans.length).toBeGreaterThanOrEqual(1);
     expect(plansBody.plans[0].price_rub).toBeGreaterThan(0);
+    expect(["mock", "yookassa", "transfer"]).toContain(plansBody.mode);
 
     const checkout = await request.post("/api/billing/checkout", {
       headers: authHeaders(master.token),

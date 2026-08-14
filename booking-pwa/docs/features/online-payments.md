@@ -36,7 +36,27 @@
 - Таблица `payments`
 - UI: `/app/billing`, CTA в `SubscriptionBanner`
 
-## Env
+## Пилот: оплата переводом
+
+Пока нет самозанятого / ЮKassa:
+
+- `BILLING_MODE=transfer` (или нет ключей ЮKassa — режим сам)
+- На `/app/billing` — реквизиты СБП + комментарий `MZ {slug} {plan}`
+- Владелец продлевает в `/admin` → «+30 дней»
+
+Env:
+
+```
+BILLING_MODE=transfer
+BILLING_TRANSFER_PHONE=+79…
+BILLING_TRANSFER_BANK=Сбер
+BILLING_TRANSFER_NAME=Имя
+BILLING_SUPPORT_CONTACT=moyazapis@mail.ru
+```
+
+После оформления самозанятого: ключи ЮKassa + `BILLING_MODE=yookassa` (или убрать MODE — авто).
+
+## Env (касса)
 
 ```
 YOOKASSA_SHOP_ID=
