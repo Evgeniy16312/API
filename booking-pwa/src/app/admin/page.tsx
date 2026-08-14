@@ -256,7 +256,7 @@ export default function AdminPage() {
           >
             <p className="text-sm text-red-800">
               Удалит <strong>всех</strong> мастеров и связанные записи/услуги.
-              Для тестовой БД. Введите{" "}
+              Это необратимо (на проде тоже). Введите{" "}
               <code className="bg-white px-1 rounded">DELETE_ALL</code>:
             </p>
             <input
