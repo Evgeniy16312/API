@@ -37,7 +37,8 @@
 | F33 | Telegram-бот уведомления | done | [features/telegram-bot.md](./features/telegram-bot.md) |
 | F34 | Напоминания владельцу об истекающих подписках | done | [features/owner-subscription-alerts.md](./features/owner-subscription-alerts.md) |
 | F35 | Автобэкап SQLite | done | [features/sqlite-backup.md](./features/sqlite-backup.md) |
+| F36 | Напоминания мастеру об истечении подписки | done | [features/master-expiry-reminders.md](./features/master-expiry-reminders.md) |
 
 ## Следующий свободный ID
 
-`F36`
+`F37`
