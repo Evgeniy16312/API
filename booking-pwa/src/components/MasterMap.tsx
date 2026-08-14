@@ -38,7 +38,7 @@ export default function MasterMap({
 
     const icon = L.divIcon({
       className: "",
-      html: `<div style="width:28px;height:28px;border-radius:50%;background:#c9a96e;border:3px solid #1a1a2e;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`,
+      html: `<div style="width:28px;height:28px;border-radius:50%;background:#c4a574;border:3px solid #1c1917;box-shadow:0 2px 6px rgba(0,0,0,.25)"></div>`,
       iconSize: [28, 28],
       iconAnchor: [14, 14],
     });

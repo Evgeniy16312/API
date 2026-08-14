@@ -53,7 +53,7 @@ export default function ServicesPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -61,7 +61,7 @@ export default function ServicesPage() {
   return (
     <div className="px-4 py-6 space-y-4">
       <h1 className="text-xl font-bold">Услуги</h1>
-      <p className="text-sm text-[#6b7280]">
+      <p className="text-sm text-[#78716c]">
         Клиенты выбирают услугу при записи
       </p>
 
@@ -71,7 +71,7 @@ export default function ServicesPage() {
             <div key={s.id} className="card flex justify-between items-center">
               <div>
                 <p className="font-medium">{s.name}</p>
-                <p className="text-sm text-[#6b7280]">
+                <p className="text-sm text-[#78716c]">
                   {s.duration} мин{s.price > 0 ? ` · ${s.price} ₽` : ""}
                 </p>
               </div>
@@ -97,7 +97,7 @@ export default function ServicesPage() {
         />
         <div className="flex gap-2">
           <div className="flex-1">
-            <label className="text-xs text-[#6b7280]">Длительность (мин)</label>
+            <label className="text-xs text-[#78716c]">Длительность (мин)</label>
             <input
               className="input"
               type="number"
@@ -108,7 +108,7 @@ export default function ServicesPage() {
             />
           </div>
           <div className="flex-1">
-            <label className="text-xs text-[#6b7280]">Цена (₽)</label>
+            <label className="text-xs text-[#78716c]">Цена (₽)</label>
             <input
               className="input"
               type="number"

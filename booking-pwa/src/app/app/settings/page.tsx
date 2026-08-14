@@ -129,7 +129,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -141,7 +141,7 @@ export default function SettingsPage() {
       <div className="card space-y-3">
         <h3 className="font-semibold">Профиль</h3>
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-full overflow-hidden bg-[#c9a96e]/30 flex items-center justify-center text-2xl shrink-0">
+          <div className="w-16 h-16 rounded-full overflow-hidden bg-[#c4a574]/30 flex items-center justify-center text-2xl shrink-0">
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
@@ -161,15 +161,15 @@ export default function SettingsPage() {
           </label>
         </div>
         <div>
-          <label className="text-xs text-[#6b7280]">Имя</label>
+          <label className="text-xs text-[#78716c]">Имя</label>
           <input className="input" value={name} onChange={(e) => setName(e.target.value)} />
         </div>
         <div>
-          <label className="text-xs text-[#6b7280]">Телефон</label>
+          <label className="text-xs text-[#78716c]">Телефон</label>
           <input className="input" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
         <div>
-          <label className="text-xs text-[#6b7280]">Специализация</label>
+          <label className="text-xs text-[#78716c]">Специализация</label>
           <input
             className="input"
             value={specialty}
@@ -178,9 +178,9 @@ export default function SettingsPage() {
           />
         </div>
         <div>
-          <label className="text-xs text-[#6b7280]">Адрес страницы</label>
+          <label className="text-xs text-[#78716c]">Адрес страницы</label>
           <div className="flex items-center gap-1">
-            <span className="text-sm text-[#6b7280]">/m/</span>
+            <span className="text-sm text-[#78716c]">/m/</span>
             <input
               className="input"
               value={slug}
@@ -190,7 +190,7 @@ export default function SettingsPage() {
           </div>
         </div>
         <div>
-          <label className="text-xs text-[#6b7280]">О себе</label>
+          <label className="text-xs text-[#78716c]">О себе</label>
           <textarea
             className="input min-h-[80px]"
             value={description}
@@ -212,13 +212,13 @@ export default function SettingsPage() {
 
       <div className="card space-y-3">
         <h3 className="font-semibold">Код доступа</h3>
-        <p className="text-sm text-[#6b7280]">
+        <p className="text-sm text-[#78716c]">
           Сохраните код — им можно войти с другого устройства или после очистки
           браузера. Не передавайте посторонним.
         </p>
         <code
           data-testid="recovery-token"
-          className="block text-xs break-all bg-[#faf9f7] p-3 rounded-xl border border-[#e8e6e3]"
+          className="block text-xs break-all bg-[#f4f0ea] p-3 rounded-xl border border-[#e7e0d6]"
         >
           {recoveryToken || "—"}
         </code>
@@ -234,7 +234,7 @@ export default function SettingsPage() {
 
       <div className="card space-y-3">
         <h3 className="font-semibold">Уведомления</h3>
-        <p className="text-sm text-[#6b7280]">
+        <p className="text-sm text-[#78716c]">
           Сейчас уведомления о записях приходят на email. Мессенджеры подключим
           позже.
         </p>
@@ -249,11 +249,11 @@ export default function SettingsPage() {
             {CHANNEL_OPTIONS.map((opt) => (
               <div
                 key={opt.id}
-                className="rounded-xl border border-[#c9a96e] bg-[#c9a96e]/15 px-2 py-3 text-center"
+                className="rounded-xl border border-[#c4a574] bg-[#c4a574]/15 px-2 py-3 text-center"
                 data-testid={`notify-channel-${opt.id}`}
               >
                 <div className="text-sm font-semibold">{opt.label}</div>
-                <div className="text-[10px] text-[#6b7280] mt-1 leading-tight">
+                <div className="text-[10px] text-[#78716c] mt-1 leading-tight">
                   {opt.hint}
                 </div>
               </div>
@@ -262,10 +262,10 @@ export default function SettingsPage() {
         )}
 
         <div
-          className="bg-[#faf9f7] rounded-xl p-4 space-y-2 border border-[#c9a96e]/40"
+          className="bg-[#f4f0ea] rounded-xl p-4 space-y-2 border border-[#c4a574]/40"
           data-testid="notify-email-block"
         >
-          <label className="text-sm font-medium text-[#1a1a2e]">
+          <label className="text-sm font-medium text-[#1c1917]">
             Email для уведомлений
           </label>
           <input
@@ -280,7 +280,7 @@ export default function SettingsPage() {
             placeholder="name@mail.ru"
             autoComplete="email"
           />
-          <p className="text-xs text-[#6b7280]">
+          <p className="text-xs text-[#78716c]">
             Сюда придут письма о новых записях, отменах и напоминаниях.
           </p>
           {!channelReady && (

@@ -50,7 +50,7 @@ export default function PortfolioPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -58,7 +58,7 @@ export default function PortfolioPage() {
   return (
     <div className="px-4 py-6 space-y-4">
       <h1 className="text-xl font-bold">Портфолио</h1>
-      <p className="text-sm text-[#6b7280]">
+      <p className="text-sm text-[#78716c]">
         Фото ваших работ — клиенты увидят на странице
       </p>
 

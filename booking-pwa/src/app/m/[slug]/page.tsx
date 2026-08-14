@@ -32,7 +32,7 @@ export default async function MasterPage({ params }: Props) {
   const { slug } = await params;
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#f4f0ea] max-w-lg mx-auto">
       <BookingFlow slug={slug} />
     </div>
   );

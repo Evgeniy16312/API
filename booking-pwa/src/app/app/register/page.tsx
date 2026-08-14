@@ -68,12 +68,12 @@ export default function RegisterPage() {
 
   return (
     <div className="px-6 py-8">
-      <Link href="/" className="text-sm text-[#c9a96e] mb-6 inline-block">
+      <Link href="/" className="text-sm font-semibold text-[#9a7b4a] mb-6 inline-flex items-center min-h-11">
         ← На главную
       </Link>
 
       <h1 className="text-2xl font-bold mb-2">Создать страницу</h1>
-      <p className="text-[#6b7280] mb-8">
+      <p className="text-[#78716c] mb-8">
         Займёт 2 минуты. Потом добавите услуги и портфолио.
       </p>
 
@@ -85,7 +85,7 @@ export default function RegisterPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="register-form">
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-name">
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-name">
             Ваше имя
           </label>
           <input
@@ -100,7 +100,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-phone">
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-phone">
             Телефон
           </label>
           <input
@@ -116,7 +116,7 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-specialty">
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-specialty">
             Специализация
           </label>
           <input
@@ -130,11 +130,11 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="text-sm text-[#6b7280] mb-1 block" htmlFor="register-slug">
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-slug">
             Адрес вашей страницы
           </label>
           <div className="flex items-center gap-0">
-            <span className="text-sm text-[#6b7280] bg-[#faf9f7] border border-r-0 border-[#e8e6e3] rounded-l-xl px-3 py-3">
+            <span className="text-sm text-[#78716c] bg-[#f4f0ea] border border-r-0 border-[#e7e0d6] rounded-l-xl px-3 py-3">
               /m/
             </span>
             <input
@@ -162,9 +162,9 @@ export default function RegisterPage() {
         </button>
       </form>
 
-      <p className="text-center text-sm text-[#6b7280] mt-6">
+      <p className="text-center text-sm text-[#78716c] mt-6">
         Уже есть страница?{" "}
-        <Link href="/app/login" className="text-[#c9a96e] font-medium">
+        <Link href="/app/login" className="text-[#9a7b4a] font-semibold">
           Войти по коду
         </Link>
       </p>

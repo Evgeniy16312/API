@@ -59,7 +59,7 @@ export default function VkConnect() {
   }
 
   if (loading) {
-    return <div className="h-16 animate-pulse bg-[#faf9f7] rounded-xl" />;
+    return <div className="h-16 animate-pulse bg-[#f4f0ea] rounded-xl" />;
   }
 
   if (status?.connected) {
@@ -87,12 +87,12 @@ export default function VkConnect() {
         </button>
       ) : (
         <div className="space-y-2">
-          <p className="text-xs text-[#6b7280]">
+          <p className="text-xs text-[#78716c]">
             Напишите сообществу VK (с Callback API) команду:
           </p>
-          <div className="bg-white border border-[#e8e6e3] rounded-lg px-3 py-2 font-mono text-sm flex justify-between gap-2">
+          <div className="bg-white border border-[#e7e0d6] rounded-lg px-3 py-2 font-mono text-sm flex justify-between gap-2">
             <span>{command}</span>
-            <button type="button" onClick={copyCommand} className="text-[#c9a96e] text-xs">
+            <button type="button" onClick={copyCommand} className="text-[#c4a574] text-xs">
               {copied ? "✓" : "Копировать"}
             </button>
           </div>

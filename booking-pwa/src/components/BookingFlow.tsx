@@ -11,7 +11,7 @@ import ReviewsSection from "@/components/ReviewsSection";
 const MasterMap = dynamic(() => import("@/components/MasterMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-48 rounded-xl bg-[#faf9f7] border border-[#e8e6e3] animate-pulse" />
+    <div className="h-48 rounded-xl bg-[#f4f0ea] border border-[#e7e0d6] animate-pulse" />
   ),
 });
 
@@ -122,7 +122,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -141,23 +141,23 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
   return (
     <div>
-      <div className="bg-[#1a1a2e] text-white px-6 pt-8 pb-10 rounded-b-3xl">
+      <div className="bg-[#1c1917] text-white px-5 pt-8 pb-12 rounded-b-[1.75rem]">
         <div className="flex items-center gap-4 mb-4">
           {master.avatar_url ? (
             <img
               src={master.avatar_url}
               alt={master.name}
-              className="w-20 h-20 rounded-full object-cover border-2 border-[#c9a96e]"
+              className="w-[4.5rem] h-[4.5rem] rounded-full object-cover border-2 border-[#c4a574]"
             />
           ) : (
-            <div className="w-20 h-20 rounded-full bg-[#c9a96e] flex items-center justify-center text-3xl">
+            <div className="w-[4.5rem] h-[4.5rem] rounded-full bg-[#c4a574] flex items-center justify-center text-3xl font-semibold">
               {master.name.charAt(0)}
             </div>
           )}
           <div>
-            <h1 className="text-2xl font-bold">{master.name}</h1>
+            <h1 className="text-2xl font-bold leading-tight">{master.name}</h1>
             {master.specialty && (
-              <p className="text-[#c9a96e] text-sm">{master.specialty}</p>
+              <p className="text-[#c4a574] text-sm mt-0.5">{master.specialty}</p>
             )}
           </div>
         </div>
@@ -182,7 +182,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
             />
             {master.address && (
               <a
-                className="text-sm text-[#c9a96e]"
+                className="text-sm text-[#c4a574]"
                 href={`https://www.openstreetmap.org/?mlat=${master.lat}&mlon=${master.lng}#map=16/${master.lat}/${master.lng}`}
                 target="_blank"
                 rel="noreferrer"
@@ -224,13 +224,13 @@ export default function BookingFlow({ slug }: { slug: string }) {
             data-testid="booking-disabled"
           >
             <h2 className="text-xl font-bold mb-2">Запись временно недоступна</h2>
-            <p className="text-sm text-[#6b7280]">
+            <p className="text-sm text-[#78716c]">
               Онлайн-запись у этого мастера сейчас отключена. Свяжитесь по
               телефону
               {master.phone ? (
                 <>
                   :{" "}
-                  <a className="text-[#c9a96e]" href={`tel:${master.phone}`}>
+                  <a className="text-[#c4a574]" href={`tel:${master.phone}`}>
                     {master.phone}
                   </a>
                 </>
@@ -243,25 +243,25 @@ export default function BookingFlow({ slug }: { slug: string }) {
           <div className="card text-center py-8" data-testid="booking-done">
             <div className="text-5xl mb-4">✅</div>
             <h2 className="text-xl font-bold mb-2">Вы записаны!</h2>
-            <p className="text-[#6b7280] mb-1">{selectedService?.name}</p>
-            <p className="text-[#6b7280]">
+            <p className="text-[#78716c] mb-1">{selectedService?.name}</p>
+            <p className="text-[#78716c]">
               {selectedDate &&
                 format(parse(selectedDate, "yyyy-MM-dd", new Date()), "d MMMM", {
                   locale: ru,
                 })}{" "}
               в {selectedTime}
             </p>
-            <p className="text-sm text-[#6b7280] mt-4">
+            <p className="text-sm text-[#78716c] mt-4">
               Мастер получит уведомление и свяжется с вами при необходимости
             </p>
             {manageUrl && (
               <div className="mt-6 space-y-2 text-left">
-                <p className="text-sm text-[#6b7280]">
+                <p className="text-sm text-[#78716c]">
                   Сохраните ссылку — по ней можно отменить запись:
                 </p>
                 <a
                   href={manageUrl}
-                  className="block text-sm text-[#c9a96e] break-all underline"
+                  className="block text-sm text-[#c4a574] break-all underline"
                   data-testid="manage-booking-link"
                 >
                   {manageUrl}
@@ -281,9 +281,9 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
             {(step === "service" || !selectedService) && (
               <div className="space-y-2">
-                <p className="text-sm text-[#6b7280] mb-2">Выберите услугу и цену</p>
+                <p className="text-sm text-[#78716c] mb-2">Выберите услугу и цену</p>
                 {master.services.length === 0 ? (
-                  <p className="text-[#6b7280] text-sm">Услуги пока не добавлены</p>
+                  <p className="text-[#78716c] text-sm">Услуги пока не добавлены</p>
                 ) : (
                   master.services.map((s) => (
                     <button
@@ -295,14 +295,14 @@ export default function BookingFlow({ slug }: { slug: string }) {
                         setSelectedDate("");
                         setSelectedTime("");
                       }}
-                      className="w-full flex justify-between items-center p-3 rounded-xl border border-[#e8e6e3] hover:border-[#c9a96e] active:scale-[0.99] transition-all text-left"
+                      className="w-full flex justify-between items-center p-4 min-h-16 rounded-2xl border border-[#e7e0d6] active:scale-[0.99] transition-all text-left"
                     >
                       <div>
                         <p className="font-medium">{s.name}</p>
-                        <p className="text-sm text-[#6b7280]">{s.duration} мин</p>
+                        <p className="text-sm text-[#78716c]">{s.duration} мин</p>
                       </div>
                       {s.price > 0 && (
-                        <span className="font-semibold text-[#c9a96e]">
+                        <span className="font-semibold text-[#c4a574]">
                           {s.price} ₽
                         </span>
                       )}
@@ -321,12 +321,12 @@ export default function BookingFlow({ slug }: { slug: string }) {
                     setSelectedDate("");
                     setSelectedTime("");
                   }}
-                  className="text-sm text-[#c9a96e] mb-3"
+                  className="text-sm text-[#c4a574] mb-3"
                 >
                   ← {selectedService.name}
                 </button>
 
-                <p className="text-sm text-[#6b7280] mb-2">Выберите день</p>
+                <p className="text-sm text-[#78716c] mb-2">Выберите день</p>
                 <MonthCalendar
                   availableDates={availableDates}
                   selectedDate={selectedDate}
@@ -340,9 +340,9 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
                 {selectedDate && (
                   <>
-                    <p className="text-sm text-[#6b7280] mb-2 mt-4">Свободное время</p>
+                    <p className="text-sm text-[#78716c] mb-2 mt-4">Свободное время</p>
                     {slots.length === 0 ? (
-                      <p className="text-sm text-[#6b7280]">Нет свободного времени</p>
+                      <p className="text-sm text-[#78716c]">Нет свободного времени</p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
                         {slots.map((t) => (
@@ -371,14 +371,14 @@ export default function BookingFlow({ slug }: { slug: string }) {
               <div>
                 <button
                   onClick={() => setStep("datetime")}
-                  className="text-sm text-[#c9a96e] mb-3"
+                  className="text-sm text-[#c4a574] mb-3"
                 >
                   ← {selectedDate} в {selectedTime}
                 </button>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="text-sm text-[#6b7280] mb-1 block">Ваше имя</label>
+                    <label className="text-sm text-[#78716c] mb-1 block">Ваше имя</label>
                     <input
                       className="input"
                       data-testid="booking-client-name"
@@ -388,7 +388,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
                     />
                   </div>
                   <div>
-                    <label className="text-sm text-[#6b7280] mb-1 block">Телефон</label>
+                    <label className="text-sm text-[#78716c] mb-1 block">Телефон</label>
                     <input
                       className="input"
                       type="tel"
@@ -414,7 +414,7 @@ export default function BookingFlow({ slug }: { slug: string }) {
 
         {master.phone && (
           <div className="card text-center space-y-2">
-            <p className="text-sm text-[#6b7280]">Есть вопрос?</p>
+            <p className="text-sm text-[#78716c]">Есть вопрос?</p>
             <div className="flex flex-wrap gap-2 justify-center">
               <a href={`tel:${master.phone}`} className="btn-outline inline-block text-sm">
                 Позвонить

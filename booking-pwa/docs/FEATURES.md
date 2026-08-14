@@ -38,7 +38,8 @@
 | F34 | Напоминания владельцу об истекающих подписках | done | [features/owner-subscription-alerts.md](./features/owner-subscription-alerts.md) |
 | F35 | Автобэкап SQLite | done | [features/sqlite-backup.md](./features/sqlite-backup.md) |
 | F36 | Напоминания мастеру об истечении подписки | done | [features/master-expiry-reminders.md](./features/master-expiry-reminders.md) |
+| F37 | Mobile-first UI | done | [features/mobile-first-ui.md](./features/mobile-first-ui.md) |
 
 ## Следующий свободный ID
 
-`F37`
+`F38`

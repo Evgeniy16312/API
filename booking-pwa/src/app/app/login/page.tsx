@@ -37,12 +37,12 @@ export default function LoginPage() {
 
   return (
     <div className="px-6 py-8">
-      <Link href="/" className="text-sm text-[#c9a96e] mb-6 inline-block">
+      <Link href="/" className="text-sm font-semibold text-[#9a7b4a] mb-6 inline-flex items-center min-h-11">
         ← На главную
       </Link>
 
       <h1 className="text-2xl font-bold mb-2">Войти в кабинет</h1>
-      <p className="text-[#6b7280] mb-8">
+      <p className="text-[#78716c] mb-8">
         Вставьте код доступа — он выдаётся при регистрации и хранится в
         Настройках.
       </p>
@@ -60,7 +60,7 @@ export default function LoginPage() {
       >
         <div>
           <label
-            className="text-sm text-[#6b7280] mb-1 block"
+            className="text-sm text-[#78716c] mb-1 block"
             htmlFor="login-token"
           >
             Код доступа
@@ -87,9 +87,9 @@ export default function LoginPage() {
         </button>
       </form>
 
-      <p className="text-center text-sm text-[#6b7280] mt-6">
+      <p className="text-center text-sm text-[#78716c] mt-6">
         Нет страницы?{" "}
-        <Link href="/app/register" className="text-[#c9a96e] font-medium">
+        <Link href="/app/register" className="text-[#9a7b4a] font-semibold">
           Создать
         </Link>
       </p>

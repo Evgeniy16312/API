@@ -35,7 +35,7 @@ export default function AppDashboard() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -43,70 +43,65 @@ export default function AppDashboard() {
   if (!master) return null;
 
   const pageUrl = masterPublicPageUrl(master.slug);
+  const firstName = master.name.split(" ")[0];
 
   return (
-    <div className="px-4 py-6 space-y-4">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold">Привет, {master.name.split(" ")[0]}!</h1>
-          <p className="text-sm text-[#6b7280]">Ваша панель управления</p>
-        </div>
-        <Link href="/app/settings" className="text-2xl">⚙️</Link>
+    <div className="px-4 py-5 space-y-4">
+      <div>
+        <p className="text-sm text-[#78716c]">Кабинет</p>
+        <h1 className="text-2xl font-bold tracking-tight">Привет, {firstName}</h1>
       </div>
 
-      <QRShare url={pageUrl} slug={master.slug} />
-
-      {bookings.length > 0 && (
-        <div className="card">
-          <div className="flex justify-between items-center mb-3">
-            <h3 className="font-semibold">Новые записи</h3>
-            <Link href="/app/bookings" className="text-sm text-[#c9a96e]">
-              Все →
-            </Link>
-          </div>
-          {bookings.slice(0, 3).map((b) => (
-            <div
+      <section className="card">
+        <div className="flex justify-between items-center mb-3">
+          <h2 className="font-semibold">Новые записи</h2>
+          <Link href="/app/bookings" className="text-sm font-semibold text-[#9a7b4a]">
+            Все
+          </Link>
+        </div>
+        {bookings.length === 0 ? (
+          <p className="text-sm text-[#78716c] py-2">
+            Пока пусто. Отправьте ссылку клиенту — запись появится здесь.
+          </p>
+        ) : (
+          bookings.slice(0, 4).map((b) => (
+            <Link
               key={b.id}
-              className="flex justify-between items-center py-2 border-b border-[#e8e6e3] last:border-0"
+              href="/app/bookings"
+              className="flex justify-between items-center py-3 border-t border-[#e7e0d6] first:border-0 min-h-14"
             >
               <div>
-                <p className="font-medium text-sm">{b.client_name}</p>
-                <p className="text-xs text-[#6b7280]">
+                <p className="font-medium">{b.client_name}</p>
+                <p className="text-sm text-[#78716c]">
                   {b.service_name} · {b.date} {b.time}
                 </p>
               </div>
-              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
+              <span className="text-xs font-semibold bg-[#c4a574]/20 text-[#9a7b4a] px-2.5 py-1 rounded-full shrink-0">
                 Новая
               </span>
-            </div>
-          ))}
-        </div>
-      )}
+            </Link>
+          ))
+        )}
+      </section>
+
+      <QRShare url={pageUrl} slug={master.slug} />
 
       <div className="grid grid-cols-2 gap-3">
-        <Link href="/app/services" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">✂️</span>
-          <span className="text-sm font-medium">Услуги</span>
+        <Link href="/app/portfolio" className="card text-center py-5 active:scale-[0.98] transition-transform min-h-24">
+          <span className="text-xl block mb-1">Портфолио</span>
+          <span className="text-xs text-[#78716c]">Фото работ</span>
         </Link>
-        <Link href="/app/portfolio" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">🖼️</span>
-          <span className="text-sm font-medium">Портфолио</span>
+        <Link href="/app/reviews" className="card text-center py-5 active:scale-[0.98] transition-transform min-h-24">
+          <span className="text-xl block mb-1">Отзывы</span>
+          <span className="text-xs text-[#78716c]">Оценки клиентов</span>
         </Link>
-        <Link href="/app/schedule" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">📅</span>
-          <span className="text-sm font-medium">Календарь</span>
+        <Link href="/app/billing" className="card text-center py-5 active:scale-[0.98] transition-transform min-h-24">
+          <span className="text-xl block mb-1">Подписка</span>
+          <span className="text-xs text-[#78716c]">290 ₽ / мес</span>
         </Link>
-        <Link href="/app/reviews" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">⭐</span>
-          <span className="text-sm font-medium">Отзывы</span>
-        </Link>
-        <Link href="/app/settings" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">🔔</span>
-          <span className="text-sm font-medium">MAX / VK</span>
-        </Link>
-        <Link href="/app/bookings" className="card text-center py-4 active:scale-[0.98] transition-transform">
-          <span className="text-2xl block mb-1">📋</span>
-          <span className="text-sm font-medium">Записи</span>
+        <Link href="/app/settings" className="card text-center py-5 active:scale-[0.98] transition-transform min-h-24">
+          <span className="text-xl block mb-1">Профиль</span>
+          <span className="text-xs text-[#78716c]">Почта и ссылка</span>
         </Link>
       </div>
     </div>

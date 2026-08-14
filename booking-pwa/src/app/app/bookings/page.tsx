@@ -58,10 +58,10 @@ export default function BookingsPage() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium whitespace-nowrap ${
+            className={`px-4 min-h-11 rounded-full text-sm font-semibold whitespace-nowrap ${
               filter === f.key
-                ? "bg-[#1a1a2e] text-white"
-                : "bg-white border border-[#e8e6e3]"
+                ? "bg-[#1c1917] text-white"
+                : "bg-[#fffcf8] border border-[#e7e0d6]"
             }`}
           >
             {f.label}
@@ -71,12 +71,12 @@ export default function BookingsPage() {
 
       {loading ? (
         <div className="flex justify-center py-10">
-          <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
         </div>
       ) : bookings.length === 0 ? (
         <div className="card text-center py-8">
-          <p className="text-[#6b7280]">Записей пока нет</p>
-          <p className="text-sm text-[#6b7280] mt-1">
+          <p className="text-[#78716c]">Записей пока нет</p>
+          <p className="text-sm text-[#78716c] mt-1">
             Поделитесь ссылкой с клиентами
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function BookingsPage() {
                   <p className="font-medium">{b.client_name}</p>
                   <a
                     href={`tel:${b.client_phone}`}
-                    className="text-sm text-[#c9a96e]"
+                    className="text-sm text-[#c4a574]"
                   >
                     {b.client_phone}
                   </a>
@@ -100,7 +100,7 @@ export default function BookingsPage() {
                   {statusLabel[b.status]}
                 </span>
               </div>
-              <p className="text-sm text-[#6b7280]">
+              <p className="text-sm text-[#78716c]">
                 {b.service_name} · {b.date} в {b.time}
               </p>
               {b.status === "pending" && (

@@ -81,7 +81,7 @@ export default function SchedulePage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -90,7 +90,7 @@ export default function SchedulePage() {
     <div className="px-4 py-6 space-y-4">
       <div>
         <h1 className="text-xl font-bold">Календарь работы</h1>
-        <p className="text-sm text-[#6b7280]">
+        <p className="text-sm text-[#78716c]">
           Отметьте дни и часы — клиент увидит свободные слоты при записи
         </p>
       </div>
@@ -105,8 +105,8 @@ export default function SchedulePage() {
           onMonthChange={setMonth}
         />
         {previewDate && (
-          <div className="pt-2 border-t border-[#e8e6e3]">
-            <p className="text-sm text-[#6b7280] mb-2">
+          <div className="pt-2 border-t border-[#e7e0d6]">
+            <p className="text-sm text-[#78716c] mb-2">
               Слоты на{" "}
               {format(parse(previewDate, "yyyy-MM-dd", new Date()), "d MMMM", {
                 locale: ru,
@@ -114,7 +114,7 @@ export default function SchedulePage() {
               {services[0] ? ` (${services[0].name}, ${services[0].duration} мин)` : ""}
             </p>
             {previewSlots.length === 0 ? (
-              <p className="text-sm text-[#6b7280]">Нет слотов в этот день</p>
+              <p className="text-sm text-[#78716c]">Нет слотов в этот день</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {previewSlots.map((t) => (
@@ -163,9 +163,9 @@ export default function SchedulePage() {
                     type="checkbox"
                     checked={d.enabled}
                     onChange={(e) => updateDay(day, "enabled", e.target.checked)}
-                    className="w-4 h-4 accent-[#c9a96e]"
+                    className="w-4 h-4 accent-[#c4a574]"
                   />
-                  <span className="text-xs text-[#6b7280]">
+                  <span className="text-xs text-[#78716c]">
                     {d.enabled ? "Работаю" : "Выходной"}
                   </span>
                 </label>
@@ -178,7 +178,7 @@ export default function SchedulePage() {
                     onChange={(e) => updateDay(day, "start", e.target.value)}
                     className="input text-sm py-2"
                   />
-                  <span className="text-[#6b7280]">—</span>
+                  <span className="text-[#78716c]">—</span>
                   <input
                     type="time"
                     value={d.end}

@@ -20,9 +20,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [router, isPublic, pathname]);
 
   return (
-    <div className="min-h-screen bg-[#faf9f7] max-w-lg mx-auto">
+    <div className="min-h-screen bg-[#f4f0ea] max-w-lg mx-auto">
       {!isPublic && <SubscriptionBanner />}
-      <div className={isPublic ? "" : "pb-20"}>{children}</div>
+      <div className={isPublic ? "" : "pb-[calc(4.25rem+env(safe-area-inset-bottom))]"}>
+        {children}
+      </div>
       {!isPublic && <BottomNav />}
     </div>
   );

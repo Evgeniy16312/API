@@ -58,7 +58,7 @@ export default function ManageBookingPage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -67,7 +67,7 @@ export default function ManageBookingPage() {
     return (
       <div className="max-w-lg mx-auto px-4 py-16 text-center">
         <p className="text-red-600 mb-4">{error}</p>
-        <Link href="/" className="text-[#c9a96e]">
+        <Link href="/" className="text-[#c4a574]">
           На главную
         </Link>
       </div>
@@ -79,12 +79,12 @@ export default function ManageBookingPage() {
   const cancelled = booking.status === "cancelled";
 
   return (
-    <div className="min-h-screen bg-[#faf9f7]">
+    <div className="min-h-screen bg-[#f4f0ea]">
       <div className="max-w-lg mx-auto px-4 py-8 space-y-4">
-        <h1 className="text-xl font-bold text-[#1a1a2e]">Ваша запись</h1>
+        <h1 className="text-xl font-bold text-[#1c1917]">Ваша запись</h1>
         <div className="card space-y-2" data-testid="manage-booking">
           <p className="font-semibold">{booking.master_name}</p>
-          <p className="text-sm text-[#6b7280]">{booking.service_name}</p>
+          <p className="text-sm text-[#78716c]">{booking.service_name}</p>
           <p className="text-sm">
             {booking.date} в {booking.time}
           </p>

@@ -64,7 +64,7 @@ export default function MonthCalendar({
         </button>
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-[#6b7280]">
+      <div className="grid grid-cols-7 gap-1 text-center text-xs text-[#78716c]">
         {WEEKDAYS.map((d) => (
           <div key={d} className="py-1">
             {d}
@@ -87,12 +87,12 @@ export default function MonthCalendar({
               disabled={!canSelect}
               onClick={() => onSelect(value)}
               className={[
-                "aspect-square rounded-lg text-sm transition-all",
+                "min-h-11 rounded-xl text-sm transition-all",
                 !inMonth && "opacity-30",
-                canSelect && !selected && "bg-[#c9a96e]/15 text-[#1a1a2e] font-medium hover:bg-[#c9a96e]/30",
-                !canSelect && "text-[#d1d5db] cursor-default",
-                selected && "bg-[#1a1a2e] text-white font-semibold",
-                today && !selected && "ring-1 ring-[#c9a96e]",
+                canSelect && !selected && "bg-[#c4a574]/15 text-[#1c1917] font-medium",
+                !canSelect && "text-[#d6d3d1] cursor-default",
+                selected && "bg-[#1c1917] text-white font-semibold",
+                today && !selected && "ring-1 ring-[#c4a574]",
               ]
                 .filter(Boolean)
                 .join(" ")}

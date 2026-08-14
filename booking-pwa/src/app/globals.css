@@ -1,15 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf9f7;
-  --foreground: #1a1a2e;
-  --accent: #c9a96e;
-  --accent-dark: #a88b4a;
-  --card: #ffffff;
-  --muted: #6b7280;
-  --border: #e8e6e3;
-  --success: #16a34a;
+  --background: #f4f0ea;
+  --foreground: #1c1917;
+  --accent: #c4a574;
+  --accent-dark: #9a7b4a;
+  --card: #fffcf8;
+  --muted: #78716c;
+  --border: #e7e0d6;
+  --success: #15803d;
   --danger: #dc2626;
+  --ink: #1c1917;
+  --nav-h: 4.25rem;
 }
 
 @theme inline {
@@ -23,42 +25,67 @@
   --font-sans: var(--font-geist-sans);
 }
 
+html {
+  height: 100%;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  padding: env(safe-area-inset-top) 0 0;
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .btn-primary {
-  @apply bg-[#1a1a2e] text-white px-6 py-3 rounded-xl font-medium
+  @apply bg-[#1c1917] text-white px-5 font-semibold rounded-2xl
     active:scale-[0.98] transition-transform disabled:opacity-50 disabled:active:scale-100;
+  min-height: 3rem;
+  font-size: 1rem;
 }
 
 .btn-accent {
-  @apply bg-[#c9a96e] text-white px-6 py-3 rounded-xl font-medium
+  @apply bg-[#c4a574] text-white px-5 font-semibold rounded-2xl
     active:scale-[0.98] transition-transform disabled:opacity-50;
+  min-height: 3rem;
 }
 
 .btn-outline {
-  @apply border border-[#e8e6e3] bg-white text-[#1a1a2e] px-6 py-3 rounded-xl font-medium
+  @apply border border-[#e7e0d6] bg-[#fffcf8] text-[#1c1917] px-5 font-semibold rounded-2xl
     active:scale-[0.98] transition-transform;
+  min-height: 3rem;
 }
 
 .card {
-  @apply bg-white rounded-2xl border border-[#e8e6e3] p-4;
+  @apply bg-[#fffcf8] rounded-2xl border border-[#e7e0d6] p-4;
+  box-shadow: 0 1px 0 rgba(28, 25, 23, 0.04);
 }
 
 .input {
-  @apply w-full px-4 py-3 rounded-xl border border-[#e8e6e3] bg-white
-    focus:outline-none focus:ring-2 focus:ring-[#c9a96e]/40 focus:border-[#c9a96e];
+  @apply w-full px-4 rounded-2xl border border-[#e7e0d6] bg-[#fffcf8]
+    focus:outline-none focus:ring-2 focus:ring-[#c4a574]/35 focus:border-[#c4a574];
+  min-height: 3rem;
+  font-size: 1rem; /* iOS не зумит поля ≥16px */
 }
 
 .slot-btn {
-  @apply px-4 py-2 rounded-lg border border-[#e8e6e3] text-sm font-medium
-    hover:border-[#c9a96e] active:scale-95 transition-all;
+  @apply px-3 font-semibold rounded-xl border border-[#e7e0d6] text-sm
+    active:scale-95 transition-all;
+  min-height: 2.75rem;
 }
 
 .slot-btn-active {
-  @apply bg-[#1a1a2e] text-white border-[#1a1a2e];
+  @apply bg-[#1c1917] text-white border-[#1c1917];
+}
+
+.sticky-cta {
+  position: sticky;
+  bottom: 0;
+  padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--background) 70%, transparent);
 }

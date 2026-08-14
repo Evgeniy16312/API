@@ -52,31 +52,31 @@ export default function ReviewsSection({ slug, initialReviews }: Props) {
       <h2 className="font-semibold">Отзывы</h2>
 
       {reviews.length === 0 ? (
-        <p className="text-sm text-[#6b7280]">Пока нет отзывов — будьте первым</p>
+        <p className="text-sm text-[#78716c]">Пока нет отзывов — будьте первым</p>
       ) : (
         <ul className="space-y-3">
           {reviews.map((r) => (
             <li
               key={r.id}
-              className="border border-[#e8e6e3] rounded-xl p-3"
+              className="border border-[#e7e0d6] rounded-xl p-3"
               data-testid="review-item"
             >
               <div className="flex justify-between items-center mb-1">
                 <span className="font-medium text-sm">{r.client_name}</span>
-                <span className="text-[#c9a96e] text-sm" aria-label={`${r.rating} из 5`}>
+                <span className="text-[#c4a574] text-sm" aria-label={`${r.rating} из 5`}>
                   {"★".repeat(r.rating)}
                   {"☆".repeat(5 - r.rating)}
                 </span>
               </div>
               {r.text && (
-                <p className="text-sm text-[#6b7280] leading-relaxed">{r.text}</p>
+                <p className="text-sm text-[#78716c] leading-relaxed">{r.text}</p>
               )}
             </li>
           ))}
         </ul>
       )}
 
-      <form onSubmit={submit} className="space-y-3 border-t border-[#e8e6e3] pt-4">
+      <form onSubmit={submit} className="space-y-3 border-t border-[#e7e0d6] pt-4">
         <p className="text-sm font-medium">Оставить отзыв</p>
         {error && (
           <div className="bg-red-50 text-red-600 text-sm p-2 rounded-lg">{error}</div>
@@ -102,8 +102,8 @@ export default function ReviewsSection({ slug, initialReviews }: Props) {
               onClick={() => setRating(n)}
               className={`w-10 h-10 rounded-lg border text-lg ${
                 n <= rating
-                  ? "border-[#c9a96e] bg-[#c9a96e]/15 text-[#c9a96e]"
-                  : "border-[#e8e6e3] text-[#d1d5db]"
+                  ? "border-[#c4a574] bg-[#c4a574]/15 text-[#c4a574]"
+                  : "border-[#e7e0d6] text-[#d1d5db]"
               }`}
               aria-label={`${n} звёзд`}
             >

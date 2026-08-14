@@ -34,32 +34,32 @@ export default function ReviewsManagePage() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="px-4 py-6 space-y-4">
-      <Link href="/app" className="text-sm text-[#c9a96e]">
+      <Link href="/app" className="text-sm text-[#c4a574]">
         ← Назад
       </Link>
       <h1 className="text-xl font-bold">Отзывы</h1>
 
       {reviews.length === 0 ? (
-        <p className="text-[#6b7280] text-sm">Пока нет отзывов</p>
+        <p className="text-[#78716c] text-sm">Пока нет отзывов</p>
       ) : (
         <div className="space-y-3">
           {reviews.map((r) => (
             <div key={r.id} className="card space-y-2" data-testid="master-review">
               <div className="flex justify-between">
                 <span className="font-medium">{r.client_name}</span>
-                <span className="text-[#c9a96e]">
+                <span className="text-[#c4a574]">
                   {"★".repeat(r.rating)}
                   {"☆".repeat(5 - r.rating)}
                 </span>
               </div>
-              {r.text && <p className="text-sm text-[#6b7280]">{r.text}</p>}
+              {r.text && <p className="text-sm text-[#78716c]">{r.text}</p>}
               <p className="text-xs text-[#9ca3af]">
                 {r.status === "hidden" ? "Скрыт" : "Опубликован"}
               </p>

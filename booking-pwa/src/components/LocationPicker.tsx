@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 const MasterMap = dynamic(() => import("./MasterMap"), {
   ssr: false,
   loading: () => (
-    <div className="h-48 rounded-xl bg-[#faf9f7] border border-[#e8e6e3] animate-pulse" />
+    <div className="h-48 rounded-xl bg-[#f4f0ea] border border-[#e7e0d6] animate-pulse" />
   ),
 });
 
@@ -65,7 +65,7 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
   return (
     <div className="space-y-3" data-testid="location-picker">
       <div>
-        <label className="text-xs text-[#6b7280]" htmlFor="location-address">
+        <label className="text-xs text-[#78716c]" htmlFor="location-address">
           Адрес на карте (бесплатно, OpenStreetMap)
         </label>
         <div className="flex gap-2 mt-1">
@@ -95,12 +95,12 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       {results.length > 0 && (
-        <ul className="border border-[#e8e6e3] rounded-xl overflow-hidden divide-y divide-[#e8e6e3]">
+        <ul className="border border-[#e7e0d6] rounded-xl overflow-hidden divide-y divide-[#e7e0d6]">
           {results.map((hit) => (
             <li key={`${hit.lat}-${hit.lng}-${hit.label}`}>
               <button
                 type="button"
-                className="w-full text-left text-sm px-3 py-2 hover:bg-[#faf9f7]"
+                className="w-full text-left text-sm px-3 py-2 hover:bg-[#f4f0ea]"
                 onClick={() => pick(hit)}
               >
                 {hit.label}
@@ -113,12 +113,12 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
       {lat != null && lng != null ? (
         <div className="space-y-2">
           <MasterMap lat={lat} lng={lng} label={address || query} />
-          <button type="button" className="text-sm text-[#6b7280]" onClick={clearPin}>
+          <button type="button" className="text-sm text-[#78716c]" onClick={clearPin}>
             Убрать метку с карты
           </button>
         </div>
       ) : (
-        <p className="text-xs text-[#6b7280]">
+        <p className="text-xs text-[#78716c]">
           Нажмите «Найти» и выберите адрес — на странице появится карта для клиентов.
         </p>
       )}

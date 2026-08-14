@@ -32,7 +32,7 @@ export default function SubscriptionBanner() {
       data-testid="subscription-banner"
       className={`mx-4 mt-4 rounded-xl px-3 py-2 text-sm flex items-start justify-between gap-3 ${
         allowed
-          ? "bg-[#c9a96e]/15 text-[#5c4a2a]"
+          ? "bg-[#c4a574]/15 text-[#5c4a2a]"
           : "bg-red-50 text-red-700 border border-red-100"
       }`}
     >

@@ -10,7 +10,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "МояЗапись — онлайн-запись для мастеров",
   description:
-    "Страница мастера с портфолио и онлайн-записью. Уведомления в MAX и VK. Работает на любом телефоне.",
+    "Страница мастера с портфолио и онлайн-записью. Клиенты записываются с телефона — вы получаете письмо.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -20,11 +20,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#1a1a2e",
+  themeColor: "#f4f0ea",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

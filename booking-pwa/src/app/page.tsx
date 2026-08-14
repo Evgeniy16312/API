@@ -2,94 +2,61 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="px-6 py-4 flex justify-between items-center">
-        <span className="text-xl font-bold text-[#1a1a2e]">МояЗапись</span>
-        <Link href="/app/login" className="text-sm text-[#c9a96e] font-medium">
-          Войти →
+    <div className="min-h-screen flex flex-col max-w-lg mx-auto">
+      <header className="px-5 py-4 flex justify-between items-center">
+        <span className="text-lg font-bold tracking-tight">МояЗапись</span>
+        <Link
+          href="/app/login"
+          className="text-sm font-semibold text-[#9a7b4a] min-h-11 inline-flex items-center"
+        >
+          Войти
         </Link>
       </header>
 
-      <main className="flex-1 px-6 py-8 max-w-lg mx-auto w-full">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 bg-[#c9a96e]/10 text-[#a88b4a] px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            Уведомления на почту
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#1a1a2e] leading-tight mb-4">
-            Ваша страница
-            <br />
-            <span className="text-[#c9a96e]">с записью</span>
-          </h1>
-          <p className="text-[#6b7280] text-lg leading-relaxed">
-            Портфолио, услуги и онлайн-запись в одной ссылке. Клиенты
-            записываются сами — вы получаете письмо о новой записи.
-          </p>
-        </div>
-
-        <div className="space-y-3 mb-8">
-          <Link
-            href="/app/register"
-            className="btn-primary block text-center w-full text-lg py-4"
-          >
-            Создать страницу бесплатно
-          </Link>
-          <p className="text-center text-sm text-[#6b7280]">
-            После регистрации в кабинете появятся ваша ссылка и QR-код
-          </p>
-        </div>
-
-        <p className="text-xs font-medium uppercase tracking-wide text-[#9ca3af] mb-3 px-1">
-          Что получите
+      <main className="flex-1 px-5 pt-2 pb-28">
+        <p className="inline-flex items-center rounded-full bg-[#c4a574]/15 text-[#9a7b4a] px-3 py-1 text-xs font-semibold mb-4">
+          Для мастеров с телефона
         </p>
-        <div className="space-y-3 mb-10">
+        <h1 className="text-[2rem] leading-[1.15] font-bold mb-3">
+          Клиенты записываются сами.
+          <span className="block text-[#9a7b4a]">Вы только работаете.</span>
+        </h1>
+        <p className="text-[#78716c] text-[1.05rem] leading-relaxed mb-6">
+          Одна ссылка: портфолио, цены и свободное время. Письмо о новой записи
+          приходит на почту.
+        </p>
+
+        <ol className="space-y-3 mb-8">
           {[
-            {
-              icon: "📱",
-              title: "Ссылка и QR-код",
-              desc: "В кабинете после регистрации — скопируйте или покажите клиенту",
-            },
-            {
-              icon: "🖼️",
-              title: "Портфолио работ",
-              desc: "Клиенты видят ваши лучшие работы",
-            },
-            {
-              icon: "📅",
-              title: "Запись 24/7",
-              desc: "Клиент выбирает услугу, дату и время",
-            },
-            {
-              icon: "🔔",
-              title: "Уведомления на почту",
-              desc: "Письмо о новой записи на ваш Mail.ru или другой email",
-            },
-          ].map((item) => (
-            <div
-              key={item.title}
-              className="rounded-2xl border border-[#e8e6e3] bg-[#faf9f7] p-4 flex gap-4 items-start"
+            { n: "1", t: "Создайте страницу", d: "Имя, услуга, график — пара минут" },
+            { n: "2", t: "Отправьте ссылку", d: "В WhatsApp, Telegram или как QR" },
+            { n: "3", t: "Принимайте записи", d: "Подтвердите в кабинете одним тапом" },
+          ].map((s) => (
+            <li
+              key={s.n}
+              className="card flex gap-3 items-start py-3.5"
             >
-              <span className="text-2xl" aria-hidden>
-                {item.icon}
+              <span className="w-8 h-8 rounded-full bg-[#1c1917] text-white text-sm font-bold flex items-center justify-center shrink-0">
+                {s.n}
               </span>
               <div>
-                <h3 className="font-semibold text-[#1a1a2e]">{item.title}</h3>
-                <p className="text-sm text-[#6b7280]">{item.desc}</p>
+                <p className="font-semibold">{s.t}</p>
+                <p className="text-sm text-[#78716c]">{s.d}</p>
               </div>
-            </div>
+            </li>
           ))}
-        </div>
+        </ol>
 
-        <Link
-          href="/app/login"
-          className="btn-outline block text-center w-full"
-        >
-          Уже есть аккаунт? Войти
-        </Link>
+        <p className="text-center text-sm text-[#78716c]">
+          14 дней бесплатно · дальше от 290 ₽ / мес
+        </p>
       </main>
 
-      <footer className="px-6 py-6 text-center text-sm text-[#6b7280] border-t border-[#e8e6e3]">
-        МояЗапись © 2026
-      </footer>
+      <div className="sticky-cta max-w-lg mx-auto w-full">
+        <Link href="/app/register" className="btn-primary block text-center w-full">
+          Создать страницу
+        </Link>
+      </div>
     </div>
   );
 }

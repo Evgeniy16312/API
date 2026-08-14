@@ -63,7 +63,7 @@ export default function MaxConnect() {
   }
 
   if (loading) {
-    return <div className="h-20 animate-pulse bg-[#faf9f7] rounded-xl" />;
+    return <div className="h-20 animate-pulse bg-[#f4f0ea] rounded-xl" />;
   }
 
   if (status?.connected) {
@@ -97,7 +97,7 @@ export default function MaxConnect() {
           {generating ? "Генерируем код..." : "🔗 Подключить MAX"}
         </button>
       ) : (
-        <div className="bg-[#faf9f7] rounded-xl p-4 space-y-3">
+        <div className="bg-[#f4f0ea] rounded-xl p-4 space-y-3">
           <p className="text-sm font-medium">Шаг 1. Откройте бота в MAX</p>
           {botUrl && (
             <a
@@ -111,18 +111,18 @@ export default function MaxConnect() {
           )}
 
           <p className="text-sm font-medium">Шаг 2. Отправьте боту команду</p>
-          <div className="bg-white border border-[#e8e6e3] rounded-lg px-3 py-2 font-mono text-sm flex justify-between items-center">
+          <div className="bg-white border border-[#e7e0d6] rounded-lg px-3 py-2 font-mono text-sm flex justify-between items-center">
             <span>{connectCommand}</span>
-            <button onClick={copyCommand} className="text-[#c9a96e] text-xs font-sans">
+            <button onClick={copyCommand} className="text-[#c4a574] text-xs font-sans">
               {copied ? "✓" : "Копировать"}
             </button>
           </div>
 
-          <p className="text-xs text-[#6b7280]">
+          <p className="text-xs text-[#78716c]">
             Код действует 15 минут. Страница обновится автоматически после подключения.
           </p>
 
-          <button onClick={generateCode} className="text-sm text-[#c9a96e]">
+          <button onClick={generateCode} className="text-sm text-[#c4a574]">
             Получить новый код
           </button>
         </div>

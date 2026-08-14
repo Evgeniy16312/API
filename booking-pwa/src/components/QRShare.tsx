@@ -8,7 +8,7 @@ interface QRShareProps {
   slug: string;
 }
 
-export default function QRShare({ url, slug }: QRShareProps) {
+export default function QRShare({ url }: QRShareProps) {
   const [copied, setCopied] = useState(false);
 
   async function copyLink() {
@@ -30,25 +30,26 @@ export default function QRShare({ url, slug }: QRShareProps) {
   }
 
   return (
-    <div className="card text-center">
-      <h3 className="font-semibold mb-1">Ваша ссылка</h3>
-      <p className="text-sm text-[#6b7280] mb-4">
-        Отправьте клиентам или добавьте в соцсети
+    <div className="card">
+      <h3 className="font-semibold mb-1">Ваша ссылка для клиентов</h3>
+      <p className="text-sm text-[#78716c] mb-3">
+        Отправьте в мессенджер или покажите QR в салоне
       </p>
 
-      <div className="bg-white p-4 rounded-xl inline-block mb-4 border border-[#e8e6e3]">
-        <QRCodeSVG value={url} size={160} level="M" />
-      </div>
-
-      <div className="bg-[#faf9f7] rounded-xl px-4 py-3 mb-4 font-mono text-xs sm:text-sm break-all text-left">
-        {url}
+      <div className="flex gap-3 items-center mb-4">
+        <div className="bg-white p-2 rounded-xl border border-[#e7e0d6] shrink-0">
+          <QRCodeSVG value={url} size={88} level="M" />
+        </div>
+        <p className="font-mono text-xs break-all text-[#57534e] leading-relaxed">
+          {url}
+        </p>
       </div>
 
       <div className="flex gap-2">
-        <button onClick={copyLink} className="btn-outline flex-1 text-sm">
-          {copied ? "✓ Скопировано" : "Копировать"}
+        <button type="button" onClick={copyLink} className="btn-outline flex-1 text-sm">
+          {copied ? "Скопировано" : "Копировать"}
         </button>
-        <button onClick={shareLink} className="btn-primary flex-1 text-sm">
+        <button type="button" onClick={shareLink} className="btn-primary flex-1 text-sm">
           Поделиться
         </button>
       </div>

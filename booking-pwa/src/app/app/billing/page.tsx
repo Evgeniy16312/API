@@ -107,7 +107,7 @@ function BillingInner() {
   if (loading) {
     return (
       <div className="flex justify-center py-20">
-        <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -122,7 +122,7 @@ function BillingInner() {
     <div className="px-4 py-6 space-y-4" data-testid="billing-page">
       <h1 className="text-xl font-bold">Подписка</h1>
       {banner && (
-        <p className="text-sm text-[#6b7280]" data-testid="billing-status">
+        <p className="text-sm text-[#78716c]" data-testid="billing-status">
           {banner}
         </p>
       )}
@@ -147,23 +147,23 @@ function BillingInner() {
             type="button"
             data-testid={`billing-plan-${p.id}`}
             onClick={() => setSelected(p.id)}
-            className={`card w-full text-left space-y-1 border transition ${
+            className={`card w-full text-left space-y-1 border transition min-h-16 ${
               selected === p.id
-                ? "border-[#c9a96e] bg-[#c9a96e]/10"
+                ? "border-[#c4a574] bg-[#c4a574]/10"
                 : "border-transparent"
             }`}
           >
             <div className="flex items-baseline justify-between gap-2">
               <h2 className="font-semibold">{p.label}</h2>
-              <div className="text-lg font-bold text-[#1a1a2e]">
+              <div className="text-lg font-bold text-[#1c1917]">
                 {p.price_rub} ₽
-                <span className="text-xs font-normal text-[#6b7280]">
+                <span className="text-xs font-normal text-[#78716c]">
                   {" "}
                   / {p.days} дн.
                 </span>
               </div>
             </div>
-            <p className="text-sm text-[#6b7280]">{p.hint}</p>
+            <p className="text-sm text-[#78716c]">{p.hint}</p>
           </button>
         ))}
       </div>
@@ -174,7 +174,7 @@ function BillingInner() {
           data-testid="billing-transfer-block"
         >
           <h3 className="font-semibold">Оплата переводом (пилот)</h3>
-          <p className="text-sm text-[#6b7280]">
+          <p className="text-sm text-[#78716c]">
             Пока подключаем онлайн-кассу, оплата — по СБП. После перевода
             напишите нам — продлим доступ в течение дня.
           </p>
@@ -209,7 +209,7 @@ function BillingInner() {
             />
           </div>
 
-          <p className="text-xs text-[#6b7280]">{transfer.note}</p>
+          <p className="text-xs text-[#78716c]">{transfer.note}</p>
           <p className="text-sm">
             Поддержка:{" "}
             <span className="font-medium" data-testid="billing-support">
@@ -230,7 +230,7 @@ function BillingInner() {
           >
             {paying === plan.id ? "Переходим…" : `Оплатить ${plan.price_rub} ₽`}
           </button>
-          <p className="text-xs text-[#6b7280]">
+          <p className="text-xs text-[#78716c]">
             Оплата через ЮKassa. После оплаты доступ продлевается автоматически.
           </p>
         </>
@@ -253,9 +253,9 @@ function Row({
   copied?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-2 rounded-lg bg-[#faf9f7] px-3 py-2">
+    <div className="flex items-start justify-between gap-2 rounded-lg bg-[#f4f0ea] px-3 py-2">
       <div>
-        <div className="text-[10px] uppercase tracking-wide text-[#6b7280]">
+        <div className="text-[10px] uppercase tracking-wide text-[#78716c]">
           {label}
         </div>
         <div className="font-medium break-all" data-testid={testId}>
@@ -265,7 +265,7 @@ function Row({
       {onCopy && (
         <button
           type="button"
-          className="text-xs text-[#c9a96e] shrink-0 pt-1"
+          className="text-xs text-[#c4a574] shrink-0 pt-1"
           onClick={onCopy}
         >
           {copied ? "Скопировано" : "Копировать"}
@@ -280,7 +280,7 @@ export default function BillingPage() {
     <Suspense
       fallback={
         <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-2 border-[#c9a96e] border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-[#c4a574] border-t-transparent rounded-full animate-spin" />
         </div>
       }
     >
