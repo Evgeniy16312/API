@@ -41,3 +41,35 @@ test.describe("API · телефон и email", () => {
     expect((await res.json()).notify_email).toBe("master.name+tag@mail.ru");
   });
 });
+
+test.describe("API · услуга: длительность и цена", () => {
+  test("отклоняет слишком короткую длительность", async ({ request }) => {
+    const master = await expectRegistered(request, makeMaster());
+    const res = await request.post("/api/services", {
+      headers: authHeaders(master.token),
+      data: { name: "Тест", duration: 5, price: 1000 },
+    });
+    expect(res.status()).toBe(400);
+    expect((await res.json()).error).toMatch(/длительность/i);
+  });
+
+  test("отклоняет цену выше 100 000", async ({ request }) => {
+    const master = await expectRegistered(request, makeMaster());
+    const res = await request.post("/api/services", {
+      headers: authHeaders(master.token),
+      data: { name: "Тест", duration: 60, price: 100_001 },
+    });
+    expect(res.status()).toBe(400);
+    expect((await res.json()).error).toMatch(/100/);
+  });
+
+  test("принимает цену 100 000", async ({ request }) => {
+    const master = await expectRegistered(request, makeMaster());
+    const res = await request.post("/api/services", {
+      headers: authHeaders(master.token),
+      data: { name: "VIP", duration: 120, price: 100_000 },
+    });
+    expect(res.status()).toBe(201);
+    expect((await res.json()).price).toBe(100_000);
+  });
+});

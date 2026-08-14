@@ -3,12 +3,23 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "@/lib/client";
 import type { Service } from "@/lib/types";
+import {
+  SERVICE_DURATION_MAX,
+  SERVICE_DURATION_MIN,
+  SERVICE_PRICE_MAX,
+  digitsInput,
+  parseServiceDuration,
+  parseServicePrice,
+} from "@/lib/validate";
 
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("60");
   const [price, setPrice] = useState("");
+  const [durationError, setDurationError] = useState("");
+  const [priceError, setPriceError] = useState("");
+  const [formError, setFormError] = useState("");
   const [loading, setLoading] = useState(true);
   const [adding, setAdding] = useState(false);
 
@@ -27,22 +38,37 @@ export default function ServicesPage() {
 
   async function addService(e: React.FormEvent) {
     e.preventDefault();
+    setFormError("");
+    setDurationError("");
+    setPriceError("");
+
+    const durationParsed = parseServiceDuration(duration);
+    if (!durationParsed.ok) {
+      setDurationError(durationParsed.error);
+      return;
+    }
+    const priceParsed = parseServicePrice(price);
+    if (!priceParsed.ok) {
+      setPriceError(priceParsed.error);
+      return;
+    }
+
     setAdding(true);
     try {
       await apiFetch("/api/services", {
         method: "POST",
         body: JSON.stringify({
           name,
-          duration: Math.max(15, parseInt(duration, 10) || 60),
-          price: parseInt(price, 10) || 0,
+          duration: durationParsed.value,
+          price: priceParsed.value,
         }),
       });
       setName("");
       setDuration("60");
       setPrice("");
       await loadServices();
-    } catch {
-      // handled by apiFetch
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : "Не удалось добавить услугу");
     } finally {
       setAdding(false);
     }
@@ -92,6 +118,11 @@ export default function ServicesPage() {
 
       <form onSubmit={addService} className="card space-y-3">
         <h3 className="font-semibold">Добавить услугу</h3>
+        {formError && (
+          <div className="rounded-xl bg-red-50 text-red-600 text-sm px-3 py-2">
+            {formError}
+          </div>
+        )}
         <input
           className="input"
           value={name}
@@ -103,30 +134,52 @@ export default function ServicesPage() {
           <div className="flex-1">
             <label className="text-xs text-[#78716c]">Длительность (мин)</label>
             <input
-              className="input"
+              className={`input ${durationError ? "border-red-300 focus:border-red-400 focus:ring-red-200" : ""}`}
               type="text"
               inputMode="numeric"
               data-testid="service-duration"
               value={duration}
-              onChange={(e) =>
-                setDuration(e.target.value.replace(/\D/g, "").slice(0, 4))
-              }
+              onChange={(e) => {
+                setDuration(
+                  digitsInput(e.target.value, 4, SERVICE_DURATION_MAX)
+                );
+                setDurationError("");
+              }}
               placeholder="60"
+              aria-invalid={Boolean(durationError)}
             />
+            <p className="text-[10px] text-[#78716c] mt-1">
+              {SERVICE_DURATION_MIN}–{SERVICE_DURATION_MAX} мин
+            </p>
+            {durationError && (
+              <p className="text-xs text-red-600 mt-1" data-testid="service-duration-error">
+                {durationError}
+              </p>
+            )}
           </div>
           <div className="flex-1">
             <label className="text-xs text-[#78716c]">Цена (₽)</label>
             <input
-              className="input"
+              className={`input ${priceError ? "border-red-300 focus:border-red-400 focus:ring-red-200" : ""}`}
               type="text"
               inputMode="numeric"
               data-testid="service-price"
               value={price}
-              onChange={(e) =>
-                setPrice(e.target.value.replace(/\D/g, "").slice(0, 7))
-              }
+              onChange={(e) => {
+                setPrice(digitsInput(e.target.value, 6, SERVICE_PRICE_MAX));
+                setPriceError("");
+              }}
               placeholder="0"
+              aria-invalid={Boolean(priceError)}
             />
+            <p className="text-[10px] text-[#78716c] mt-1">
+              до {SERVICE_PRICE_MAX.toLocaleString("ru-RU")} ₽
+            </p>
+            {priceError && (
+              <p className="text-xs text-red-600 mt-1" data-testid="service-price-error">
+                {priceError}
+              </p>
+            )}
           </div>
         </div>
         <button type="submit" disabled={adding} className="btn-primary w-full">

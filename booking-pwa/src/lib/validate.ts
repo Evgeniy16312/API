@@ -48,3 +48,72 @@ export function isValidEmail(email: string): boolean {
   if (v.length > 254) return false;
   return EMAIL_REGEX.test(v);
 }
+
+/** Услуга: длительность и цена */
+export const SERVICE_DURATION_MIN = 15;
+export const SERVICE_DURATION_MAX = 1440;
+export const SERVICE_PRICE_MIN = 0;
+export const SERVICE_PRICE_MAX = 100_000;
+
+export type ParseResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: string };
+
+export function parseServiceDuration(raw: unknown): ParseResult<number> {
+  const s = String(raw ?? "").trim();
+  if (!s) {
+    return { ok: false, error: "Укажите длительность в минутах" };
+  }
+  const n = parseInt(s, 10);
+  if (!Number.isFinite(n) || Number.isNaN(n)) {
+    return { ok: false, error: "Длительность: только целое число минут" };
+  }
+  if (n < SERVICE_DURATION_MIN) {
+    return {
+      ok: false,
+      error: `Длительность: минимум ${SERVICE_DURATION_MIN} мин`,
+    };
+  }
+  if (n > SERVICE_DURATION_MAX) {
+    return {
+      ok: false,
+      error: `Длительность: максимум ${SERVICE_DURATION_MAX} мин`,
+    };
+  }
+  return { ok: true, value: n };
+}
+
+export function parseServicePrice(raw: unknown): ParseResult<number> {
+  const s = String(raw ?? "").trim();
+  if (!s) {
+    return { ok: true, value: 0 };
+  }
+  const n = parseInt(s, 10);
+  if (!Number.isFinite(n) || Number.isNaN(n)) {
+    return { ok: false, error: "Цена: только целое число" };
+  }
+  if (n < SERVICE_PRICE_MIN) {
+    return { ok: false, error: "Цена не может быть отрицательной" };
+  }
+  if (n > SERVICE_PRICE_MAX) {
+    return {
+      ok: false,
+      error: `Цена: максимум ${SERVICE_PRICE_MAX.toLocaleString("ru-RU")} ₽`,
+    };
+  }
+  return { ok: true, value: n };
+}
+
+/** Цифры для поля ввода, с опциональным верхним пределом. */
+export function digitsInput(
+  value: string,
+  maxLen: number,
+  maxValue?: number
+): string {
+  let d = digitsOnly(value).slice(0, maxLen);
+  if (maxValue !== undefined && d) {
+    const n = parseInt(d, 10);
+    if (Number.isFinite(n) && n > maxValue) d = String(maxValue);
+  }
+  return d;
+}

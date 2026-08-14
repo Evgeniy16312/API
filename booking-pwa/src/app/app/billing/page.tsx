@@ -66,10 +66,16 @@ function BillingInner() {
       }>,
     ])
       .then(([p, me]) => {
-        setPlans(p.plans || []);
+        const loaded = p.plans || [];
+        setPlans(loaded);
         setMode(p.mode || "transfer");
         setTransfer(p.transfer);
         setBanner(me.subscription_banner || null);
+        if (loaded.length > 0) {
+          setSelected((cur) =>
+            loaded.some((plan) => plan.id === cur) ? cur : loaded[0].id
+          );
+        }
       })
       .catch((e: unknown) => {
         setError(e instanceof Error ? e.message : "Ошибка загрузки");
@@ -140,32 +146,60 @@ function BillingInner() {
         </div>
       )}
 
-      <div className="space-y-3">
-        {plans.map((p) => (
-          <button
-            key={p.id}
-            type="button"
-            data-testid={`billing-plan-${p.id}`}
-            onClick={() => setSelected(p.id)}
-            className={`card w-full text-left space-y-1 border transition min-h-16 ${
-              selected === p.id
-                ? "border-[#c4a574] bg-[#c4a574]/10"
-                : "border-transparent"
-            }`}
-          >
-            <div className="flex items-baseline justify-between gap-2">
-              <h2 className="font-semibold">{p.label}</h2>
-              <div className="text-lg font-bold text-[#1c1917]">
-                {p.price_rub} ₽
-                <span className="text-xs font-normal text-[#78716c]">
-                  {" "}
-                  / {p.days} дн.
+      <div className="space-y-3" role="radiogroup" aria-label="Тариф подписки">
+        {plans.map((p) => {
+          const isSelected = selected === p.id;
+          return (
+            <button
+              key={p.id}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              data-testid={`billing-plan-${p.id}`}
+              data-selected={isSelected ? "true" : "false"}
+              onClick={() => setSelected(p.id)}
+              className={`billing-plan min-h-16 ${
+                isSelected ? "billing-plan--selected" : ""
+              }`}
+            >
+              <div className="flex gap-3">
+                <span className="billing-plan-radio" aria-hidden="true">
+                  {isSelected && (
+                    <svg
+                      viewBox="0 0 12 12"
+                      className="h-3 w-3 text-white"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M2.5 6l2.5 2.5 4.5-5" />
+                    </svg>
+                  )}
                 </span>
+                <div className="min-w-0 flex-1 space-y-1">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h2 className="font-semibold">{p.label}</h2>
+                    <div className="text-lg font-bold text-[#1c1917]">
+                      {p.price_rub} ₽
+                      <span className="text-xs font-normal text-[#78716c]">
+                        {" "}
+                        / {p.days} дн.
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-sm text-[#78716c]">{p.hint}</p>
+                  {isSelected && (
+                    <p className="text-xs font-medium text-[#a8864a]">
+                      Выбран
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-            <p className="text-sm text-[#78716c]">{p.hint}</p>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
 
       {mode === "transfer" && transfer && plan && (

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireAuth } from "@/lib/auth";
 import { getDb } from "@/lib/db";
+import { parseServiceDuration, parseServicePrice } from "@/lib/validate";
 
 export async function DELETE(
   request: Request,
@@ -47,11 +48,30 @@ export async function PATCH(
   const fields: string[] = [];
   const values: import("@/lib/db").SqlParam[] = [];
 
-  for (const key of ["name", "duration", "price"] as const) {
-    if (body[key] !== undefined) {
-      fields.push(`${key} = ?`);
-      values.push(body[key]);
+  if (body.name !== undefined) {
+    if (!String(body.name).trim()) {
+      return NextResponse.json({ error: "Укажите название услуги" }, { status: 400 });
     }
+    fields.push("name = ?");
+    values.push(String(body.name).trim());
+  }
+
+  if (body.duration !== undefined) {
+    const parsed = parseServiceDuration(body.duration);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    fields.push("duration = ?");
+    values.push(parsed.value);
+  }
+
+  if (body.price !== undefined) {
+    const parsed = parseServicePrice(body.price);
+    if (!parsed.ok) {
+      return NextResponse.json({ error: parsed.error }, { status: 400 });
+    }
+    fields.push("price = ?");
+    values.push(parsed.value);
   }
 
   if (fields.length > 0) {

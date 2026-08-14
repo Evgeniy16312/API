@@ -72,6 +72,28 @@ body {
   box-shadow: 0 1px 0 rgba(28, 25, 23, 0.04);
 }
 
+.billing-plan {
+  @apply w-full text-left rounded-2xl border-2 p-4 transition-all duration-200 active:scale-[0.99];
+  @apply bg-[#fffcf8] border-[#e7e0d6];
+  box-shadow: 0 1px 0 rgba(28, 25, 23, 0.04);
+}
+
+.billing-plan--selected {
+  @apply border-[#c4a574] bg-[#faf3e8];
+  box-shadow:
+    0 0 0 3px rgba(196, 165, 116, 0.28),
+    0 4px 14px rgba(196, 165, 116, 0.18);
+}
+
+.billing-plan-radio {
+  @apply mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors;
+  @apply border-[#d6d3d1] bg-white;
+}
+
+.billing-plan--selected .billing-plan-radio {
+  @apply border-[#c4a574] bg-[#c4a574];
+}
+
 .input {
   @apply w-full px-4 rounded-2xl border border-[#e7e0d6] bg-[#fffcf8]
     focus:outline-none focus:ring-2 focus:ring-[#c4a574]/35 focus:border-[#c4a574];
