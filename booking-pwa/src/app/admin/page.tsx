@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { NotifyChannel } from "@/lib/types";
 
 type AdminMaster = {
@@ -26,6 +26,8 @@ const PLANS = ["trial", "basic", "pro"];
 const STATUSES = ["trial", "active", "past_due", "blocked"];
 const KEY_STORAGE = "moyazapis_admin_key";
 
+type SortKey = "created_at" | "name" | "bookings" | "paid_until" | "status";
+
 export default function AdminPage() {
   const [key, setKey] = useState("");
   const [authed, setAuthed] = useState(false);
@@ -34,28 +36,50 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  const load = useCallback(async (adminKey: string) => {
-    setLoading(true);
-    setError("");
-    try {
-      const res = await fetch("/api/admin/masters", {
-        headers: { "x-admin-key": adminKey },
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body.error || "Нет доступа");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [planFilter, setPlanFilter] = useState("all");
+  const [blockedFilter, setBlockedFilter] = useState<"all" | "yes" | "no">(
+    "all"
+  );
+  const [sort, setSort] = useState<SortKey>("created_at");
+  const [order, setOrder] = useState<"asc" | "desc">("desc");
+  const [purgeConfirm, setPurgeConfirm] = useState("");
+  const [showPurge, setShowPurge] = useState(false);
+
+  const load = useCallback(
+    async (adminKey: string) => {
+      setLoading(true);
+      setError("");
+      try {
+        const params = new URLSearchParams({
+          q,
+          status: statusFilter,
+          plan: planFilter,
+          blocked: blockedFilter,
+          sort,
+          order,
+        });
+        const res = await fetch(`/api/admin/masters?${params}`, {
+          headers: { "x-admin-key": adminKey },
+        });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || "Нет доступа");
+        }
+        const data = await res.json();
+        setMasters(data.masters || []);
+        setAuthed(true);
+        sessionStorage.setItem(KEY_STORAGE, adminKey);
+      } catch (e) {
+        setAuthed(false);
+        setError(e instanceof Error ? e.message : "Ошибка");
+      } finally {
+        setLoading(false);
       }
-      const data = await res.json();
-      setMasters(data.masters || []);
-      setAuthed(true);
-      sessionStorage.setItem(KEY_STORAGE, adminKey);
-    } catch (e) {
-      setAuthed(false);
-      setError(e instanceof Error ? e.message : "Ошибка");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    },
+    [q, statusFilter, planFilter, blockedFilter, sort, order]
+  );
 
   useEffect(() => {
     const saved = sessionStorage.getItem(KEY_STORAGE);
@@ -63,7 +87,14 @@ export default function AdminPage() {
       setKey(saved);
       void load(saved);
     }
-  }, [load]);
+    // initial only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!authed || !key) return;
+    void load(key);
+  }, [authed, key, load]);
 
   async function patchMaster(id: string, body: Record<string, unknown>) {
     setSavingId(id);
@@ -89,6 +120,66 @@ export default function AdminPage() {
       setSavingId(null);
     }
   }
+
+  async function deleteMaster(m: AdminMaster) {
+    if (
+      !confirm(
+        `Удалить мастера «${m.name}» (/${m.slug}) со всеми записями и услугами?`
+      )
+    ) {
+      return;
+    }
+    setSavingId(m.id);
+    setError("");
+    try {
+      const res = await fetch(`/api/admin/masters/${m.id}`, {
+        method: "DELETE",
+        headers: { "x-admin-key": key },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Ошибка удаления");
+      }
+      setMasters((prev) => prev.filter((row) => row.id !== m.id));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Ошибка");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  async function purgeAll() {
+    setSavingId("purge");
+    setError("");
+    try {
+      const res = await fetch("/api/admin/masters", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          "x-admin-key": key,
+        },
+        body: JSON.stringify({ confirm: purgeConfirm }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Ошибка очистки");
+      }
+      const data = await res.json();
+      setMasters([]);
+      setShowPurge(false);
+      setPurgeConfirm("");
+      alert(`Удалено мастеров: ${data.deleted}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Ошибка");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
+  const totalLabel = useMemo(
+    () => `${masters.length} ${masters.length === 1 ? "мастер" : "мастеров"}`,
+    [masters.length]
+  );
 
   if (!authed) {
     return (
@@ -128,24 +219,150 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-[#f5f3ef] px-4 py-8">
       <div className="max-w-5xl mx-auto space-y-4">
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h1 className="text-xl font-bold">Мастера</h1>
             <p className="text-sm text-[#6b7280]">
-              Канал уведомлений, тариф, блокировка
+              {totalLabel} · канал, тариф, удаление
             </p>
           </div>
-          <button
-            type="button"
-            className="btn-outline text-sm"
-            onClick={() => {
-              sessionStorage.removeItem(KEY_STORAGE);
-              setAuthed(false);
-              setMasters([]);
-            }}
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="btn-outline text-sm text-red-600 border-red-200"
+              data-testid="admin-purge-open"
+              onClick={() => setShowPurge((v) => !v)}
+            >
+              Очистить всех
+            </button>
+            <button
+              type="button"
+              className="btn-outline text-sm"
+              onClick={() => {
+                sessionStorage.removeItem(KEY_STORAGE);
+                setAuthed(false);
+                setMasters([]);
+              }}
+            >
+              Выйти
+            </button>
+          </div>
+        </div>
+
+        {showPurge && (
+          <div
+            className="card space-y-3 border border-red-200 bg-red-50/50"
+            data-testid="admin-purge-block"
           >
-            Выйти
-          </button>
+            <p className="text-sm text-red-800">
+              Удалит <strong>всех</strong> мастеров и связанные записи/услуги.
+              Для тестовой БД. Введите{" "}
+              <code className="bg-white px-1 rounded">DELETE_ALL</code>:
+            </p>
+            <input
+              className="input"
+              data-testid="admin-purge-confirm"
+              value={purgeConfirm}
+              onChange={(e) => setPurgeConfirm(e.target.value)}
+              placeholder="DELETE_ALL"
+            />
+            <button
+              type="button"
+              className="btn-primary w-full bg-red-600 border-red-600"
+              data-testid="admin-purge-submit"
+              disabled={savingId === "purge" || purgeConfirm !== "DELETE_ALL"}
+              onClick={() => void purgeAll()}
+            >
+              {savingId === "purge" ? "Удаляем…" : "Удалить всех мастеров"}
+            </button>
+          </div>
+        )}
+
+        <div
+          className="card grid sm:grid-cols-2 lg:grid-cols-5 gap-3"
+          data-testid="admin-filters"
+        >
+          <label className="text-xs space-y-1 block sm:col-span-2">
+            <span className="text-[#6b7280]">Поиск</span>
+            <input
+              className="input"
+              data-testid="admin-filter-q"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Имя, slug, телефон, email"
+            />
+          </label>
+          <label className="text-xs space-y-1 block">
+            <span className="text-[#6b7280]">Статус</span>
+            <select
+              className="input"
+              data-testid="admin-filter-status"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Все</option>
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs space-y-1 block">
+            <span className="text-[#6b7280]">План</span>
+            <select
+              className="input"
+              value={planFilter}
+              onChange={(e) => setPlanFilter(e.target.value)}
+            >
+              <option value="all">Все</option>
+              {PLANS.map((p) => (
+                <option key={p} value={p}>
+                  {p}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs space-y-1 block">
+            <span className="text-[#6b7280]">Блок</span>
+            <select
+              className="input"
+              value={blockedFilter}
+              onChange={(e) =>
+                setBlockedFilter(e.target.value as "all" | "yes" | "no")
+              }
+            >
+              <option value="all">Все</option>
+              <option value="no">Активные</option>
+              <option value="yes">Заблокированные</option>
+            </select>
+          </label>
+          <label className="text-xs space-y-1 block">
+            <span className="text-[#6b7280]">Сортировка</span>
+            <select
+              className="input"
+              data-testid="admin-sort"
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+            >
+              <option value="created_at">По дате создания</option>
+              <option value="name">По имени</option>
+              <option value="bookings">По записям</option>
+              <option value="paid_until">По оплате до</option>
+              <option value="status">По статусу</option>
+            </select>
+          </label>
+          <label className="text-xs space-y-1 block">
+            <span className="text-[#6b7280]">Порядок</span>
+            <select
+              className="input"
+              value={order}
+              onChange={(e) => setOrder(e.target.value as "asc" | "desc")}
+            >
+              <option value="desc">Сначала новые / больше</option>
+              <option value="asc">Сначала старые / меньше</option>
+            </select>
+          </label>
         </div>
 
         {error && (
@@ -195,6 +412,15 @@ export default function AdminPage() {
                     onClick={() => patchMaster(m.id, { blocked: !m.blocked })}
                   >
                     {m.blocked ? "Разблокировать" : "Заблокировать"}
+                  </button>
+                  <button
+                    type="button"
+                    className="text-sm px-3 py-1 rounded-lg border border-red-300 text-red-700"
+                    disabled={savingId === m.id}
+                    data-testid={`admin-delete-${m.slug}`}
+                    onClick={() => void deleteMaster(m)}
+                  >
+                    Удалить
                   </button>
                 </div>
               </div>
@@ -312,7 +538,9 @@ export default function AdminPage() {
             </div>
           ))}
           {masters.length === 0 && (
-            <p className="text-sm text-[#6b7280]">Мастеров пока нет</p>
+            <p className="text-sm text-[#6b7280]">
+              {loading ? "Загрузка…" : "Никого не найдено"}
+            </p>
           )}
         </div>
       </div>

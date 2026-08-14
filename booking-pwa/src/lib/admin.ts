@@ -1,4 +1,4 @@
-import { getDb } from "@/lib/db";
+import { getDb, withTransaction } from "@/lib/db";
 import {
   isNotifyChannel,
   type NotifyChannel,
@@ -11,17 +11,41 @@ export type AdminMasterRow = Master & {
   bookings_count: number;
 };
 
-export function listMastersForAdmin(): AdminMasterRow[] {
+export type AdminListQuery = {
+  q?: string;
+  status?: string;
+  plan?: string;
+  blocked?: "all" | "yes" | "no";
+  sort?: "created_at" | "name" | "bookings" | "paid_until" | "status";
+  order?: "asc" | "desc";
+};
+
+export function listMastersForAdmin(
+  query: AdminListQuery = {}
+): AdminMasterRow[] {
+  const sort = query.sort || "created_at";
+  const order = query.order === "asc" ? "ASC" : "DESC";
+  const sortSql =
+    sort === "name"
+      ? `m.name COLLATE NOCASE ${order}`
+      : sort === "bookings"
+        ? `bookings_count ${order}`
+        : sort === "paid_until"
+          ? `m.paid_until ${order}`
+          : sort === "status"
+            ? `m.subscription_status ${order}`
+            : `m.created_at ${order}`;
+
   const rows = getDb()
     .prepare(
       `SELECT m.*,
         (SELECT COUNT(*) FROM bookings b WHERE b.master_id = m.id) AS bookings_count
        FROM masters m
-       ORDER BY m.created_at DESC`
+       ORDER BY ${sortSql}`
     )
     .all() as Record<string, unknown>[];
 
-  return rows.map((row) => {
+  let list = rows.map((row) => {
     const master = rowToMaster(row);
     return {
       ...master,
@@ -29,6 +53,29 @@ export function listMastersForAdmin(): AdminMasterRow[] {
       bookings_count: Number(row.bookings_count || 0),
     };
   });
+
+  const q = (query.q || "").trim().toLowerCase();
+  if (q) {
+    list = list.filter((m) => {
+      const hay = [m.name, m.slug, m.phone, m.notify_email]
+        .join(" ")
+        .toLowerCase();
+      return hay.includes(q);
+    });
+  }
+  if (query.status && query.status !== "all") {
+    list = list.filter((m) => m.subscription_status === query.status);
+  }
+  if (query.plan && query.plan !== "all") {
+    list = list.filter((m) => m.plan === query.plan);
+  }
+  if (query.blocked === "yes") {
+    list = list.filter((m) => m.blocked);
+  } else if (query.blocked === "no") {
+    list = list.filter((m) => !m.blocked);
+  }
+
+  return list;
 }
 
 export function getMasterForAdmin(id: string): AdminMasterRow | null {
@@ -138,4 +185,75 @@ export function patchMasterAsAdmin(
 
   const master = getMasterForAdmin(id)!;
   return { ok: true, master };
+}
+
+function purgeMasterRelated(database: ReturnType<typeof getDb>, masterId: string) {
+  // Tables without reliable ON DELETE CASCADE in older DBs
+  const tables = [
+    "notification_outbox", // may not have master_id — skip
+    "max_connect_codes",
+    "vk_connect_codes",
+    "telegram_connect_codes",
+    "owner_alert_log",
+    "payments",
+    "reviews",
+    "portfolio",
+    "services",
+    "bookings",
+  ];
+  for (const table of tables) {
+    if (table === "notification_outbox") continue;
+    try {
+      database.prepare(`DELETE FROM ${table} WHERE master_id = ?`).run(masterId);
+    } catch {
+      /* table may not exist yet */
+    }
+  }
+}
+
+export function deleteMasterAsAdmin(
+  id: string
+): { ok: true } | { ok: false; error: string; status: number } {
+  const existing = getMasterForAdmin(id);
+  if (!existing) {
+    return { ok: false, error: "Мастер не найден", status: 404 };
+  }
+
+  withTransaction((database) => {
+    purgeMasterRelated(database, id);
+    database.prepare("DELETE FROM masters WHERE id = ?").run(id);
+  });
+
+  return { ok: true };
+}
+
+/** Wipe all masters (test cleanup). Requires confirm phrase. */
+export function deleteAllMastersAsAdmin(
+  confirm: string
+): { ok: true; deleted: number } | { ok: false; error: string; status: number } {
+  if (confirm !== "DELETE_ALL") {
+    return {
+      ok: false,
+      error: 'Для очистки введите подтверждение: DELETE_ALL',
+      status: 400,
+    };
+  }
+
+  const deleted = withTransaction((database) => {
+    const count = (
+      database.prepare("SELECT COUNT(*) AS c FROM masters").get() as {
+        c: number;
+      }
+    ).c;
+    const ids = database
+      .prepare("SELECT id FROM masters")
+      .all() as { id: string }[];
+    for (const row of ids) {
+      purgeMasterRelated(database, row.id);
+    }
+    database.prepare("DELETE FROM masters").run();
+    return count;
+  });
+
+  return { ok: true, deleted };
 }

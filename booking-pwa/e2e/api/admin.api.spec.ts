@@ -63,4 +63,54 @@ test.describe("API · админка", () => {
     expect(extended.blocked).toBe(false);
     expect(extended.paid_until).toBeTruthy();
   });
+
+  test("удаление одного и очистка всех", async ({ request }) => {
+    const a = await expectRegistered(request, makeMaster());
+    const b = await expectRegistered(request, makeMaster());
+
+    const del = await request.delete(`/api/admin/masters/${a.id}`, {
+      headers: { "x-admin-key": ADMIN_KEY },
+    });
+    expect(del.status()).toBe(200);
+
+    const list = await request.get("/api/admin/masters", {
+      headers: { "x-admin-key": ADMIN_KEY },
+    });
+    const masters = (await list.json()).masters as { id: string }[];
+    expect(masters.some((m) => m.id === a.id)).toBe(false);
+    expect(masters.some((m) => m.id === b.id)).toBe(true);
+
+    const filtered = await request.get(
+      `/api/admin/masters?q=${encodeURIComponent(b.slug)}&sort=name&order=asc`,
+      { headers: { "x-admin-key": ADMIN_KEY } }
+    );
+    expect(filtered.status()).toBe(200);
+    const fBody = await filtered.json();
+    expect(fBody.masters.length).toBeGreaterThanOrEqual(1);
+    expect(fBody.masters[0].slug).toBe(b.slug);
+
+    const bad = await request.delete("/api/admin/masters", {
+      headers: {
+        "x-admin-key": ADMIN_KEY,
+        "Content-Type": "application/json",
+      },
+      data: { confirm: "nope" },
+    });
+    expect(bad.status()).toBe(400);
+
+    const purge = await request.delete("/api/admin/masters", {
+      headers: {
+        "x-admin-key": ADMIN_KEY,
+        "Content-Type": "application/json",
+      },
+      data: { confirm: "DELETE_ALL" },
+    });
+    expect(purge.status()).toBe(200);
+    expect((await purge.json()).deleted).toBeGreaterThanOrEqual(1);
+
+    const empty = await request.get("/api/admin/masters", {
+      headers: { "x-admin-key": ADMIN_KEY },
+    });
+    expect((await empty.json()).masters).toEqual([]);
+  });
 });

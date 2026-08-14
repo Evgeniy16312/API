@@ -6,7 +6,7 @@
 |------|----------|
 | ID | F29 |
 | Статус | done |
-| Обновлено | 2026-08-13 |
+| Обновлено | 2026-08-14 |
 
 ## Зачем
 
@@ -15,28 +15,25 @@
 ## Пользовательский сценарий
 
 1. Открыть `/admin`, ввести `ADMIN_SETUP_KEY`
-2. Видеть список мастеров
-3. Менять канал уведомлений, план, статус, `paid_until`, блок
-4. Кнопка «+30 дней» — быстрое продление
+2. Список с **поиском / фильтром / сортировкой**
+3. Менять канал, план, статус, `paid_until`, блок, «+30 дней»
+4. **Удалить** одного мастера (с услугами и записями)
+5. **Очистить всех** — кнопка + подтверждение `DELETE_ALL` (для тестовых данных)
 
 ## API
 
 | Метод | Путь | Auth | Описание |
 |-------|------|------|----------|
-| GET | `/api/admin/masters` | `x-admin-key` | список |
-| GET/PATCH | `/api/admin/masters/[id]` | `x-admin-key` | карточка / правка |
+| GET | `/api/admin/masters` | `x-admin-key` | список + query `q,status,plan,blocked,sort,order` |
+| GET/PATCH/DELETE | `/api/admin/masters/[id]` | `x-admin-key` | карточка / правка / удаление |
+| DELETE | `/api/admin/masters` | `x-admin-key` | `{ "confirm": "DELETE_ALL" }` |
 
-`PATCH` поддерживает `extend_days` (1–366) → `paid_until` + `active` + unblock.
+`PATCH` поддерживает `extend_days` (1–366).
 
 ## UI
 
-- `/admin` — login + список
-- `data-testid`: `admin-key`, `admin-login`, `admin-masters`, `admin-extend-*`
-
-## Данные
-
-- `masters.plan`, `subscription_status`, `paid_until`, `blocked`
-- При `blocked` / `past_due` публичная запись → 403
+- `/admin`
+- `data-testid`: `admin-key`, `admin-login`, `admin-masters`, `admin-filters`, `admin-delete-*`, `admin-purge-*`
 
 ## Тесты
 

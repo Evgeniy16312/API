@@ -1,4 +1,8 @@
-import { getMasterForAdmin, patchMasterAsAdmin } from "@/lib/admin";
+import {
+  deleteMasterAsAdmin,
+  getMasterForAdmin,
+  patchMasterAsAdmin,
+} from "@/lib/admin";
 import { jsonError, jsonOk, requireAdmin } from "@/lib/http";
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -39,4 +43,16 @@ export async function PATCH(request: Request, ctx: Ctx) {
     console.error("Admin patch master error:", error);
     return jsonError("Ошибка обновления", 500);
   }
+}
+
+export async function DELETE(request: Request, ctx: Ctx) {
+  if (!requireAdmin(request)) {
+    return jsonError("Forbidden", 403);
+  }
+  const { id } = await ctx.params;
+  const result = deleteMasterAsAdmin(id);
+  if (!result.ok) {
+    return jsonError(result.error, result.status);
+  }
+  return jsonOk({ deleted: true, id });
 }
