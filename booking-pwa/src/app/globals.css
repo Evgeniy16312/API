@@ -49,22 +49,25 @@ body {
 }
 
 .btn-primary {
-  @apply bg-[#1c1917] text-white px-5 font-semibold rounded-2xl
+  @apply inline-flex items-center justify-center bg-[#1c1917] text-white px-5 font-semibold rounded-2xl
     active:scale-[0.98] transition-transform disabled:opacity-50 disabled:active:scale-100;
   min-height: 3rem;
   font-size: 1rem;
+  line-height: 1.25;
 }
 
 .btn-accent {
-  @apply bg-[#c4a574] text-white px-5 font-semibold rounded-2xl
+  @apply inline-flex items-center justify-center bg-[#c4a574] text-white px-5 font-semibold rounded-2xl
     active:scale-[0.98] transition-transform disabled:opacity-50;
   min-height: 3rem;
+  line-height: 1.25;
 }
 
 .btn-outline {
-  @apply border border-[#e7e0d6] bg-[#fffcf8] text-[#1c1917] px-5 font-semibold rounded-2xl
+  @apply inline-flex items-center justify-center border border-[#e7e0d6] bg-[#fffcf8] text-[#1c1917] px-5 font-semibold rounded-2xl
     active:scale-[0.98] transition-transform;
   min-height: 3rem;
+  line-height: 1.25;
 }
 
 .card {
@@ -116,6 +119,46 @@ body {
   bottom: 0;
   padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
   background: linear-gradient(to top, var(--background) 70%, transparent);
+}
+
+.landing-hero {
+  background: linear-gradient(165deg, #141210 0%, #1c1917 45%, #2a2520 100%);
+  color: #fffcf8;
+  box-shadow: 0 24px 48px rgba(20, 18, 16, 0.18);
+}
+
+.landing-badge {
+  @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
+  background: rgba(196, 165, 116, 0.18);
+  color: #e8d4b0;
+  border: 1px solid rgba(196, 165, 116, 0.28);
+}
+
+.landing-step {
+  @apply rounded-2xl border p-4 flex gap-3 items-start;
+  background: #fffcf8;
+  border-color: #e7e0d6;
+  box-shadow: 0 8px 24px rgba(28, 25, 23, 0.06);
+}
+
+.landing-step-num {
+  @apply w-9 h-9 rounded-xl text-sm font-bold flex items-center justify-center shrink-0;
+  background: linear-gradient(145deg, #c4a574, #9a7b4a);
+  color: #141210;
+  box-shadow: 0 4px 12px rgba(196, 165, 116, 0.35);
+}
+
+.landing-cta {
+  background: linear-gradient(145deg, #2a2520, #1c1917);
+  box-shadow:
+    0 10px 32px rgba(196, 165, 116, 0.38),
+    0 0 0 1px rgba(196, 165, 116, 0.22);
+}
+
+.landing-cta:active {
+  box-shadow:
+    0 6px 20px rgba(196, 165, 116, 0.28),
+    0 0 0 1px rgba(196, 165, 116, 0.18);
 }
 
 .page-theme {
