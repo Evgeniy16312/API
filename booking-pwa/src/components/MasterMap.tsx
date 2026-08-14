@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { MAP_TILE_ATTRIBUTION, MAP_TILE_URL } from "@/lib/geo";
 
 type Props = {
   lat: number;
@@ -12,7 +13,7 @@ type Props = {
   zoom?: number;
 };
 
-/** Free OpenStreetMap map — no API keys. */
+/** Neutral CARTO map tiles — free, no API key. */
 export default function MasterMap({
   lat,
   lng,
@@ -31,9 +32,10 @@ export default function MasterMap({
       attributionControl: true,
     }).setView([lat, lng], zoom);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>',
-      maxZoom: 19,
+    L.tileLayer(MAP_TILE_URL, {
+      attribution: MAP_TILE_ATTRIBUTION,
+      subdomains: "abcd",
+      maxZoom: 20,
     }).addTo(map);
 
     const icon = L.divIcon({

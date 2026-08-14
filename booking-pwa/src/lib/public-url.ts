@@ -1,3 +1,11 @@
+/** Server-side origin for emails and webhooks. */
+export function getServerAppUrl(): string {
+  return (process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000").replace(
+    /\/$/,
+    ""
+  );
+}
+
 /** Canonical public origin for QR / share links (never loopback if possible). */
 export function getPublicAppUrl(): string {
   const fromEnv = (process.env.NEXT_PUBLIC_APP_URL || "").replace(/\/$/, "");

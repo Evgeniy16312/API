@@ -13,7 +13,10 @@ test.describe("API · регистрация мастера", () => {
     const master = makeMaster();
     await expectRegistered(request, master);
 
-    const { response, body } = await registerMaster(request, master);
+    const { response, body } = await registerMaster(request, {
+      ...makeMaster(),
+      slug: master.slug,
+    });
     expect(response.status()).toBe(409);
     expect(body.error).toMatch(/занят/i);
   });
@@ -30,5 +33,12 @@ test.describe("API · регистрация мастера", () => {
     const { response, body } = await registerMaster(request, master);
     expect(response.status()).toBe(400);
     expect(body.error).toMatch(/адрес/i);
+  });
+
+  test("требует email и пароль", async ({ request }) => {
+    const master = makeMaster({ email: "bad", password: "1" });
+    const { response, body } = await registerMaster(request, master);
+    expect(response.status()).toBe(400);
+    expect(body.error).toMatch(/email|парол/i);
   });
 });

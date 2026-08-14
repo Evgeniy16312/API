@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { apiFetch, getToken, logoutSession, compressImage } from "@/lib/client";
+import { apiFetch, logoutSession, compressImage } from "@/lib/client";
 import LocationPicker from "@/components/LocationPicker";
 import PhoneRuInput from "@/components/PhoneRuInput";
 import { isValidEmail, isValidPhone } from "@/lib/validate";
@@ -48,11 +48,7 @@ export default function SettingsPage() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [error, setError] = useState("");
 
-  const [recoveryToken, setRecoveryToken] = useState("");
-  const [copied, setCopied] = useState(false);
-
   useEffect(() => {
-    setRecoveryToken(getToken() || "");
     apiFetch("/api/masters/me")
       .then((m: Master) => {
         setName(m.name);
@@ -105,6 +101,7 @@ export default function SettingsPage() {
       });
       setSlug(updated.slug);
       setNotifyEmail(updated.notify_email || "");
+      setAvatarUrl(updated.avatar_url || avatarUrl);
       setSaved(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка сохранения");
@@ -117,25 +114,27 @@ export default function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploadingAvatar(true);
+    setError("");
     try {
       const dataUrl = await compressImage(file, 600);
       setAvatarUrl(dataUrl);
-      setSaved(false);
+      const updated = await apiFetch("/api/masters/me", {
+        method: "PATCH",
+        body: JSON.stringify({ avatar_url: dataUrl }),
+      });
+      setAvatarUrl(updated.avatar_url || "");
+      setSaved(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Не удалось загрузить фото");
     } finally {
       setUploadingAvatar(false);
+      e.target.value = "";
     }
   }
 
   async function logout() {
     await logoutSession();
     router.replace("/app/login");
-  }
-
-  async function copyRecovery() {
-    if (!recoveryToken) return;
-    await navigator.clipboard.writeText(recoveryToken);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   }
 
   if (loading) {
@@ -168,6 +167,9 @@ export default function SettingsPage() {
               accept="image/*"
               className="hidden"
               onChange={onAvatarChange}
+              disabled={uploadingAvatar}
+              data-testid="settings-avatar-input"
+            />
               disabled={uploadingAvatar}
             />
           </label>
@@ -220,28 +222,6 @@ export default function SettingsPage() {
             setSaved(false);
           }}
         />
-      </div>
-
-      <div className="card space-y-3">
-        <h3 className="font-semibold">Код доступа</h3>
-        <p className="text-sm text-[#78716c]">
-          Сохраните код — им можно войти с другого устройства или после очистки
-          браузера. Не передавайте посторонним.
-        </p>
-        <code
-          data-testid="recovery-token"
-          className="block text-xs break-all bg-[#f4f0ea] p-3 rounded-xl border border-[#e7e0d6]"
-        >
-          {recoveryToken || "—"}
-        </code>
-        <button
-          type="button"
-          onClick={copyRecovery}
-          className="btn-outline w-full"
-          data-testid="copy-recovery"
-        >
-          {copied ? "Скопировано" : "Скопировать код"}
-        </button>
       </div>
 
       <div className="card space-y-3">

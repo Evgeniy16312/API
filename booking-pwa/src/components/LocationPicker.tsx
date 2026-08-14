@@ -43,7 +43,9 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
       if (!res.ok) throw new Error(data.error);
       setResults(data.results || []);
       if (!(data.results || []).length) {
-        setError("Адрес не найден — попробуйте уточнить город");
+        setError(
+          data.hint || "Адрес не найден — укажите город и улицу в России"
+        );
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Ошибка поиска");
@@ -66,7 +68,7 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
     <div className="space-y-3" data-testid="location-picker">
       <div>
         <label className="text-xs text-[#78716c]" htmlFor="location-address">
-          Адрес на карте (бесплатно, OpenStreetMap)
+          Адрес салона или студии (Россия)
         </label>
         <div className="flex gap-2 mt-1">
           <input
@@ -78,7 +80,7 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
               setQuery(e.target.value);
               onChange({ address: e.target.value, lat, lng });
             }}
-            placeholder="Город, улица, дом"
+            placeholder="Москва, ул. Пример, 10"
           />
           <button
             type="button"
@@ -119,7 +121,8 @@ export default function LocationPicker({ address, lat, lng, onChange }: Props) {
         </div>
       ) : (
         <p className="text-xs text-[#78716c]">
-          Нажмите «Найти» и выберите адрес — на странице появится карта для клиентов.
+          Поиск адресов по России. Нажмите «Найти», выберите вариант — клиенты
+          увидят карту на вашей странице.
         </p>
       )}
     </div>

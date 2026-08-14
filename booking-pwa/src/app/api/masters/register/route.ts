@@ -1,18 +1,34 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDb } from "@/lib/db";
+import { hashPassword, validatePassword } from "@/lib/password";
+import { loginEmailTaken } from "@/lib/master-auth";
 import { jsonError, jsonOk } from "@/lib/http";
 import { isValidSlug } from "@/lib/slots";
-import { normalizeRuPhone } from "@/lib/validate";
+import { isValidEmail, normalizeLoginEmail, normalizeRuPhone } from "@/lib/validate";
 import { attachSessionCookie } from "@/lib/session";
 import { DEFAULT_SCHEDULE } from "@/lib/types";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, phone, slug, specialty } = body;
+    const { name, phone, slug, specialty, email, password } = body;
 
     if (!name?.trim() || !phone?.trim() || !slug?.trim()) {
       return jsonError("Заполните имя, телефон и адрес страницы", 400);
+    }
+
+    const loginEmail = normalizeLoginEmail(email);
+    if (!loginEmail || !isValidEmail(loginEmail)) {
+      return jsonError("Укажите корректный email — он будет вашим логином", 400);
+    }
+
+    const passwordError = validatePassword(String(password || ""));
+    if (passwordError) {
+      return jsonError(passwordError, 400);
+    }
+
+    if (loginEmailTaken(loginEmail)) {
+      return jsonError("Этот email уже зарегистрирован", 409);
     }
 
     const cleanSlug = slug.trim().toLowerCase();
@@ -40,11 +56,14 @@ export async function POST(request: Request) {
     const id = uuidv4();
     const token = uuidv4();
     const now = new Date().toISOString();
+    const passwordHash = hashPassword(String(password));
 
     getDb()
       .prepare(
-        `INSERT INTO masters (id, slug, name, phone, specialty, work_schedule, token, created_at, notify_channel)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'email')`
+        `INSERT INTO masters (
+          id, slug, name, phone, specialty, work_schedule, token,
+          login_email, password_hash, notify_email, created_at, notify_channel
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'email')`
       )
       .run(
         id,
@@ -54,6 +73,9 @@ export async function POST(request: Request) {
         specialty?.trim() || "",
         JSON.stringify(DEFAULT_SCHEDULE),
         token,
+        loginEmail,
+        passwordHash,
+        loginEmail,
         now
       );
 
@@ -62,6 +84,7 @@ export async function POST(request: Request) {
       slug: cleanSlug,
       token,
       name: name.trim(),
+      login_email: loginEmail,
     });
     return attachSessionCookie(response, token);
   } catch (error) {

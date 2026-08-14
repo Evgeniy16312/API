@@ -49,6 +49,10 @@ export function isValidEmail(email: string): boolean {
   return EMAIL_REGEX.test(v);
 }
 
+export function normalizeLoginEmail(email: string): string {
+  return String(email || "").trim().toLowerCase();
+}
+
 /** Услуга: длительность и цена */
 export const SERVICE_DURATION_MIN = 15;
 export const SERVICE_DURATION_MAX = 1440;

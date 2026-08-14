@@ -50,6 +50,10 @@ export interface Master {
   /** Saved theme; applied on the public page only for active Pro. */
   page_theme: PageTheme;
   theme_customizable?: boolean;
+  /** Email for login; empty for legacy accounts. */
+  login_email?: string;
+  /** Whether password login is configured. */
+  has_password?: boolean;
 }
 
 export interface Service {

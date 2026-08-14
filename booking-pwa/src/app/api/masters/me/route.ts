@@ -26,6 +26,8 @@ export async function GET(request: Request) {
     booking_allowed: sub?.booking_allowed,
     subscription_banner: sub?.banner ?? null,
     theme_customizable: canCustomizePageTheme(sub),
+    login_email: master.login_email || "",
+    has_password: master.has_password ?? false,
   });
 }
 

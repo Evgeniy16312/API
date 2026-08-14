@@ -6,19 +6,22 @@ import { ru } from "date-fns/locale";
 import { apiFetch } from "@/lib/client";
 import { DAY_KEYS, DAY_LABELS, DEFAULT_SCHEDULE } from "@/lib/types";
 import type { WorkSchedule, WorkDay, Service } from "@/lib/types";
-import { getAvailableDates, getAvailableSlots, isValidTime } from "@/lib/slots";
+import type { SlotOverviewItem } from "@/lib/slots";
+import { getAvailableDates, isValidTime } from "@/lib/slots";
 import MonthCalendar from "@/components/MonthCalendar";
 
 export default function SchedulePage() {
   const [schedule, setSchedule] = useState<WorkSchedule>(DEFAULT_SCHEDULE);
   const [slotDuration, setSlotDuration] = useState(60);
   const [services, setServices] = useState<Service[]>([]);
+  const [previewServiceId, setPreviewServiceId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [month, setMonth] = useState(() => new Date());
   const [previewDate, setPreviewDate] = useState("");
-  const [previewSlots, setPreviewSlots] = useState<string[]>([]);
+  const [previewSlots, setPreviewSlots] = useState<SlotOverviewItem[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([apiFetch("/api/masters/me"), apiFetch("/api/services")])
@@ -26,6 +29,9 @@ export default function SchedulePage() {
         setSchedule(m.work_schedule || DEFAULT_SCHEDULE);
         setSlotDuration(m.slot_duration || 60);
         setServices(s);
+        if (s.length > 0) {
+          setPreviewServiceId(s[0].id);
+        }
       })
       .finally(() => setLoading(false));
   }, []);
@@ -35,24 +41,37 @@ export default function SchedulePage() {
     [schedule]
   );
 
+  const previewService = services.find((s) => s.id === previewServiceId);
+
   useEffect(() => {
     if (!previewDate) {
       setPreviewSlots([]);
       return;
     }
-    const duration = services[0]?.duration || slotDuration;
-    const fakeService = {
-      id: "preview",
-      master_id: "",
-      name: "preview",
-      duration,
-      price: 0,
-      sort_order: 0,
+
+    let cancelled = false;
+    setSlotsLoading(true);
+
+    const query = new URLSearchParams({ date: previewDate });
+    if (previewServiceId) {
+      query.set("service_id", previewServiceId);
+    }
+
+    apiFetch(`/api/masters/schedule/slots?${query}`)
+      .then((data: { overview: SlotOverviewItem[] }) => {
+        if (!cancelled) setPreviewSlots(data.overview || []);
+      })
+      .catch(() => {
+        if (!cancelled) setPreviewSlots([]);
+      })
+      .finally(() => {
+        if (!cancelled) setSlotsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
     };
-    setPreviewSlots(
-      getAvailableSlots(previewDate, schedule, fakeService, [], slotDuration)
-    );
-  }, [previewDate, schedule, services, slotDuration]);
+  }, [previewDate, previewServiceId]);
 
   function updateDay(day: string, field: keyof WorkDay, value: boolean | string) {
     setSchedule((prev) => ({
@@ -94,12 +113,15 @@ export default function SchedulePage() {
     );
   }
 
+  const freeCount = previewSlots.filter((s) => s.status === "free").length;
+  const busyCount = previewSlots.filter((s) => s.status === "busy").length;
+
   return (
     <div className="px-4 py-6 space-y-4">
       <div>
         <h1 className="text-xl font-bold">Календарь работы</h1>
         <p className="text-sm text-[#78716c]">
-          Отметьте дни и часы — клиент увидит свободные слоты при записи
+          Свободное и занятое время — с учётом записей клиентов
         </p>
       </div>
 
@@ -113,25 +135,92 @@ export default function SchedulePage() {
           onMonthChange={setMonth}
         />
         {previewDate && (
-          <div className="pt-2 border-t border-[#e7e0d6]">
-            <p className="text-sm text-[#78716c] mb-2">
-              Слоты на{" "}
+          <div className="pt-2 border-t border-[#e7e0d6] space-y-3">
+            {services.length > 1 && (
+              <div>
+                <label className="text-xs text-[#78716c] block mb-1" htmlFor="preview-service">
+                  Услуга для сетки слотов
+                </label>
+                <select
+                  id="preview-service"
+                  className="input text-sm"
+                  value={previewServiceId}
+                  onChange={(e) => setPreviewServiceId(e.target.value)}
+                  data-testid="schedule-preview-service"
+                >
+                  {services.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.duration} мин)
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <p className="text-sm text-[#78716c]">
               {format(parse(previewDate, "yyyy-MM-dd", new Date()), "d MMMM", {
                 locale: ru,
               })}
-              {services[0] ? ` (${services[0].name}, ${services[0].duration} мин)` : ""}
+              {previewService
+                ? ` · ${previewService.name}, ${previewService.duration} мин`
+                : ` · шаг ${slotDuration} мин`}
+              {!slotsLoading && previewSlots.length > 0 && (
+                <span className="block text-xs mt-1">
+                  Свободно: {freeCount} · Занято: {busyCount}
+                </span>
+              )}
             </p>
-            {previewSlots.length === 0 ? (
+
+            {slotsLoading ? (
+              <p className="text-sm text-[#78716c]">Загружаем слоты…</p>
+            ) : previewSlots.length === 0 ? (
               <p className="text-sm text-[#78716c]">Нет слотов в этот день</p>
             ) : (
-              <div className="flex flex-wrap gap-2">
-                {previewSlots.map((t) => (
-                  <span key={t} className="slot-btn slot-btn-active cursor-default">
-                    {t}
+              <div className="flex flex-wrap gap-2" data-testid="schedule-day-slots">
+                {previewSlots.map((slot) => (
+                  <span
+                    key={slot.time}
+                    data-testid={`schedule-slot-${slot.status}`}
+                    data-time={slot.time}
+                    title={
+                      slot.status === "busy"
+                        ? `${slot.client_name || "Клиент"} · ${slot.booking_status === "confirmed" ? "подтверждено" : "ожидает"}`
+                        : undefined
+                    }
+                    className={[
+                      "slot-btn cursor-default inline-flex flex-col items-center justify-center min-w-[4.5rem] px-2 py-1.5",
+                      slot.status === "free" && "slot-btn-free",
+                      slot.status === "busy" && "slot-btn-busy",
+                      slot.status === "past" && "slot-btn-past",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  >
+                    <span>{slot.time}</span>
+                    {slot.status === "busy" && (
+                      <span className="text-[10px] font-normal leading-tight truncate max-w-full">
+                        {slot.client_name?.split(" ")[0] || "занято"}
+                      </span>
+                    )}
+                    {slot.status === "free" && (
+                      <span className="text-[10px] font-normal opacity-80">свободно</span>
+                    )}
                   </span>
                 ))}
               </div>
             )}
+
+            <div className="flex flex-wrap gap-3 text-xs text-[#78716c]">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded slot-btn-free border" /> Свободно
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded slot-btn-busy border" /> Занято
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="w-3 h-3 rounded slot-btn-past border" /> Прошло
+              </span>
+            </div>
           </div>
         )}
       </div>

@@ -181,6 +181,22 @@ test.describe("API · профиль, слоты, портфолио", () => {
     });
     expect(del.status()).toBe(404);
   });
+
+  test("аватар сохраняется как файл на сервере", async ({ request }) => {
+    const master = await expectRegistered(request, makeMaster());
+    const headers = authHeaders(master.token);
+
+    const patch = await request.patch("/api/masters/me", {
+      headers,
+      data: { avatar_url: TINY_PNG },
+    });
+    expect(patch.status()).toBe(200);
+    const body = await patch.json();
+    expect(body.avatar_url).toMatch(/^\/uploads\/.+\/avatar\/.+\.png$/);
+
+    const me = await request.get("/api/masters/me", { headers });
+    expect((await me.json()).avatar_url).toBe(body.avatar_url);
+  });
 });
 
 test.describe("API · billing transfer + admin filter", () => {

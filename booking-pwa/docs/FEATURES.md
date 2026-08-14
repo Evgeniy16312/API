@@ -42,7 +42,8 @@
 | F38 | Дизайн страницы (Pro) | done | [features/page-theme.md](./features/page-theme.md) |
 | F39 | Продающий сайт | planned | [features/marketing-site.md](./features/marketing-site.md) |
 | F40 | Три тарифа (Старт 149) | done | [features/three-tier-billing.md](./features/three-tier-billing.md) |
+| F41 | Email и пароль (вход / восстановление) | done | [features/email-password-auth.md](./features/email-password-auth.md) |
 
 ## Следующий свободный ID
 
-`F41`
+`F42`

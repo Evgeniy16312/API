@@ -1,12 +1,11 @@
+import {
+  buildPhotonSearchUrl,
+  mapPhotonResults,
+  type PhotonResponse,
+} from "@/lib/geo";
 import { jsonError, jsonOk } from "@/lib/http";
 
-export type GeoResult = {
-  label: string;
-  lat: number;
-  lng: number;
-};
-
-/** Free geocoding via OpenStreetMap Nominatim (no API key). */
+/** Free geocoding via Photon (Komoot): addresses in Russia only. */
 export async function GET(request: Request) {
   const q = new URL(request.url).searchParams.get("q")?.trim();
   if (!q || q.length < 3) {
@@ -14,17 +13,10 @@ export async function GET(request: Request) {
   }
 
   try {
-    const url = new URL("https://nominatim.openstreetmap.org/search");
-    url.searchParams.set("q", q);
-    url.searchParams.set("format", "json");
-    url.searchParams.set("limit", "5");
-    url.searchParams.set("addressdetails", "0");
+    const url = buildPhotonSearchUrl(q);
 
     const res = await fetch(url.toString(), {
-      headers: {
-        "User-Agent": "MoyaZapisBookingPWA/0.1 (local master booking)",
-        Accept: "application/json",
-      },
+      headers: { Accept: "application/json", "Accept-Language": "ru" },
       next: { revalidate: 0 },
     });
 
@@ -32,17 +24,15 @@ export async function GET(request: Request) {
       return jsonError("Сервис карт временно недоступен", 502);
     }
 
-    const data = (await res.json()) as {
-      display_name: string;
-      lat: string;
-      lon: string;
-    }[];
+    const data = (await res.json()) as PhotonResponse;
+    const results = mapPhotonResults(data);
 
-    const results: GeoResult[] = data.map((item) => ({
-      label: item.display_name,
-      lat: Number(item.lat),
-      lng: Number(item.lon),
-    }));
+    if (results.length === 0) {
+      return jsonOk({
+        results: [],
+        hint: "Уточните город и улицу — ищем только адреса в России",
+      });
+    }
 
     return jsonOk({ results });
   } catch (error) {

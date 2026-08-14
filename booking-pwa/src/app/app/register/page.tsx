@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { setToken } from "@/lib/client";
 import PhoneRuInput from "@/components/PhoneRuInput";
-import { isValidPhone } from "@/lib/validate";
+import { isValidEmail, isValidPhone } from "@/lib/validate";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("+7");
   const [slug, setSlug] = useState("");
   const [specialty, setSpecialty] = useState("");
@@ -44,6 +46,18 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
+    if (!isValidEmail(email)) {
+      setError("Укажите корректный email — он будет вашим логином");
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Пароль: минимум 8 символов, буква и цифра");
+      setLoading(false);
+      return;
+    }
+
     if (!isValidPhone(phone)) {
       setError("Телефон: +7 и 10 цифр");
       setLoading(false);
@@ -55,7 +69,7 @@ export default function RegisterPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name, phone, slug, specialty }),
+        body: JSON.stringify({ name, email, password, phone, slug, specialty }),
       });
 
       const data = await res.json();
@@ -82,7 +96,7 @@ export default function RegisterPage() {
 
       <h1 className="text-2xl font-bold mb-2">Создать страницу</h1>
       <p className="text-[#78716c] mb-8">
-        Займёт 2 минуты. Потом добавите услуги и портфолио.
+        Email и пароль — для входа с любого устройства. Потом добавите услуги и портфолио.
       </p>
 
       {error && (
@@ -104,6 +118,41 @@ export default function RegisterPage() {
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder="Ринат"
             required
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-email">
+            Email (логин)
+          </label>
+          <input
+            id="register-email"
+            data-testid="register-email"
+            type="email"
+            autoComplete="email"
+            className="input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@mail.ru"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="register-password">
+            Пароль
+          </label>
+          <input
+            id="register-password"
+            data-testid="register-password"
+            type="password"
+            autoComplete="new-password"
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Минимум 8 символов"
+            required
+            minLength={8}
           />
         </div>
 
@@ -170,7 +219,7 @@ export default function RegisterPage() {
       <p className="text-center text-sm text-[#78716c] mt-6">
         Уже есть страница?{" "}
         <Link href="/app/login" className="text-[#9a7b4a] font-semibold">
-          Войти по коду
+          Войти
         </Link>
       </p>
     </div>

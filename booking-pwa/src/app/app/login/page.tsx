@@ -7,7 +7,8 @@ import { setToken } from "@/lib/client";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [token, setTokenInput] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -21,7 +22,7 @@ export default function LoginPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ token: token.trim() }),
+        body: JSON.stringify({ email: email.trim(), password }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
@@ -41,10 +42,9 @@ export default function LoginPage() {
         ← На главную
       </Link>
 
-      <h1 className="text-2xl font-bold mb-2">Войти в кабинет</h1>
+      <h1 className="text-2xl font-bold mb-2">Войти</h1>
       <p className="text-[#78716c] mb-8">
-        Вставьте код доступа — он выдаётся при регистрации и хранится в
-        Настройках.
+        Email и пароль, которые вы указали при регистрации.
       </p>
 
       {error && (
@@ -59,21 +59,35 @@ export default function LoginPage() {
         data-testid="login-form"
       >
         <div>
-          <label
-            className="text-sm text-[#78716c] mb-1 block"
-            htmlFor="login-token"
-          >
-            Код доступа
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="login-email">
+            Email
           </label>
           <input
-            id="login-token"
-            data-testid="login-token"
-            className="input font-mono text-sm"
-            value={token}
-            onChange={(e) => setTokenInput(e.target.value)}
-            placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+            id="login-email"
+            data-testid="login-email"
+            type="email"
+            autoComplete="email"
+            className="input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@mail.ru"
             required
-            autoComplete="off"
+          />
+        </div>
+
+        <div>
+          <label className="text-sm text-[#78716c] mb-1 block" htmlFor="login-password">
+            Пароль
+          </label>
+          <input
+            id="login-password"
+            data-testid="login-password"
+            type="password"
+            autoComplete="current-password"
+            className="input"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
           />
         </div>
 
@@ -86,6 +100,16 @@ export default function LoginPage() {
           {loading ? "Входим..." : "Войти"}
         </button>
       </form>
+
+      <p className="text-center text-sm mt-4">
+        <Link
+          href="/app/forgot-access"
+          className="text-[#9a7b4a] font-semibold"
+          data-testid="forgot-access-link"
+        >
+          Забыли email или пароль?
+        </Link>
+      </p>
 
       <p className="text-center text-sm text-[#78716c] mt-6">
         Нет страницы?{" "}

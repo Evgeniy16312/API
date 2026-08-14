@@ -74,6 +74,8 @@ export function rowToMaster(row: Record<string, unknown>): Master {
     slot_duration: (row.slot_duration as number) || 60,
     created_at: row.created_at as string,
     page_theme: parseStoredPageTheme(row.page_theme),
+    login_email: (row.login_email as string) || "",
+    has_password: Boolean((row.password_hash as string) || ""),
   };
 }
 

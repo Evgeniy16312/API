@@ -47,6 +47,7 @@ export default defineConfig({
           SMTP_USER: "",
           SMTP_PASS: "",
           TELEGRAM_WEBHOOK_SECRET: "",
+          AUTH_RETURN_RESET_TOKEN: "1",
         },
       },
 });

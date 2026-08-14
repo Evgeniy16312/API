@@ -112,11 +112,12 @@ test.describe("API · записи и слоты", () => {
 });
 
 test.describe("API · сессия", () => {
-  test("login по токену открывает /api/masters/me", async ({ request }) => {
-    const master = await expectRegistered(request, makeMaster());
+  test("login по email открывает /api/masters/me", async ({ request }) => {
+    const input = makeMaster();
+    const master = await expectRegistered(request, input);
 
     const login = await request.post("/api/masters/login", {
-      data: { token: master.token },
+      data: { email: input.email, password: input.password },
     });
     expect(login.status()).toBe(200);
 
@@ -128,9 +129,12 @@ test.describe("API · сессия", () => {
     expect(body.slug).toBe(master.slug);
   });
 
-  test("неверный токен login → 401", async ({ request }) => {
+  test("неверный пароль login → 401", async ({ request }) => {
+    const input = makeMaster();
+    await expectRegistered(request, input);
+
     const res = await request.post("/api/masters/login", {
-      data: { token: "00000000-0000-0000-0000-000000000000" },
+      data: { email: input.email, password: "WrongPass9" },
     });
     expect(res.status()).toBe(401);
   });

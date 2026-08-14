@@ -19,6 +19,7 @@
 
 ## UI / API
 
-- UI: `/app/schedule`
+- UI: `/app/schedule` — зелёные слоты свободны, красные заняты (с учётом записей)
 - Обновление через `PATCH /api/masters/me`
-- Чтение свободных слотов: `GET /api/slots`
+- Публичные слоты: `GET /api/slots`
+- Календарь мастера: `GET /api/masters/schedule/slots?date=&service_id=`

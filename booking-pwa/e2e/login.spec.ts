@@ -2,14 +2,16 @@ import { test, expect } from "@playwright/test";
 import { expectRegistered } from "./helpers/api";
 import { makeMaster } from "./fixtures/master";
 
-test.describe("UI · вход по коду", () => {
-  test("логин токеном открывает кабинет", async ({ page, request }) => {
-    const master = await expectRegistered(request, makeMaster());
+test.describe("UI · вход", () => {
+  test("логин email+паролем открывает кабинет", async ({ page, request }) => {
+    const master = makeMaster();
+    await expectRegistered(request, master);
 
     await page.goto("/app/login");
     await expect(page.getByTestId("login-form")).toBeVisible();
 
-    await page.getByTestId("login-token").fill(master.token);
+    await page.getByTestId("login-email").fill(master.email);
+    await page.getByTestId("login-password").fill(master.password);
 
     const [response] = await Promise.all([
       page.waitForResponse(

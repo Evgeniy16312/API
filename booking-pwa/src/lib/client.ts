@@ -40,7 +40,7 @@ export async function apiFetch(path: string, options: RequestInit = {}) {
   return data;
 }
 
-/** End session: clear cookie on server + local recovery token. */
+/** End session: clear cookie on server + local session token. */
 export async function logoutSession() {
   try {
     await fetch("/api/masters/logout", {
@@ -57,6 +57,11 @@ export function compressImage(file: File, maxWidth = 1200): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = (e) => {
+      const src = e.target?.result;
+      if (typeof src !== "string") {
+        reject(new Error("Не удалось прочитать файл"));
+        return;
+      }
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
@@ -73,9 +78,10 @@ export function compressImage(file: File, maxWidth = 1200): Promise<string> {
         ctx?.drawImage(img, 0, 0, width, height);
         resolve(canvas.toDataURL("image/jpeg", 0.8));
       };
-      img.onerror = reject;
+      img.onerror = () => reject(new Error("Не удалось обработать изображение"));
+      img.src = src;
     };
-    reader.onerror = reject;
+    reader.onerror = () => reject(new Error("Не удалось прочитать файл"));
     reader.readAsDataURL(file);
   });
 }

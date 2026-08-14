@@ -264,8 +264,21 @@ function ensureMigrations(database: DatabaseSync) {
       "ALTER TABLE masters ADD COLUMN page_theme TEXT NOT NULL DEFAULT ''"
     );
   }
+  if (!masterCols.has("login_email")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN login_email TEXT DEFAULT ''"
+    );
+  }
+  if (!masterCols.has("password_hash")) {
+    database.exec(
+      "ALTER TABLE masters ADD COLUMN password_hash TEXT DEFAULT ''"
+    );
+  }
 
   database.exec(`
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_masters_login_email
+    ON masters(login_email) WHERE login_email != '';
+
     CREATE TABLE IF NOT EXISTS telegram_connect_codes (
       code TEXT PRIMARY KEY,
       master_id TEXT NOT NULL,
@@ -352,6 +365,18 @@ function ensureMigrations(database: DatabaseSync) {
   database.exec(
     "CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_manage_token ON bookings(manage_token) WHERE manage_token != ''"
   );
+
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      token TEXT PRIMARY KEY,
+      master_id TEXT NOT NULL,
+      expires_at TEXT NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY (master_id) REFERENCES masters(id) ON DELETE CASCADE
+    );
+    CREATE INDEX IF NOT EXISTS idx_password_reset_master ON password_reset_tokens(master_id);
+  `);
 }
 
 export function parseSchedule(json: string) {

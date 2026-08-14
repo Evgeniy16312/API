@@ -7,7 +7,7 @@ import { ru } from "date-fns/locale";
 import type { PortfolioItem, Review, Service } from "@/lib/types";
 import MonthCalendar from "@/components/MonthCalendar";
 import ReviewsSection from "@/components/ReviewsSection";
-import PhoneRuInput from "@/components/PhoneRuInput";
+import { yandexMapsUrl } from "@/lib/geo";
 import { isValidPhone } from "@/lib/validate";
 
 const MasterMap = dynamic(() => import("@/components/MasterMap"), {
@@ -190,11 +190,11 @@ export default function BookingFlow({ slug }: { slug: string }) {
             {master.address && (
               <a
                 className="text-sm mz-accent"
-                href={`https://www.openstreetmap.org/?mlat=${master.lat}&mlon=${master.lng}#map=16/${master.lat}/${master.lng}`}
+                href={yandexMapsUrl(master.lat as number, master.lng as number)}
                 target="_blank"
                 rel="noreferrer"
               >
-                Открыть в OpenStreetMap →
+                Открыть в Яндекс.Картах →
               </a>
             )}
           </div>

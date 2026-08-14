@@ -41,6 +41,18 @@ export async function expectRegistered(
   return body;
 }
 
+export async function loginWithPassword(
+  request: APIRequestContext,
+  email: string,
+  password: string
+) {
+  const response = await request.post("/api/masters/login", {
+    data: { email, password },
+  });
+  const body = await response.json();
+  return { response, body };
+}
+
 export function authHeaders(token: string) {
   return { Authorization: `Bearer ${token}` };
 }

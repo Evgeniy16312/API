@@ -12,6 +12,8 @@ test.describe("UI · регистрация мастера", () => {
 
     // Name first — auto-slug runs, then we overwrite with unique test slug
     await page.getByTestId("register-name").fill(master.name);
+    await page.getByTestId("register-email").fill(master.email);
+    await page.getByTestId("register-password").fill(master.password);
     await page.getByTestId("register-phone").fill(master.phone);
     await page.getByTestId("register-specialty").fill(master.specialty);
     await page.getByTestId("register-slug").fill(master.slug);

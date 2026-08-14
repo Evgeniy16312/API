@@ -60,39 +60,79 @@ export function getAvailableSlots(
   existingBookings: Booking[],
   slotDuration: number
 ): string[] {
+  return getDaySlotOverview(
+    dateStr,
+    schedule,
+    service.duration || slotDuration,
+    existingBookings,
+    slotDuration
+  )
+    .filter((s) => s.status === "free")
+    .map((s) => s.time);
+}
+
+export type SlotOverviewStatus = "free" | "busy" | "past";
+
+export type SlotOverviewItem = {
+  time: string;
+  status: SlotOverviewStatus;
+  client_name?: string;
+  booking_status?: string;
+};
+
+/** All slots in a work day with free / busy / past status (for master calendar). */
+export function getDaySlotOverview(
+  dateStr: string,
+  schedule: WorkSchedule,
+  stepDuration: number,
+  existingBookings: Booking[],
+  slotDuration: number
+): SlotOverviewItem[] {
   const date = parse(dateStr, "yyyy-MM-dd", new Date());
   const dayKey = DAY_MAP[date.getDay()];
   const daySchedule = schedule[dayKey];
 
   if (!daySchedule?.enabled) return [];
 
-  const duration = service.duration || slotDuration;
   const start = parse(daySchedule.start, "HH:mm", date);
   const end = parse(daySchedule.end, "HH:mm", date);
 
-  const slots: string[] = [];
+  const items: SlotOverviewItem[] = [];
   let current = start;
   const now = new Date();
   const isToday = format(date, "yyyy-MM-dd") === format(now, "yyyy-MM-dd");
 
-  while (addMinutes(current, duration) <= end) {
+  while (addMinutes(current, stepDuration) <= end) {
     const timeStr = format(current, "HH:mm");
-    const free = !hasBookingConflict(
-      timeStr,
-      duration,
-      existingBookings,
-      dateStr,
-      slotDuration
+    const booking = existingBookings.find(
+      (b) =>
+        b.date === dateStr &&
+        b.status !== "cancelled" &&
+        intervalsOverlap(
+          timeStr,
+          stepDuration,
+          b.time,
+          bookingDuration(b, slotDuration)
+        )
     );
 
-    if (free && (!isToday || isAfter(current, now))) {
-      slots.push(timeStr);
+    if (isToday && !isAfter(current, now)) {
+      items.push({ time: timeStr, status: "past" });
+    } else if (booking) {
+      items.push({
+        time: timeStr,
+        status: "busy",
+        client_name: booking.client_name,
+        booking_status: booking.status,
+      });
+    } else {
+      items.push({ time: timeStr, status: "free" });
     }
 
-    current = addMinutes(current, duration);
+    current = addMinutes(current, stepDuration);
   }
 
-  return slots;
+  return items;
 }
 
 export function getAvailableDates(

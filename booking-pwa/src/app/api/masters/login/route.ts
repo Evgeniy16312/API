@@ -1,29 +1,33 @@
-import { getMasterByToken } from "@/lib/auth";
+import { getMasterAuthByLoginEmail } from "@/lib/master-auth";
+import { verifyPassword } from "@/lib/password";
 import { jsonError, jsonOk } from "@/lib/http";
 import { attachSessionCookie } from "@/lib/session";
 
-/** Restore master session by recovery token (UUID from registration). */
+/** Login by email and password. */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const token = typeof body.token === "string" ? body.token.trim() : "";
+    const email =
+      typeof body.email === "string" ? body.email.trim() : "";
+    const password = typeof body.password === "string" ? body.password : "";
 
-    if (!token) {
-      return jsonError("Вставьте код доступа", 400);
+    if (!email || !password) {
+      return jsonError("Введите email и пароль", 400);
     }
 
-    const master = getMasterByToken(token);
-    if (!master) {
-      return jsonError("Код неверный или устарел", 401);
+    const master = getMasterAuthByLoginEmail(email);
+    if (!master?.password_hash || !verifyPassword(password, master.password_hash)) {
+      return jsonError("Неверный email или пароль", 401);
     }
 
     const response = jsonOk({
       id: master.id,
       slug: master.slug,
-      token,
+      token: master.token,
       name: master.name,
+      login_email: master.login_email,
     });
-    return attachSessionCookie(response, token);
+    return attachSessionCookie(response, master.token);
   } catch (error) {
     console.error("Login error:", error);
     return jsonError("Ошибка входа", 500);
