@@ -170,8 +170,6 @@ export default function SettingsPage() {
               disabled={uploadingAvatar}
               data-testid="settings-avatar-input"
             />
-              disabled={uploadingAvatar}
-            />
           </label>
         </div>
         <div>

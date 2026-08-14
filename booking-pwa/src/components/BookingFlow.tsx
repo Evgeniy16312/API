@@ -7,6 +7,7 @@ import { ru } from "date-fns/locale";
 import type { PortfolioItem, Review, Service } from "@/lib/types";
 import MonthCalendar from "@/components/MonthCalendar";
 import ReviewsSection from "@/components/ReviewsSection";
+import PhoneRuInput from "@/components/PhoneRuInput";
 import { yandexMapsUrl } from "@/lib/geo";
 import { isValidPhone } from "@/lib/validate";
 
